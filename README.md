@@ -1,6 +1,20 @@
-# ranlib
+# ran
 
 RAN Library
+
+## Philosophy & Tenants
+
+For any paper:
+
+- EASY install
+- EASY use
+- EASY upload
+
+- No BS
+- No strings attached
+- No extra setup needed
+
+- Just drop-in and start using it
 
 ## Setup
 
