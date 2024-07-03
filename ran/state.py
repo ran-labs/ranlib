@@ -1,13 +1,14 @@
 import os
 
 from typing import List, Dict, Union
+from pydantic import BaseModel, Field
 
 import tomli
 import json
 
 # This file is for the stuff having to do with state, being ran.toml the lockfile (.ran/ran-lock.json)
 
-# Cannot not end with a slash (/)
+# Cannot end with a slash (/)
 ROOT_PATH: str = ""
 
 
@@ -55,6 +56,19 @@ def get_lockfile_path() -> str:
     else:
         ROOT_PATH = find_root_path()
         return LOCKFILE_PATH()
+
+
+class RanDependency(BaseModel):
+    paper_impl_id: str
+    package_dependencies: List[str]
+
+
+class RanLock(BaseModel):
+    dependencies: List[RanDependency]
+
+    # Post-resolution
+    compilation_steps: List[str]  # change dtype of this later?
+    resolved_package_dependencies: List[str]
 
 
 # TODO:

@@ -1,6 +1,17 @@
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Union
 
 from state import ran_toml_exists, lockfile_exists
+from state import generate_lockfile, RanLock
+
+
+# NOTE:Initialization consists of:
+# Setting up the project (ran.toml and lockfile will exist)
+# Generating a RanLock, either via the lockfile (preferred) or ran.toml
+# Pre-Resolve and Install the dependencies of the paper
+# Fetch git urls from DB using the RanLock
+# git clone them & remove everything that doesnt really matter
+# Compile if needed into .ran/ran_modules
+# Add it to ran.toml dependencies
 
 
 def smart_init(allow_init_from_scratch: bool = True):
@@ -33,12 +44,23 @@ def init_from_lockfile():
 
     if no ran.toml, also generate that
     """
+    # Find lockfile and make RanLock from it
+    # Then, run init_from_lock(ran_lock)
+    # Generate ran.toml if it doesn't exist
+    pass
+
+
+# TODO:
+def init_from_lock(lock: RanLock):
     pass
 
 
 # TODO:
 def init_from_rantoml():
     """Initialize from ran.toml"""
+    # This adds the extra step at the beginning to produce a lock
+    # Make a RanLock then run init_from_lock
+    # Write to lockfile
     pass
 
 

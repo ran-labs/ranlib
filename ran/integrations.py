@@ -35,14 +35,14 @@ def setup_integration(integration: Integration):
     GIT_INTEGRATONS: Set[str] = {"git", "huggingface"}
     GITHUB_INTEGRATIONS: Set[str] = {"github", "dagshub"}
 
-    # TODO:
     if integration in GIT_INTEGRATONS:
         # Just make a .ran/.gitignore and put the ran_modules/ directory in there
         append_to_gitignore(".ran/ran_modules/", gitignore_path=".gitignore")
 
         # maybe also do some pre-commit stuff like compilation?
-        pass
     elif integration in GITHUB_INTEGRATIONS:
+        # TODO: github CI compilation pipeline
         pass
     elif integration == "gitlab":
+        # TODO: gitlab CI compilation pipeline
         pass

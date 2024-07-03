@@ -10,6 +10,10 @@ from integrations import Integration, setup_integration
 app = typer.Typer()
 
 
+# TODO: ran setup --papers paper1 paper2 paper3
+# TODO: `ran use paper1` will also do a `ran setup` before doing it if the setup has not happened yet
+
+
 # ran setup
 @app.command()
 def setup(integration: Integration = "auto", override: bool = False):
@@ -47,7 +51,7 @@ def install(from_rantoml: bool = False):
 @app.command()
 def use(paper_impl_id: List[str]):
     """Installs a paper library/module (or multiple)"""
-    # Fetch from DB
+    # Fetch git urls from DB
     # git clone it & remove everything that doesnt really matter
     # Pre-Resolve and Install the dependencies of the paper
     # Compile if needed into .ran/ran_modules
@@ -92,7 +96,7 @@ def loadstate():
 def push():
     """
     Optionally compile the code and push to the specified remote.
-    What IS required though is that a compilation graph/dump is produced and written to a file, so that a user can easily recompile on their own machine
+    What IS required though is that a compilation tree/dump is produced and written to a file, so that a user can easily recompile on their own machine
     When this project is setup with git / github / gitlab integrations, this will run on pushing to those
     """
     pass
