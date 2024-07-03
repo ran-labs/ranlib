@@ -14,6 +14,12 @@ from state import generate_lockfile, RanLock
 # Add it to ran.toml dependencies
 
 
+# Simplified:
+# 1.) Produce lock (pre-resolve packages if needed)
+# 2.) (Clone + Compile/Transpile if needed), Package installation
+# 3.) Update ran.toml dependencies and lockfile
+
+
 def smart_init(allow_init_from_scratch: bool = True):
     """
     - if .ran/ran-lock.json, install from there
