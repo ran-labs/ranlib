@@ -17,6 +17,7 @@ def install():
     pass
 
 
+# ran use
 @app.command()
 def use(paper_impl_id: str):
     pass
@@ -26,16 +27,25 @@ def generate_lockfile():
     pass
 
 
+# ran savestate
 @app.command()
 def savestate():
     generate_lockfile()
 
 
+# ran lock
 @app.command()
 def lock():
     generate_lockfile()
 
 
+# ran loadstate
+@app.command()
+def loadstate():
+    pass
+
+
+# ran push
 @app.command()
 def push():
     pass
