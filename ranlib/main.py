@@ -23,6 +23,11 @@ def use(paper_impl_id: str):
     pass
 
 
+@app.command()
+def remove(paper_impl_id: str):
+    pass
+
+
 def generate_lockfile():
     pass
 
