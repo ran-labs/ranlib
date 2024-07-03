@@ -58,8 +58,25 @@ def get_lockfile_path() -> str:
         return LOCKFILE_PATH()
 
 
+# ran.toml reqs
+
+# For pushers [optional]
+# RAN username
+# paper name/id
+# tag
+# version
+# description
+# readme
+
+# papers (just the paper implementations)
+
+# settings
+# package manager (either 'pip', 'pipx', 'uv', 'uvx', 'poetry', 'conda', 'mamba', 'micromamba')
+# package resolver (either 'auto' or 'isolate'). auto: if resolution fails, fallback to pipx/uvx (isolate mode)
+
+
 class RanDependency(BaseModel):
-    paper_impl_id: str
+    paper_impl_id: str  # for future: can be remote only
     package_dependencies: List[str]
 
 
