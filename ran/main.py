@@ -4,7 +4,7 @@ import typer
 
 import state
 from cli import initialization as init
-from integrations import Integration, auto_detect_integration
+from integrations import Integration, setup_integration
 
 
 app = typer.Typer()
@@ -27,24 +27,9 @@ def setup(integration: Integration = "auto", override: bool = False):
     else:
         init.smart_init()
 
-    # For auto integration
-    # if git repo detected with auto integration, integration is set to git
-    if integration == "auto":
-        integration = auto_detect_integration()
-
-    # Setup github or gitlab integration for ran (register to RAN registry)
-    GIT_INTEGRATONS: Set[str] = {"git", "huggingface"}
-    GITHUB_INTEGRATIONS: Set[str] = {"github", "dagshub"}
-
-    # TODO:
-    if integration in GIT_INTEGRATONS:
-        # Just make a .ran/.gitignore and put the ran_modules/ directory in there
-        # maybe also do some pre-commit stuff like compilation?
-        pass
-    elif integration in GITHUB_INTEGRATIONS:
-        pass
-    elif integration == "gitlab":
-        pass
+    # Setup the integration
+    if integration != "none":
+        setup_integration(integration)
 
 
 # ran install
