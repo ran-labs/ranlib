@@ -23,6 +23,7 @@ def use(paper_impl_id: str):
     pass
 
 
+# ran remove
 @app.command()
 def remove(paper_impl_id: str):
     pass
