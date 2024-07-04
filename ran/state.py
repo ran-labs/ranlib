@@ -192,7 +192,7 @@ class RanDependency(BaseModel):
 class RanPackageDependency(BaseModel):
     package_name: str
     version: str
-    isolated: bool = Field(default=False)
+    isolated: bool
 
 
 class RanLock(BaseModel):

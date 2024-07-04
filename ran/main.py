@@ -88,7 +88,7 @@ def loadstate():
 # TODO:
 # ran push
 @app.command()
-def push():
+def push(compile: bool = False):
     """
     Optionally compile the code and push to the specified remote.
     What IS required though is that a compilation tree/dump is produced and written to a file, so that a user can easily recompile on their own machine
