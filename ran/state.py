@@ -121,6 +121,14 @@ def produce_lock() -> RanLock:
     pass
 
 
+def apply_lock(lock: RanLock):
+    # 1.) (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is desccribed in lock: RanLock
+    lock.run()
+
+    # 2.) Write to lockfile (yes, the above actually modified the RanLock)
+    write_to_lockfile(lock)
+
+
 # TODO:
 def write_to_lockfile(lock: RanLock):
     pass

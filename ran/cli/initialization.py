@@ -2,8 +2,7 @@ from typing import List, Dict, Union
 
 from state import ran_toml_exists, lockfile_exists
 from state import generate_ran_toml
-from state import read_lock, produce_lock, RanLock
-from state import write_to_lockfile
+from state import read_lock, produce_lock, apply_lock, RanLock
 
 
 # NOTE:Initialization consists of:
@@ -54,20 +53,12 @@ def init_from_lockfile():
     # 1.) Find lockfile and make RanLock from it
     ran_lock: RanLock = read_lock()
 
-    # 2.) Run init_from_lock(ran_lock)
-    init_from_lock(ran_lock)
+    # 2.) Run apply_lock(ran_lock)
+    apply_lock(ran_lock)
 
     # 3.) Generate ran.toml if it doesn't exist
     if not ran_toml_exists():
         generate_ran_toml()
-
-
-def init_from_lock(lock: RanLock):
-    # 1.) (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is desccribed in lock: RanLock
-    lock.run()
-
-    # 2.) Write to lockfile (yes, the above actually modified the RanLock)
-    write_to_lockfile(lock)
 
 
 def init_from_ran_toml():
@@ -75,8 +66,8 @@ def init_from_ran_toml():
     # 1.) Produce RanLock (pre-resolve packages if needed)
     ran_lock: RanLock = produce_lock()
 
-    # 2.) Run init_from_lock(ran_lock)
-    init_from_lock(ran_lock)
+    # 2.) Run apply_lock(ran_lock)
+    apply_lock(ran_lock)
 
 
 # TODO:
