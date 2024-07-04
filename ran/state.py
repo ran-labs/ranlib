@@ -184,15 +184,18 @@ def read_ran_toml() -> RanTOML:
 
 
 # -- RAN LOCK STUFF (LOCKFILE) --
-class RanDependency(BaseModel):
-    paper_impl_id: str  # for future: can be remote only
-    package_dependencies: List[str]
-
-
-class RanPackageDependency(BaseModel):
+class PythonPackageDependency(BaseModel):
     package_name: str
     version: str
+
+
+class RanPackageDependency(PythonPackageDependency):
     isolated: bool
+
+
+class RanDependency(BaseModel):
+    paper_impl_id: str  # for future: can be remote only
+    package_dependencies: List[PythonPackageDependency]
 
 
 class RanLock(BaseModel):
@@ -210,7 +213,7 @@ class RanLock(BaseModel):
     # (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is desccribed in ran_lock
     def run(self):
         """Above says it all. However, as compilation steps are done after receiving the stuff, they will be recorded and changed with this method"""
-        # And if something gets recompiled, the compilation steps WILL be replaced
+        # And if something gets recompiled, the compilation steps WILL be replaced (desired behavior)
         pass
 
 
