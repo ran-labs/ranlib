@@ -14,6 +14,9 @@ app = typer.Typer()
 # TODO: `ran use paper1` will also do a `ran setup` before doing it if the setup has not happened yet
 
 
+# TODO: produce the DIFF lock to not make things slow like snail
+
+
 # ran setup
 @app.command()
 def setup(integration: Integration = "auto", override: bool = False):
@@ -51,9 +54,8 @@ def install(from_rantoml: bool = False):
 @app.command()
 def use(paper_impl_id: List[str], isolated: bool = False):
     """Installs a paper library/module (or multiple)"""
-    # DW ABT THIS RN
 
-    # 1.) Produce lock (pre-resolve packages if needed)
+    # 1.) Produce lock DIFF (pre-resolve packages if needed)
     # 2.) (Clone + Compile/Transpile if needed), Package installation
     # 3.) Update ran.toml dependencies and lockfile
 

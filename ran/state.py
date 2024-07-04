@@ -213,7 +213,7 @@ class RanLock(BaseModel):
     # (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is desccribed in ran_lock
     def run(self):
         """Above says it all. However, as compilation steps are done after receiving the stuff, they will be recorded and changed with this method"""
-        # And if something gets recompiled, the compilation steps WILL be replaced (desired behavior)
+        # And if something gets recompiled (perhaps due to a different package version?), the compilation steps WILL be replaced (desired behavior)
         pass
 
 
@@ -237,10 +237,19 @@ def produce_lock() -> RanLock:
     isolate_dependencies: bool = ran_toml.settings.isolate_dependencies
 
     # TODO: pre-resolution
+    ran_dependencies: List[RanDependency] = []  # add to this
 
     # Get previous compilation steps (tree)
     prev_ran_lock: RanLock = read_lock()
-    prev_compilation_steps: Dict[str, List[str]] = prev_ran_lock.compilation_steps
+    prev_compilation_steps: Dict[str, List[str]] = []
+
+    # Only include compilation steps for the matching dependencies
+    ran_dependency_names: List[str] = [
+        ran_dependency.paper_impl_id for ran_dependency in ran_dependencies
+    ]
+    for paper_impl_id, comp_steps in prev_ran_lock.compilation_steps:
+        if paper_impl_id in ran_dependency_names:
+            prev_compilation_steps.append(paper_impl_id)
 
     ran_lock: RanLock = RanLock(
         dependencies=[],  # TODO:
