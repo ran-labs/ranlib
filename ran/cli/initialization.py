@@ -1,7 +1,9 @@
 from typing import List, Dict, Union
 
 from state import ran_toml_exists, lockfile_exists
-from state import generate_lockfile, RanLock
+from state import generate_ran_toml
+from state import read_lock, produce_lock, RanLock
+from state import write_to_lockfile
 
 
 # NOTE:Initialization consists of:
@@ -16,7 +18,7 @@ from state import generate_lockfile, RanLock
 
 # Simplified:
 # 1.) Produce lock (pre-resolve packages if needed)
-# 2.) (Clone + Compile/Transpile if needed), Package installation
+# 2.) (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is desccribed in ran_lock
 # 3.) Update ran.toml dependencies and lockfile
 
 
@@ -34,7 +36,7 @@ def smart_init(allow_init_from_scratch: bool = True):
         init_from_lockfile()
     elif ran_toml_exists():
         print("Initializing from ran.toml...")
-        init_from_rantoml()
+        init_from_ran_toml()
     else:
         if allow_init_from_scratch:
             print("Freshly initializing...")
@@ -43,31 +45,38 @@ def smart_init(allow_init_from_scratch: bool = True):
             print("Initialization Failed.")
 
 
-# TODO:
 def init_from_lockfile():
     """
     Initialize from lockfile (.ran/ran-lock.json)
 
     if no ran.toml, also generate that
     """
-    # Find lockfile and make RanLock from it
-    # Then, run init_from_lock(ran_lock)
-    # Generate ran.toml if it doesn't exist
-    pass
+    # 1.) Find lockfile and make RanLock from it
+    ran_lock: RanLock = read_lock()
+
+    # 2.) Run init_from_lock(ran_lock)
+    init_from_lock(ran_lock)
+
+    # 3.) Generate ran.toml if it doesn't exist
+    if not ran_toml_exists():
+        generate_ran_toml()
 
 
-# TODO:
 def init_from_lock(lock: RanLock):
-    pass
+    # 1.) (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is desccribed in lock: RanLock
+    lock.run()
+
+    # 2.) Write to lockfile (yes, the above actually modified the RanLock)
+    write_to_lockfile(lock)
 
 
-# TODO:
-def init_from_rantoml():
+def init_from_ran_toml():
     """Initialize from ran.toml"""
-    # This adds the extra step at the beginning to produce a lock
-    # Make a RanLock then run init_from_lock
-    # Write to lockfile
-    pass
+    # 1.) Produce RanLock (pre-resolve packages if needed)
+    ran_lock: RanLock = produce_lock()
+
+    # 2.) Run init_from_lock(ran_lock)
+    init_from_lock(ran_lock)
 
 
 # TODO:

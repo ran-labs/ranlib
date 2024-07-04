@@ -71,7 +71,7 @@ def get_lockfile_path() -> str:
 # papers (just the paper implementations)
 
 # settings
-# package manager (either 'pip', 'pipx', 'uv', 'uvx', 'poetry', 'conda', 'mamba', 'micromamba')
+# package manager (either 'pip', 'pipx', 'uv', 'uvx', 'poetry', 'conda', 'mamba', 'micromamba', 'pipenv')
 # package resolver (either 'auto' or 'isolate'). auto: if resolution fails, fallback to pipx/uvx (isolate mode)
 
 
@@ -80,15 +80,47 @@ class RanDependency(BaseModel):
     package_dependencies: List[str]
 
 
+class RanPackageDependency(BaseModel):
+    package_name: str
+    version: str
+    isolated: bool = Field(default=False)
+
+
 class RanLock(BaseModel):
     dependencies: List[RanDependency]
 
     # Post-resolution
     compilation_steps: List[str]  # change dtype of this later?
-    resolved_package_dependencies: List[str]
+    resolved_package_dependencies: List[RanPackageDependency]
+
+    # TODO:
+    # (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is desccribed in ran_lock
+    def run(self):
+        """Above says it all. However, as compilation steps are done after receiving the stuff, they will be recorded and changed with this method"""
+        pass
 
 
 # TODO:
-def generate_lockfile():
-    """Generate/Update a lockfile for the papers in .ran/ran-lock.json"""
+def generate_ran_toml():
+    """Generate a fresh ran.toml"""
+    pass
+
+
+def read_lock() -> RanLock:
+    """Find the lockfile and make a RanLock out of it"""
+    with open(get_lockfile_path(), "r") as file:
+        lockfile = json.load(file)
+
+    ran_lock: RanLock = RanLock(**lockfile)
+    return ran_lock
+
+
+# TODO:
+def produce_lock() -> RanLock:
+    """Produce a RanLock from ran.toml (pre-resolve packages as well)"""
+    pass
+
+
+# TODO:
+def write_to_lockfile(lock: RanLock):
     pass
