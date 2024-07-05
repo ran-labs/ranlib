@@ -163,13 +163,25 @@ class RanTOML(BaseModel):
 
         return paper_installations
 
+    def serialize_paper_installations(
+        paper_installations: List[PaperInstallation],
+    ) -> str:
+        pass
 
-# TODO: make it generate off the lock from default if exists
+
 def generate_ran_toml():
-    """Generate a fresh ran.toml"""
+    """Generate a fresh ran.toml. If the lockfile exists, it will generate off that."""
 
     # Make the string to write to the ran.toml file
     ran_toml_obj: RanTOML = RanTOML()
+
+    if lockfile_exists():
+        # Generate off the lockfile
+        ran_lock: RanLock = read_lock()
+        ran_toml_obj.papers = RanTOML.serialize_paper_installations(
+            ran_lock.get_as_paper_installations()
+        )
+
     ran_dot_toml: str = tomli_w.dumps(ran_toml_obj.dict(), multiline_strings=True)
 
     # Write it to the ran.toml file
@@ -240,6 +252,11 @@ class DeltaLockData(BaseModel):
     ran_paper_installations: List[RanPaperInstallation]
     pypackage_dependencies: List[PythonPackageDependency]
 
+    def empty():
+        return DeltaLockData(
+            paper_impl_ids=[], ran_paper_installations=[], pypackage_dependencies=[]
+        )
+
 
 class DeltaRanLock(BaseModel):
     to_add: DeltaLockData
@@ -258,14 +275,9 @@ class DeltaRanLock(BaseModel):
 
 # On Adding: pretty obvious; the only stuff that will be installed though is from preresolved_python_dependencies
 # On Removing: deletes the associated modules and compilation steps, uninstalls the isolated packages that nobody depends on anymore
-def produce_delta_lock() -> DeltaRanLock:
-    """Produce a DeltaRanLock from ran.toml (pre-resolve packages as well)"""
-    ran_toml: RanTOML = read_ran_toml()
+def produce_delta_lock(paper_installations: List[PaperInstallation]) -> DeltaRanLock:
+    """Produce a DeltaRanLock from paper installations (pre-resolve packages as well)"""
     prev_ran_lock: RanLock = read_lock()
-
-    paper_installations: List[PaperInstallation] = (
-        ran_toml.deserialize_paper_installations()
-    )
 
     prev_paper_installations: List[PaperInstallation] = (
         prev_ran_lock.get_as_paper_installations()
@@ -341,6 +353,22 @@ def produce_delta_lock() -> DeltaRanLock:
     )
 
 
+def produce_delta_lock_from_ran_toml(ran_toml: RanTOML):
+    """Produce a DeltaRanLock from ran.toml (pre-resolve packages as well)"""
+    paper_installations: List[PaperInstallation] = (
+        ran_toml.deserialize_paper_installations()
+    )
+
+    return produce_delta_lock(paper_installations)
+
+
+def produce_delta_lock_from_ran_lock(ran_lock: RanLock):
+    """Produce a DeltaRanLock from a RanLock (pre-resolve packages as well)"""
+    paper_installations: List[PaperInstallation] = ran_lock.get_as_paper_installations()
+
+    return produce_delta_lock(paper_installations)
+
+
 def read_lock() -> RanLock:
     """Find the lockfile and make a RanLock out of it"""
     try:
@@ -360,6 +388,22 @@ def apply_delta_lock(delta_lock: DeltaRanLock):
 
     # 2.) Write to lockfile (yes, the above actually modified the RanLock)
     write_to_lockfile(lock)
+
+
+def apply_ran_toml(ran_toml: RanTOML):
+    # 0.) Make a DeltaRanLock
+    delta_ran_lock: DeltaRanLock = produce_delta_lock_from_ran_toml(ran_toml)
+
+    # 1.) Apply the DeltaRanLock
+    apply_delta_lock(delta_ran_lock)
+
+
+def apply_lock(lock: RanLock):
+    # 0.) Make a DeltaRanLock
+    delta_ran_lock: DeltaRanLock = produce_delta_lock_from_ran_lock(lock)
+
+    # 1.) Apply the DeltaRanLock
+    apply_delta_lock(delta_ran_lock)
 
 
 def write_to_lockfile(lock: RanLock):

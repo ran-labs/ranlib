@@ -14,9 +14,6 @@ app = typer.Typer()
 # TODO: `ran use paper1` will also do a `ran setup` before doing it if the setup has not happened yet
 
 
-# TODO: produce the DIFF lock to not make things slow like snail
-
-
 # ran setup
 @app.command()
 def setup(integration: Integration = "auto", override: bool = False):
