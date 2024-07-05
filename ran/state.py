@@ -1,6 +1,6 @@
 import os
 
-from typing import List, Dict, Union
+from typing import List, Dict, Set, Union
 from pydantic import BaseModel, Field
 
 import tomli
@@ -9,6 +9,9 @@ import json
 
 # RegEx
 import re
+
+from cli.info_retrieval import fetch_dependencies
+from cli import preresolution
 
 # This file is for the stuff having to do with state, being ran.toml the lockfile (.ran/ran-lock.json)
 
@@ -66,6 +69,12 @@ def get_lockfile_path() -> str:
         return LOCKFILE_PATH()
 
 
+class PaperInstallation(BaseModel):
+    paper_impl_id: str
+    isolate: bool
+    # remote_only: bool
+
+
 # -- ran.toml reqs --
 
 
@@ -109,56 +118,53 @@ class RanTOML(BaseModel):
 
     settings: RanSettings = Field(default=RanSettings())
 
-    def deserialize_paper_impl_ids(self):
-        return deserialize_paper_impl_ids(self.papers)
+    # Yeah, I'm gonna be a bitch about this unless the users complain
+    def deserialize_paper_installations(self) -> List[PaperInstallation]:
+        """
+        Isolation Notation: 'isolate:' or 'noisolate:'
+
+        Example - isolate:ameerarsala/rwkv:latest
+        """
+
+        # Example Before:
+
+        """
+        - attention_is_all_you_need
+        - seanmeher/mamba
+        - mae
+        - rwkv:latest
+        """
+
+        # Example After:
+        """
+        ['attention_is_all_you_need', 'seanmeher/mamba', 'mae', 'rwkv:latest']
+        """
+
+        # Remove ALL whitespace
+        paper_impl_ids_no_whitespace: str = re.sub(r"\s", "", self.papers)
+
+        # Separate by hyphens
+        paper_impl_ids_list: List[str] = paper_impl_ids_no_whitespace.split("-")
+
+        # Read isolation notation
+        paper_installations: List[PaperInstallation] = []
+        for paper_impl_id in paper_impl_ids_list:
+            isolation: bool = self.settings.isolate_dependencies  # Default value
+            if paper_impl_id.startswith("isolate:"):
+                isolation = True
+            elif paper_impl_id.startswith("noisolate:"):
+                isolation = False
+
+            paper_installation: PaperInstallation = PaperInstallation(
+                paper_impl_id=paper_impl_id,
+                isolate=isolation,
+            )
+            paper_installations.append(paper_installation)
+
+        return paper_installations
 
 
-# Yeah, I'm gonna be a bitch about this unless the users complain
-def deserialize_paper_impl_ids(paper_impl_ids: str) -> List[str]:
-    # Example Before:
-    """
-    - attention_is_all_you_need
-    - seanmeher/mamba
-    - mae
-    - rwkv:latest
-    """
-
-    # Example After:
-    """
-    ['attention_is_all_you_need', 'seanmeher/mamba', 'mae', 'rwkv:latest']
-    """
-
-    # Remove ALL whitespace
-    paper_impl_ids_no_whitespace: str = re.sub(r"\s", "", paper_impl_ids)
-
-    # Separate by hyphens
-    paper_impl_ids_list: List[str] = paper_impl_ids_no_whitespace.split("-")
-
-    return paper_impl_ids_list
-
-
-def serialize_paper_impl_ids(paper_impl_ids: List[str]) -> str:
-    # Example Before:
-    """
-    ['attention_is_all_you_need', 'seanmeher/mamba', 'mae', 'rwkv:latest']
-    """
-
-    # Example After:
-    """
-    - attention_is_all_you_need
-    - seanmeher/mamba
-    - mae
-    - rwkv:latest
-    """
-
-    draft: str = "\n- ".join(paper_impl_ids)
-
-    # Now add it to the first as well
-    serialized_paper_impl_ids: str = "\n- " + draft
-
-    return serialized_paper_impl_ids
-
-
+# TODO: make it generate off the lock from default if exists
 def generate_ran_toml():
     """Generate a fresh ran.toml"""
 
@@ -187,19 +193,16 @@ def read_ran_toml() -> RanTOML:
 class PythonPackageDependency(BaseModel):
     package_name: str
     version: str
-
-
-class RanPackageDependency(PythonPackageDependency):
     isolated: bool
 
 
-class RanDependency(BaseModel):
-    paper_impl_id: str  # for future: can be remote only
+class RanPaperInstallation(BaseModel):
+    paper_impl_id: str
     package_dependencies: List[PythonPackageDependency]
 
 
 class RanLock(BaseModel):
-    dependencies: List[RanDependency]
+    ran_paper_installations: List[RanPaperInstallation]
 
     # Post-pre-resolution stuff below
 
@@ -207,7 +210,29 @@ class RanLock(BaseModel):
     # The value is the list of commands to run as 'compilation'
     compilation_steps: Dict[str, List[str]]
 
-    resolved_package_dependencies: List[RanPackageDependency]
+    preresolved_python_dependencies: List[PythonPackageDependency]
+
+    def empty():
+        return RanLock(
+            ran_paper_installations=[],
+            compilation_steps={},
+            preresolved_package_dependencies=[],
+        )
+
+    def get_paper_impl_ids(self):
+        return [
+            paper_installation.paper_impl_id
+            for paper_installation in self.ran_paper_installations
+        ]
+
+    def get_as_paper_installations(self) -> List[PaperInstallation]:
+        return [
+            PaperInstallation(
+                paper_impl_id=ran_paper_installation.paper_impl_id,
+                isolate=ran_paper_installation.package_dependencies[0].isolated,
+            )  # isolation happens as a group
+            for ran_paper_installation in self.ran_paper_installations
+        ]
 
     # TODO:
     # (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is desccribed in ran_lock
@@ -217,51 +242,129 @@ class RanLock(BaseModel):
         pass
 
 
-def read_lock() -> RanLock:
-    """Find the lockfile and make a RanLock out of it"""
-    with open(get_lockfile_path(), "r") as file:
-        lockfile = json.load(file)
-
-    ran_lock: RanLock = RanLock(**lockfile)
-    return ran_lock
+class DeltaLockData(BaseModel):
+    paper_impl_ids: List[str]
+    ran_paper_installations: List[RanPaperInstallation]
+    pypackage_dependencies: List[PythonPackageDependency]
 
 
-# TODO:
-def produce_lock() -> RanLock:
-    """Produce a RanLock from ran.toml (pre-resolve packages as well)"""
+class DeltaRanLock(BaseModel):
+    to_add: DeltaLockData
+    to_remove: DeltaLockData
+    final_ran_paper_installations: List[RanPaperInstallation]
+
+
+# On Adding: pretty obvious; the only stuff that will be installed though is from preresolved_python_dependencies
+# On Removing: deletes the associated modules and compilation steps, uninstalls the isolated packages that nobody depends on anymore
+def produce_delta_lock() -> DeltaRanLock:
+    """Produce a DeltaRanLock from ran.toml (pre-resolve packages as well)"""
     ran_toml: RanTOML = read_ran_toml()
-
-    paper_impl_ids: List[str] = ran_toml.deserialize_paper_impl_ids()
-
-    package_manager: str = ran_toml.settings.package_manager
-    isolate_dependencies: bool = ran_toml.settings.isolate_dependencies
-
-    # TODO: pre-resolution
-    ran_dependencies: List[RanDependency] = []  # add to this
-
-    # Get previous compilation steps (tree)
     prev_ran_lock: RanLock = read_lock()
-    prev_compilation_steps: Dict[str, List[str]] = []
 
-    # Only include compilation steps for the matching dependencies
-    ran_dependency_names: List[str] = [
-        ran_dependency.paper_impl_id for ran_dependency in ran_dependencies
-    ]
-    for paper_impl_id, comp_steps in prev_ran_lock.compilation_steps:
-        if paper_impl_id in ran_dependency_names:
-            prev_compilation_steps.append(paper_impl_id)
-
-    ran_lock: RanLock = RanLock(
-        dependencies=[],  # TODO:
-        compilation_steps=prev_compilation_steps,  # Will be elaborated on a following step
-        resolved_package_dependencies=[],  # TODO:
+    paper_installations: List[PaperInstallation] = (
+        ran_toml.deserialize_paper_installations()
     )
 
-    return ran_lock
+    prev_paper_installations: List[PaperInstallation] = (
+        prev_ran_lock.get_as_paper_installations()
+    )
+
+    # paper_impl_ids: List[str] = [paper.paper_impl_id for paper in paper_installations]
+    #
+    # paper_impl_ids_set: Set[str] = set(paper_impl_ids)
+    # prev_paper_impl_ids_set: Set[str] = set(prev_ran_lock.get_paper_impl_ids())
+    #
+    # # Used to add/remove compilation steps as well
+    # to_add_paper_impl_ids: Set[str] = paper_impl_ids_set - prev_paper_impl_ids_set
+    # to_remove_paper_impl_ids: Set[str] = prev_paper_impl_ids_set - paper_impl_ids_set
+
+    paper_installations_set: Set[PaperInstallation] = set(paper_installations)
+    prev_paper_installations_set: Set[PaperInstallation] = set(prev_paper_installations)
+
+    # Used to extract paper_impl_ids which is used to add/remove compilation steps as well
+    to_add_paper_installations: Set[PaperInstallation] = (
+        paper_installations_set - prev_paper_installations_set
+    )
+    to_remove_paper_installations: Set[PaperInstallation] = (
+        prev_paper_installations_set - paper_installations_set
+    )
+
+    # Extract paper_impl_ids
+    to_add_paper_impl_ids: Set[str] = set(
+        [
+            paper_installation.paper_impl_id
+            for paper_installation in to_add_paper_installations
+        ]
+    )
+    to_remove_paper_impl_ids: Set[str] = set(
+        [
+            paper_installation.paper_impl_id
+            for paper_installation in to_remove_paper_installations
+        ]
+    )
+
+    # Create RanPaperInstallation's
+    to_add_ranpaperinstallations: List[RanPaperInstallation] = fetch_dependencies(
+        to_add_paper_installations
+    )
+    to_remove_ranpaperinstallations: List[RanPaperInstallation] = [
+        ran_paper_installation
+        for ran_paper_installation in prev_ran_lock.ran_paper_installations
+        if ran_paper_installation.paper_impl_id in to_remove_paper_impl_ids
+    ]
+
+    ran_paper_installations: List[RanPaperInstallation] = list(
+        set(prev_ran_lock.ran_paper_installations)
+        + set(to_add_ranpaperinstallations)
+        - set(to_remove_ranpaperinstallations)
+    )
+
+    # Pre-resolution
+    preresolved_pkg_deps: List[PythonPackageDependency] = (
+        preresolution.preresolve_dependencies(ran_paper_installations)
+    )
+    prev_preresolved_pkg_deps: List[PythonPackageDependency] = (
+        prev_ran_lock.preresolved_package_dependencies
+    )
+
+    # Now, preresolution!
+    (to_add_pkg_deps, to_remove_pkg_deps) = preresolution.resolve_to_deltas(
+        preresolved_pkg_deps, prev_preresolved_pkg_deps
+    )
+
+    return DeltaRanLock(
+        to_add=DeltaLockData(
+            paper_impl_ids=list(to_add_paper_impl_ids),
+            ran_paper_installations=to_add_ranpaperinstallations,
+            pypackage_dependencies=to_add_pkg_deps,
+        ),
+        to_remove=DeltaLockData(
+            paper_impl_ids=list(to_remove_paper_impl_ids),
+            ran_paper_installations=to_remove_ranpaperinstallations,
+            pypackage_dependencies=to_remove_pkg_deps,
+        ),
+        final_ran_paper_installations=ran_paper_installations,
+    )
+
+
+def read_lock() -> RanLock:
+    """Find the lockfile and make a RanLock out of it"""
+    try:
+        with open(get_lockfile_path(), "r") as file:
+            lockfile = json.load(file)
+
+        ran_lock: RanLock = RanLock(**lockfile)
+        return ran_lock
+    except FileNotFoundError:
+        # Return an empty lock
+        return RanLock.empty()
 
 
 def apply_lock(lock: RanLock):
-    # 1.) (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is desccribed in lock: RanLock
+    # 0.) Get the delta lock to apply
+    # delta_lock: DeltaRanLock = lock.subtract(lock_prev)
+
+    # 1.) (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is described in lock: RanLock
     lock.run()
 
     # 2.) Write to lockfile (yes, the above actually modified the RanLock)
