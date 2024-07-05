@@ -234,13 +234,6 @@ class RanLock(BaseModel):
             for ran_paper_installation in self.ran_paper_installations
         ]
 
-    # TODO:
-    # (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is desccribed in ran_lock
-    def run(self):
-        """Above says it all. However, as compilation steps are done after receiving the stuff, they will be recorded and changed with this method"""
-        # And if something gets recompiled (perhaps due to a different package version?), the compilation steps WILL be replaced (desired behavior)
-        pass
-
 
 class DeltaLockData(BaseModel):
     paper_impl_ids: List[str]
@@ -251,7 +244,16 @@ class DeltaLockData(BaseModel):
 class DeltaRanLock(BaseModel):
     to_add: DeltaLockData
     to_remove: DeltaLockData
+
     final_ran_paper_installations: List[RanPaperInstallation]
+    prev_ran_lock: RanLock
+
+    # TODO:
+    # (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is described in ran_lock
+    def run_and_produce_updated_lock(self) -> RanLock:
+        """Above says it all. However, as compilation steps are done after receiving the stuff, they will be recorded and changed with this method"""
+        # And if something gets recompiled (perhaps due to a different package version?), the compilation steps WILL be replaced (desired behavior)
+        pass
 
 
 # On Adding: pretty obvious; the only stuff that will be installed though is from preresolved_python_dependencies
@@ -268,15 +270,6 @@ def produce_delta_lock() -> DeltaRanLock:
     prev_paper_installations: List[PaperInstallation] = (
         prev_ran_lock.get_as_paper_installations()
     )
-
-    # paper_impl_ids: List[str] = [paper.paper_impl_id for paper in paper_installations]
-    #
-    # paper_impl_ids_set: Set[str] = set(paper_impl_ids)
-    # prev_paper_impl_ids_set: Set[str] = set(prev_ran_lock.get_paper_impl_ids())
-    #
-    # # Used to add/remove compilation steps as well
-    # to_add_paper_impl_ids: Set[str] = paper_impl_ids_set - prev_paper_impl_ids_set
-    # to_remove_paper_impl_ids: Set[str] = prev_paper_impl_ids_set - paper_impl_ids_set
 
     paper_installations_set: Set[PaperInstallation] = set(paper_installations)
     prev_paper_installations_set: Set[PaperInstallation] = set(prev_paper_installations)
@@ -344,6 +337,7 @@ def produce_delta_lock() -> DeltaRanLock:
             pypackage_dependencies=to_remove_pkg_deps,
         ),
         final_ran_paper_installations=ran_paper_installations,
+        prev_ran_lock=prev_ran_lock,
     )
 
 
@@ -360,12 +354,9 @@ def read_lock() -> RanLock:
         return RanLock.empty()
 
 
-def apply_lock(lock: RanLock):
-    # 0.) Get the delta lock to apply
-    # delta_lock: DeltaRanLock = lock.subtract(lock_prev)
-
+def apply_delta_lock(delta_lock: DeltaRanLock):
     # 1.) (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is described in lock: RanLock
-    lock.run()
+    lock: RanLock = delta_lock.run_and_produce_updated_lock()
 
     # 2.) Write to lockfile (yes, the above actually modified the RanLock)
     write_to_lockfile(lock)
