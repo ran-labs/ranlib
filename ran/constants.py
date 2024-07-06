@@ -1,0 +1,1 @@
+DEFAULT_ISOLATION_VALUE: bool = False

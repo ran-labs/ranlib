@@ -3,8 +3,12 @@ from typing import List, Dict, Union, Set
 import typer
 
 import state
+from state import RanTOML, RanLock
 from cli import initialization as init
+from cli import modify_papers
 from integrations import Integration, setup_integration
+
+from constants import DEFAULT_ISOLATION_VALUE
 
 
 app = typer.Typer()
@@ -16,7 +20,12 @@ app = typer.Typer()
 
 # ran setup
 @app.command()
-def setup(integration: Integration = "auto", override: bool = False):
+def setup(
+    papers: List[str] = [],
+    isolated: bool = DEFAULT_ISOLATION_VALUE,
+    integration: Integration = "auto",
+    override: bool = False,
+):
     """
     Setup the project:
         - `ran setup --override` says fuck it and does a full initialization, overriding anything else that existed before
@@ -35,6 +44,10 @@ def setup(integration: Integration = "auto", override: bool = False):
     if integration != "none":
         setup_integration(integration)
 
+    # Setup the papers
+    if len(papers) > 0:
+        modify_papers.add_papers(papers, isolated)
+
 
 # ran install
 @app.command()
@@ -46,35 +59,22 @@ def install(from_rantoml: bool = False):
         init.smart_init(allow_init_from_scratch=False)
 
 
-# TODO:
 # ran use
 @app.command()
-def use(paper_impl_id: List[str], isolated: bool = False):
-    """Installs a paper library/module (or multiple)"""
-
-    # 1.) Produce lock DIFF (pre-resolve packages if needed)
-    # 2.) (Clone + Compile/Transpile if needed), Package installation
-    # 3.) Update ran.toml dependencies and lockfile
-
-    # Fetch git urls from DB
-    # git clone it & remove everything that doesnt really matter
-    # Pre-Resolve and Install the dependencies of the paper
-    # Compile if needed into .ran/ran_modules
-    # Add it to ran.toml dependencies
-    # Generate/Update lockfile
-    pass
+def use(paper_impl_ids: List[str], isolated: bool = False):
+    """Installs a paper library/module (or multiple), updates the lockfile, then updates ran.toml"""
+    modify_papers.add_papers(paper_impl_ids, isolated)
 
 
-# TODO:
 # ran remove
 @app.command()
-def remove(paper_impl_id: List[str]):
-    """Removes a paper installation (or multiple)"""
+def remove(paper_impl_ids: List[str]):
+    """Removes a paper installation (or multiple), updates the lockfile, then updates ran.toml"""
     # Remove modules from .ran/ran_modules
     # Remove its entry in ran.toml
     # For any isolated packages associated with the module(s), remove 'em
     # Generate/Update lockfile
-    pass
+    modify_papers.remove_papers(paper_impl_ids)
 
 
 # ran loadstate

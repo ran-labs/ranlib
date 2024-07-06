@@ -15,6 +15,8 @@ from cli import preresolution
 
 from __init__ import __version__
 
+from constants import DEFAULT_ISOLATION_VALUE
+
 # This file is for the stuff having to do with state, being ran.toml the lockfile (.ran/ran-lock.json)
 
 # NOTE: NO PATHS CAN END WITH A SLASH (/)
@@ -137,7 +139,7 @@ class RanPlatformParams(BaseModel):
 # package resolver (either 'auto' or 'isolate'). auto: if resolution fails, fallback to pipx/uvx (isolate mode)
 class RanSettings(BaseModel):
     package_manager: str = Field(default="pip")
-    isolate_dependencies: bool = Field(default=False)
+    isolate_dependencies: bool = Field(default=DEFAULT_ISOLATION_VALUE)
 
 
 class RanTOML(BaseModel):
@@ -199,7 +201,60 @@ class RanTOML(BaseModel):
     def serialize_paper_installations(
         paper_installations: List[PaperInstallation],
     ) -> str:
-        pass
+        # Example Before:
+        """
+        ['attention_is_all_you_need', 'seanmeher/mamba', 'mae', 'rwkv:latest']
+        """
+
+        # Example After:
+        """
+        - attention_is_all_you_need
+        - seanmeher/mamba
+        - mae
+        - rwkv:latest
+        """
+
+        serialized_papers: str = ""
+
+        for paper in paper_installations:
+            paper_impl_id: str = ""
+
+            if paper.isolate:
+                paper_impl_id += "isolate:"
+            else:
+                paper_impl_id += "noisolate:"
+
+            paper_impl_id += paper.paper_impl_id
+
+            serialized_papers += f"\n- {paper_impl_id}"
+
+        return serialized_papers
+
+    def add_paper_installations(self, paper_installations: List[PaperInstallation]):
+        # Serialize
+        new_papers_serialized: str = RanTOML.serialize_paper_installations(
+            paper_installations
+        )
+
+        # Add 'em
+        self.papers = "".join([self.papers, "\n", new_papers_serialized])
+
+    # Do this by paper_impl_id
+    def remove_paper_installations(self, to_remove_paper_impl_ids: List[str]):
+        # Deserialize to get existing
+        installed_papers: List[PaperInstallation] = (
+            self.deserialize_paper_installations()
+        )
+
+        # Installed Papers' (prime)
+        _installed_papers_: List[PaperInstallation] = [
+            installed_paper
+            for installed_paper in installed_papers
+            if installed_paper.paper_impl_id not in to_remove_paper_impl_ids
+        ]
+
+        # Reserialize and set
+        self.papers = RanTOML.serialize_paper_installations(_installed_papers_)
 
 
 def generate_ran_toml():
@@ -232,6 +287,15 @@ def read_ran_toml() -> RanTOML:
 
     ran_toml: RanTOML = RanTOML(**ran_toml_dict)
     return ran_toml
+
+
+def write_to_ran_toml(ran_toml: RanTOML):
+    """Write to ran.toml"""
+    ran_dot_toml: str = tomli_w.dumps(ran_toml.dict(), multiline_strings=True)
+
+    file_path: str = get_ran_toml_path()
+    with open(file_path, "w") as file:
+        file.write(ran_dot_toml)
 
 
 # -- RAN LOCK STUFF (LOCKFILE) --
@@ -303,6 +367,7 @@ class DeltaRanLock(BaseModel):
     def run_and_produce_updated_lock(self) -> RanLock:
         """Above says it all. However, as compilation steps are done after receiving the stuff, they will be recorded and changed with this method"""
         # And if something gets recompiled (perhaps due to a different package version?), the compilation steps WILL be replaced (desired behavior)
+        # TODO: Also postprocess the paper_impl_ids that are being added into their actual verbose values (for maximum reproducibility)
         pass
 
 
