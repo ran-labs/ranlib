@@ -70,7 +70,6 @@ def init_from_ran_toml():
     state.apply_ran_toml(ran_toml)
 
 
-# TODO:
 def full_init_from_scratch():
     """
     Fully Initialize the project from scratch. By the end, there will be:
@@ -78,4 +77,11 @@ def full_init_from_scratch():
     - .ran/
     - .ran/ran-lock.json
     """
-    pass
+    # Generate the ran.toml
+    state.generate_ran_toml()
+
+    # Now, generate the .ran/ directory with the .ran/ran_modules/
+    state.generate_dotran_dir()
+
+    # Generate the .ran/ran-lock.json
+    state.generate_ran_lock()

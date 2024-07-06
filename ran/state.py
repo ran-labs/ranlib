@@ -13,9 +13,11 @@ import re
 from cli.info_retrieval import fetch_dependencies
 from cli import preresolution
 
+from __init__ import __version__
+
 # This file is for the stuff having to do with state, being ran.toml the lockfile (.ran/ran-lock.json)
 
-# Cannot end with a slash (/)
+# NOTE: NO PATHS CAN END WITH A SLASH (/)
 ROOT_PATH: str = ""
 
 
@@ -49,26 +51,57 @@ def readme_exists() -> bool:
     return os.path.exists(f"{find_root_path()}/README.md")
 
 
+def dotran_dir_exists() -> bool:
+    return os.path.exists(DOTRAN_DIR_PATH())
+
+
 def get_ran_toml_path() -> str:
     global ROOT_PATH
 
-    if ran_toml_exists():
-        return RAN_TOML_PATH()
-    else:
+    if not ran_toml_exists():
         ROOT_PATH = find_root_path()
-        return RAN_TOML_PATH()
+
+    return RAN_TOML_PATH()
 
 
 def get_lockfile_path() -> str:
     global ROOT_PATH
 
-    if lockfile_exists():
-        return LOCKFILE_PATH()
-    else:
+    if not lockfile_exists():
         ROOT_PATH = find_root_path()
-        return LOCKFILE_PATH()
+
+    return LOCKFILE_PATH()
 
 
+def get_dotran_dir_path() -> str:
+    global ROOT_PATH
+
+    if not dotran_dir_exists():
+        ROOT_PATH = find_root_path()
+
+    return DOTRAN_DIR_PATH()
+
+
+# -- .ran/ --
+def generate_dotran_dir():
+    dotran_dir_path: str = get_dotran_dir_path()
+
+    # Generate .ran/ directory and .ran/ran_modules directory
+    try:
+        os.makedirs(dotran_dir_path, exist_ok=True)
+        print("Directory '.ran/' created successfully.")
+
+        os.makedirs(f"{dotran_dir_path}/ran_modules", exist_ok=True)
+        print("Directory '.ran/ran_modules' created successfully.")
+    except OSError as error:
+        print(f"Directory '.ran/' cannot be created successfully. Error: {error}")
+
+    # Generate a RANFILE (.ran/ran_modules/RANFILE) [lightweight lil file that doesnt do much]
+    with open(f"{dotran_dir_path}/ran_modules/RANFILE", "w") as ranfile:
+        ranfile.write(f"RANLIB Version {__version__}")
+
+
+# Rest of stuff
 class PaperInstallation(BaseModel):
     paper_impl_id: str
     isolate: bool
@@ -413,3 +446,20 @@ def write_to_lockfile(lock: RanLock):
     file_path: str = get_lockfile_path()
     with open(file_path, "w") as file:
         json.dump(ran_lock_dot_json, file)
+
+
+def generate_ran_lock():
+    """Generate a fresh .ran/ran-lock.json. If the ran.toml exists, it will generate off that."""
+
+    if ran_toml_exists():
+        ran_toml: RanTOML = read_ran_toml()
+
+        apply_ran_toml(ran_toml)
+    else:
+        # Generate a fresh one
+        ran_lock: RanLock = RanLock.empty()
+
+        # Write it to the lockfile
+        write_to_lockfile(ran_lock)
+
+    print("Generated lockfile")
