@@ -21,6 +21,11 @@ from state import RanTOML, RanLock
 # 3.) Update ran.toml dependencies and lockfile
 
 
+def appears_to_be_initialized() -> bool:
+    # TODO: maybe a better metric later?
+    return lockfile_exists() and ran_toml_exists()
+
+
 def smart_init(allow_init_from_scratch: bool = True):
     """
     - if .ran/ran-lock.json, install from there

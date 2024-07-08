@@ -11,6 +11,7 @@ def preresolve_dependencies(
     pass
 
 
+# TODO:
 def resolve_to_deltas(
     pkg_deps_new: List[PythonPackageDependency],
     pkg_deps_old: List[PythonPackageDependency],

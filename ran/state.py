@@ -104,6 +104,32 @@ def generate_dotran_dir():
 
 
 # Rest of stuff
+class PaperImplID(BaseModel):
+    author: str
+    paper_id: str
+    processed_tag: str  # cannot just be "latest" as that is before processing
+
+    def from_str(paper_impl_id: str):
+        """Create a PaperImplID object from its string version."""
+        slash_idx: int = paper_impl_id.index("/")  # for author
+        colon_idx: int = paper_impl_id.rindex(":")  # for tag
+
+        author: str = paper_impl_id[0:slash_idx]
+        paper_id: str = paper_impl_id[slash_idx + 1 : colon_idx]
+        processed_tag: str = paper_impl_id[colon_idx + 1 :]
+
+        return PaperImplID(
+            author=author, paper_id=paper_id, processed_tag=processed_tag
+        )
+
+    def __str__(self) -> str:
+        return f"{self.author}/{self.paper_id}:{self.processed_tag}"
+
+
+def paper_impl_ids_equal(paper_impl_id: str, paper_impl_id2: str) -> bool:
+    pass
+
+
 class PaperInstallation(BaseModel):
     paper_impl_id: str
     isolate: bool
@@ -184,14 +210,18 @@ class RanTOML(BaseModel):
         # Read isolation notation
         paper_installations: List[PaperInstallation] = []
         for paper_impl_id in paper_impl_ids_list:
+            paper_impl_id_: str = str(paper_impl_id)  # copy it
+
             isolation: bool = self.settings.isolate_dependencies  # Default value
             if paper_impl_id.startswith("isolate:"):
                 isolation = True
+                paper_impl_id_ = paper_impl_id_[len("isolate:") :]
             elif paper_impl_id.startswith("noisolate:"):
                 isolation = False
+                paper_impl_id_ = paper_impl_id_[len("noisolate:")]
 
             paper_installation: PaperInstallation = PaperInstallation(
-                paper_impl_id=paper_impl_id,
+                paper_impl_id=paper_impl_id_,
                 isolate=isolation,
             )
             paper_installations.append(paper_installation)
@@ -366,6 +396,7 @@ class DeltaRanLock(BaseModel):
     # (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is described in ran_lock
     def run_and_produce_updated_lock(self) -> RanLock:
         """Above says it all. However, as compilation steps are done after receiving the stuff, they will be recorded and changed with this method"""
+        # This assumes post-preresolution of what should be added and removed
         # And if something gets recompiled (perhaps due to a different package version?), the compilation steps WILL be replaced (desired behavior)
         # TODO: Also postprocess the paper_impl_ids that are being added into their actual verbose values (for maximum reproducibility)
         pass

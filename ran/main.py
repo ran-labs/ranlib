@@ -14,10 +14,6 @@ from constants import DEFAULT_ISOLATION_VALUE
 app = typer.Typer()
 
 
-# TODO: ran setup --papers paper1 paper2 paper3
-# TODO: `ran use paper1` will also do a `ran setup` before doing it if the setup has not happened yet
-
-
 # ran setup
 @app.command()
 def setup(
@@ -63,6 +59,11 @@ def install(from_rantoml: bool = False):
 @app.command()
 def use(paper_impl_ids: List[str], isolated: bool = False):
     """Installs a paper library/module (or multiple), updates the lockfile, then updates ran.toml"""
+
+    if not init.appears_to_be_initialized():
+        print("RAN appears not to be initialized. Initializing first...")
+        init.smart_init()
+
     modify_papers.add_papers(paper_impl_ids, isolated)
 
 
