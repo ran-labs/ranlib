@@ -78,7 +78,7 @@ def load_registry(update_registry: bool = True) -> Dict:
 
 
 def _find_matching_version_idx(versions: List[Dict], nametag: str) -> int:
-    for version, idx in enumerate(versions):
+    for idx, version in enumerate(versions):
         if version["tag"] == nametag:
             return idx
 
