@@ -1,6 +1,6 @@
 from typing import List, Dict, Union
 
-from state import ranstate
+from state import ranstate, dotran
 from state.pathutils import ran_toml_exists, lockfile_exists
 from state.ranstate import RanTOML, RanLock
 
@@ -86,7 +86,7 @@ def full_init_from_scratch():
     ranstate.generate_ran_toml()
 
     # Now, generate the .ran/ directory with the .ran/ran_modules/
-    ranstate.generate_dotran_dir()
+    dotran.generate_dotran_dir()
 
     # Generate the .ran/ran-lock.json
     ranstate.generate_ran_lock()
