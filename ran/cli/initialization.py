@@ -1,8 +1,8 @@
 from typing import List, Dict, Union
 
-import state
-from state import ran_toml_exists, lockfile_exists
-from state import RanTOML, RanLock
+from state import ranstate
+from state.pathutils import ran_toml_exists, lockfile_exists
+from state.ranstate import RanTOML, RanLock
 
 
 # NOTE:Initialization consists of:
@@ -56,23 +56,23 @@ def init_from_lockfile():
     if no ran.toml, also generate that
     """
     # 1.) Find lockfile and make RanLock from it
-    ran_lock: RanLock = state.read_lock()
+    ran_lock: RanLock = ranstate.read_lock()
 
     # 2.) Run apply_lock(ran_lock)
-    state.apply_lock(ran_lock, from_zero=True)
+    ranstate.apply_lock(ran_lock, from_zero=True)
 
     # 3.) Generate ran.toml if it doesn't exist
     if not ran_toml_exists():
-        state.generate_ran_toml()
+        ranstate.generate_ran_toml()
 
 
 def init_from_ran_toml():
     """Initialize from ran.toml"""
     # 1.) Read RanTOML
-    ran_toml: RanTOML = state.read_ran_toml()
+    ran_toml: RanTOML = ranstate.read_ran_toml()
 
     # 2.) Apply RanTOML
-    state.apply_ran_toml(ran_toml)
+    ranstate.apply_ran_toml(ran_toml)
 
 
 def full_init_from_scratch():
@@ -83,10 +83,10 @@ def full_init_from_scratch():
     - .ran/ran-lock.json
     """
     # Generate the ran.toml
-    state.generate_ran_toml()
+    ranstate.generate_ran_toml()
 
     # Now, generate the .ran/ directory with the .ran/ran_modules/
-    state.generate_dotran_dir()
+    ranstate.generate_dotran_dir()
 
     # Generate the .ran/ran-lock.json
-    state.generate_ran_lock()
+    ranstate.generate_ran_lock()

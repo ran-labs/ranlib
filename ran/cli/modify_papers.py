@@ -1,14 +1,14 @@
 from typing import List, Dict, Union, Set
 
-import state
-from state import PaperImplID, RanTOML, RanLock, PaperInstallation
+from state import ranstate
+from state.ranstate import RanTOML, RanLock, PaperImplID, PaperInstallation
 
 
 # ran use
 def add_papers(paper_impl_ids: List[PaperImplID], isolated: bool):
     """Installs a paper library/module (or multiple)"""
     # Read ran.toml as RanTOML
-    ran_toml: RanTOML = state.read_ran_toml()
+    ran_toml: RanTOML = ranstate.read_ran_toml()
 
     # Add to RanTOML
     ran_toml.add_paper_installations(
@@ -19,23 +19,23 @@ def add_papers(paper_impl_ids: List[PaperImplID], isolated: bool):
     )
 
     # Apply the RanTOML (runs it and updates the lockfile)
-    state.apply_ran_toml(ran_toml)
+    ranstate.apply_ran_toml(ran_toml)
 
     # Update ran.toml
-    state.write_to_ran_toml(ran_toml)
+    ranstate.write_to_ran_toml(ran_toml)
 
 
 # ran remove
 def remove_papers(paper_impl_ids: List[PaperImplID]):
     """Removes a paper installation (or multiple)"""
     # Read ran.toml as RanTOML
-    ran_toml: RanTOML = state.read_ran_toml()
+    ran_toml: RanTOML = ranstate.read_ran_toml()
 
     # Remove from RanTOML
     ran_toml.remove_paper_installations(paper_impl_ids)
 
     # Apply the RanTOML (runs it and updates the lockfile)
-    state.apply_ran_toml(ran_toml)
+    ranstate.apply_ran_toml(ran_toml)
 
     # Update ran.toml
-    state.write_to_ran_toml(ran_toml)
+    ranstate.write_to_ran_toml(ran_toml)

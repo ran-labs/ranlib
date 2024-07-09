@@ -1,5 +1,3 @@
-import os
-
 from typing import List, Dict, Set, Union
 from pydantic import BaseModel, Field
 
@@ -10,100 +8,20 @@ import json
 # RegEx
 import re
 
-from cli.info_retrieval import fetch_dependencies
-from cli import preresolution
-
-from __init__ import __version__
-
 from constants import DEFAULT_ISOLATION_VALUE, RAN_DEFAULT_AUTHOR_NAME
 
-# This file is for the stuff having to do with state, being ran.toml the lockfile (.ran/ran-lock.json)
+from state.pathutils import (
+    find_root_path,
+    readme_exists,
+    ran_toml_exists,
+    lockfile_exists,
+    get_ran_toml_path,
+    get_lockfile_path,
+)
 
-# NOTE: NO PATHS CAN END WITH A SLASH (/)
-ROOT_PATH: str = ""
-
-
-def DOTRAN_DIR_PATH() -> str:
-    return f"{ROOT_PATH}/.ran"
-
-
-def RAN_TOML_PATH() -> str:
-    return f"{ROOT_PATH}/ran.toml"
+"""This file is about the ran.toml file and lockfile (.ran/ran-lock.json)"""
 
 
-def LOCKFILE_PATH() -> str:
-    return f"{ROOT_PATH}/.ran/ran-lock.json"
-
-
-# TODO:
-def find_root_path() -> str:
-    """Must be able to perfectly find the root path every single time"""
-    pass
-
-
-def ran_toml_exists() -> bool:
-    return os.path.exists(RAN_TOML_PATH())
-
-
-def lockfile_exists() -> bool:
-    return os.path.exists(LOCKFILE_PATH())
-
-
-def readme_exists() -> bool:
-    return os.path.exists(f"{find_root_path()}/README.md")
-
-
-def dotran_dir_exists() -> bool:
-    return os.path.exists(DOTRAN_DIR_PATH())
-
-
-def get_ran_toml_path() -> str:
-    global ROOT_PATH
-
-    if not ran_toml_exists():
-        ROOT_PATH = find_root_path()
-
-    return RAN_TOML_PATH()
-
-
-def get_lockfile_path() -> str:
-    global ROOT_PATH
-
-    if not lockfile_exists():
-        ROOT_PATH = find_root_path()
-
-    return LOCKFILE_PATH()
-
-
-def get_dotran_dir_path() -> str:
-    global ROOT_PATH
-
-    if not dotran_dir_exists():
-        ROOT_PATH = find_root_path()
-
-    return DOTRAN_DIR_PATH()
-
-
-# -- .ran/ --
-def generate_dotran_dir():
-    dotran_dir_path: str = get_dotran_dir_path()
-
-    # Generate .ran/ directory and .ran/ran_modules directory
-    try:
-        os.makedirs(dotran_dir_path, exist_ok=True)
-        print("Directory '.ran/' created successfully.")
-
-        os.makedirs(f"{dotran_dir_path}/ran_modules", exist_ok=True)
-        print("Directory '.ran/ran_modules' created successfully.")
-    except OSError as error:
-        print(f"Directory '.ran/' cannot be created successfully. Error: {error}")
-
-    # Generate a RANFILE (.ran/ran_modules/RANFILE) [lightweight lil file that doesnt do much]
-    with open(f"{dotran_dir_path}/ran_modules/RANFILE", "w") as ranfile:
-        ranfile.write(f"RANLIB Version {__version__}")
-
-
-# Rest of stuff
 class PaperImplID(BaseModel):
     author: str
     paper_id: str
@@ -436,6 +354,10 @@ def produce_delta_lock(
     paper_installations are not necessarily just the ADDED installations but the state of new installations as a whole which INCLUDES those to add
     """
 
+    # I HATE PYTHON
+    from state.info_retrieval import fetch_dependencies
+    from state import preresolution
+
     prev_ran_lock: RanLock = None
     if prev_lock is not None:
         prev_ran_lock = prev_lock
@@ -582,4 +504,4 @@ def generate_ran_lock():
         # Write it to the lockfile
         write_to_lockfile(ran_lock)
 
-    print("Generated lockfile")
+    print("Generated lockfile.")

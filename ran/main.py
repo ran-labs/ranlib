@@ -2,10 +2,10 @@ from typing import List, Dict, Union, Set
 
 import typer
 
-from state import PaperImplID, RanTOML, RanLock
+from state.ranstate import PaperImplID, RanTOML, RanLock
 from cli import initialization as init
 from cli import modify_papers
-from integrations import Integration, setup_integration
+from cli.integrations import Integration, setup_integration
 
 from constants import DEFAULT_ISOLATION_VALUE
 

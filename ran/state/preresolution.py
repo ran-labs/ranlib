@@ -1,7 +1,7 @@
 from typing import List, Dict, Set, Union, Tuple
 from pydantic import BaseModel, Field
 
-from state import RanPaperInstallation, PythonPackageDependency
+from state.ranstate import RanPaperInstallation, PythonPackageDependency
 
 
 # TODO:
