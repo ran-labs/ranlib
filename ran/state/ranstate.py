@@ -8,6 +8,8 @@ import json
 # RegEx
 import re
 
+from git import Repo
+
 from constants import DEFAULT_ISOLATION_VALUE, RAN_DEFAULT_AUTHOR_NAME
 
 from state.pathutils import (
@@ -17,7 +19,11 @@ from state.pathutils import (
     lockfile_exists,
     get_ran_toml_path,
     get_lockfile_path,
+    get_dotran_dir_path,
 )
+
+from compilation import compiler
+
 
 """This file is about the ran.toml file and lockfile (.ran/ran-lock.json)"""
 
@@ -333,13 +339,77 @@ class DeltaRanLock(BaseModel):
     final_ran_paper_installations: List[RanPaperInstallation]
     prev_ran_lock: RanLock
 
-    # TODO:
+    def make_ran_lock(self, compilation_steps: Dict[str, List[str]]) -> RanLock:
+        preresolved_python_dependencies: List[PythonPackageDependency] = list(
+            set(self.prev_ran_lock.preresolved_python_dependencies)
+            + set(self.to_add.pypackage_dependencies)
+            - set(self.to_remove.pypackage_dependencies)
+        )
+
+        return RanLock(
+            ran_paper_installations=self.final_ran_paper_installations,
+            compilation_steps=compilation_steps,
+            preresolved_python_dependencies=preresolved_python_dependencies,
+        )
+
     # (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is described in ran_lock
     def run_and_produce_updated_lock(self) -> RanLock:
         """Above says it all. However, as compilation steps are done after receiving the stuff, they will be recorded and changed with this method"""
         # This assumes post-preresolution of what should be added and removed
         # And if something gets recompiled (perhaps due to a different package version?), the compilation steps WILL be replaced (desired behavior)
-        pass
+        from state.info_retrieval import fetch_repo_url
+        import state.package_installation as pkgs
+
+        compilation_steps: Dict[str, List[str]] = {}
+
+        # First, clone and compile/transpile each paper. Compilation steps should be yielded as a result
+        print("Fetching and compiling papers...")
+        for ran_paper_installation in self.final_ran_paper_installations:
+            paper_impl_id: PaperImplID = ran_paper_installation.paper_impl_id
+            if ran_paper_installation in self.to_add.ran_paper_installations:
+                # Clone & compile/transpile the paper
+                ran_modules_path: str = f"{get_dotran_dir_path()}/ran_modules"
+                repo_url: str = fetch_repo_url(paper_impl_id)
+                Repo.clone_from(repo_url, ran_modules_path)
+
+                cloned_folder_name: str = repo_url[
+                    repo_url.rindex("/") + 1 : repo_url.rindex(".git")
+                ]
+
+                # Add to compilation steps to be yielded as a result
+                comp_steps: List[str] = compiler.compile(
+                    compilation_parent_dir=ran_modules_path,
+                    compilation_target_subdir=cloned_folder_name,
+                )
+
+                compilation_steps[str(paper_impl_id)] = comp_steps
+            elif ran_paper_installation not in self.to_remove.ran_paper_installations:
+                key: str = str(paper_impl_id)
+                compilation_steps[key] = self.prev_ran_lock.compilation_steps[key]
+
+        # Next, install and remove packages
+        print("Installing and removing packages...")
+
+        ## Try to find the package manager used. If not found, default to pip
+        package_manager: str = pkgs.detect_package_manager()
+
+        pkgs.remove(
+            self.to_remove.pypackage_dependencies,
+            package_manager=package_manager,
+            lenient=True,
+        )
+
+        pkgs.install(
+            self.to_add.pypackage_dependencies, package_manager=package_manager
+        )
+
+        # Clean up by deleting modules that were removed
+        print("Cleaning up...")
+        # TODO:
+
+        # Now, make the RanLock
+        print("Generating lock...")
+        return self.make_ran_lock(compilation_steps=compilation_steps)
 
 
 # On Adding: pretty obvious; the only stuff that will be installed though is from preresolved_python_dependencies
