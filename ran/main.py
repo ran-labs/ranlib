@@ -23,12 +23,12 @@ app = typer.Typer()
 # from ran_modules import mamba
 
 print(os.getcwd())
-print(os.listdir('.'))
+# print(os.listdir('.'))
 os.chdir("ran/")
 
-print(os.listdir('.'))
+# print(os.listdir('.'))
 os.chdir(".ran/ran_modules/")
-print(os.listdir('.'))
+# print(os.listdir('.'))
 sys.path.append(os.path.join(os.getcwd()))
 
 # print(sys.path)
