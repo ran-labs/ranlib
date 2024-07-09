@@ -2,8 +2,7 @@ from typing import List, Dict, Union, Set
 
 import typer
 
-import state
-from state import RanTOML, RanLock
+from state import PaperImplID, RanTOML, RanLock
 from cli import initialization as init
 from cli import modify_papers
 from integrations import Integration, setup_integration
@@ -64,7 +63,13 @@ def use(paper_impl_ids: List[str], isolated: bool = False):
         print("RAN appears not to be initialized. Initializing first...")
         init.smart_init()
 
-    modify_papers.add_papers(paper_impl_ids, isolated)
+    # Convert papers to PaperImplID
+    paper_implementation_ids: List[PaperImplID] = [
+        PaperImplID.from_str(paper_impl_id) for paper_impl_id in paper_impl_ids
+    ]
+
+    # Add them
+    modify_papers.add_papers(paper_implementation_ids, isolated)
 
 
 # ran remove
@@ -75,7 +80,14 @@ def remove(paper_impl_ids: List[str]):
     # Remove its entry in ran.toml
     # For any isolated packages associated with the module(s), remove 'em
     # Generate/Update lockfile
-    modify_papers.remove_papers(paper_impl_ids)
+
+    # Convert papers to PaperImplID
+    paper_implementation_ids: List[PaperImplID] = [
+        PaperImplID.from_str(paper_impl_id) for paper_impl_id in paper_impl_ids
+    ]
+
+    # Remove them
+    modify_papers.remove_papers(paper_implementation_ids)
 
 
 # ran loadstate

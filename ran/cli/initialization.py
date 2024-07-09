@@ -59,7 +59,7 @@ def init_from_lockfile():
     ran_lock: RanLock = state.read_lock()
 
     # 2.) Run apply_lock(ran_lock)
-    state.apply_lock(ran_lock)
+    state.apply_lock(ran_lock, from_zero=True)
 
     # 3.) Generate ran.toml if it doesn't exist
     if not ran_toml_exists():
