@@ -17,8 +17,6 @@ app = typer.Typer()
 os.chdir(".ran/ran_modules")
 sys.path.append(os.path.join(os.getcwd()))
 from ran import mamba
-mamba.greet()
-
 
 # ran setup
 @app.command()
