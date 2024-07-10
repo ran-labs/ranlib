@@ -241,8 +241,9 @@ def compile(
         shell=True,
     )
 
-    # TODO: preprocess all python modules into using relative imports for all imports
-    # Maybe spawn a subprocess where it converts all abs to rel
+    # Preprocess all python modules into using relative imports for all imports
+    # Spawn a subprocess where it converts all abs to rel
+    # Maybe change this later
     subprocess.run(f'cd "{repo_dir}" && rawabs2rel', shell=True)
 
     # Blindly import EVERYTHING (all python modules) in the repo. This will add the functions to exposed_function_buffer
