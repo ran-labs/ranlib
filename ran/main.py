@@ -13,25 +13,9 @@ from constants import DEFAULT_ISOLATION_VALUE
 
 
 app = typer.Typer()
-# print(os.getcwd())
-# print(sys.path)
-# os.chdir("/home/sanner/Coding/Work/Anemo/ranlib/ran/.ran")
-# print(os.getcwd())
-# print(os.listdir('.'))
-# print(sys.path)
-# sys.path.append(os.getcwd())
-# from ran_modules import mamba
 
-print(os.getcwd())
-# print(os.listdir('.'))
-os.chdir("ran/")
-
-# print(os.listdir('.'))
-os.chdir(".ran/ran_modules/")
-# print(os.listdir('.'))
+os.chdir(".ran/ran_modules")
 sys.path.append(os.path.join(os.getcwd()))
-
-# print(sys.path)
 from ran import mamba
 mamba.greet()
 
