@@ -234,6 +234,7 @@ def compile(
     delete_redundant_stuff(old_repo_dir)
 
     # Also, rename the directory name to _lib/paper_id/*
+    # Maybe move this off of subprocess later (security issue)
     repo_dir: str = f"{compilation_parent_dir}/_lib/{paper_id}"
     subprocess.run(
         f'mv "{old_repo_dir}" "{repo_dir}"',
@@ -242,6 +243,7 @@ def compile(
 
     # TODO: preprocess all python modules into using relative imports for all imports
     # Maybe spawn a subprocess where it converts all abs to rel
+    subprocess.run(f'cd "{repo_dir}" && rawabs2rel', shell=True)
 
     # Blindly import EVERYTHING (all python modules) in the repo. This will add the functions to exposed_function_buffer
     # There will be a problem when you have stuff like `train.py` with no encapsulating classes/functions and just code
