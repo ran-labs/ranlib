@@ -1,6 +1,8 @@
 from typing import List, Dict, Union, Set
 
 import typer
+import os
+import sys
 
 from state.ranstate import PaperImplID, RanTOML, RanLock
 from cli import initialization as init
@@ -11,6 +13,11 @@ from constants import DEFAULT_ISOLATION_VALUE
 
 
 app = typer.Typer()
+
+os.chdir(".ran/ran_modules")
+sys.path.append(os.path.join(os.getcwd()))
+from ran import mamba
+mamba.greet()
 
 
 # ran setup
