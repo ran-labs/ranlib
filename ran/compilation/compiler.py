@@ -153,6 +153,10 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
     try:
         os.mkdir(_lib_dir_path)
         print(f"Directory '{_lib_dir_path}' created")
+
+        # Make the __init__.py
+        with open(f"{_lib_dir_path}/__init__.py") as initfile:
+            initfile.write(" ")
     except FileExistsError:
         print(f"Directory '{_lib_dir_path}' already exists")
 
@@ -210,7 +214,6 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
             json.dump(existing_buffer_serializable, file)
 
 
-# TODO:
 def compile(
     paper_id: str, compilation_parent_dir: str, compilation_target_subdir: str
 ) -> List[str]:
@@ -238,6 +241,7 @@ def compile(
     )
 
     # TODO: preprocess all python modules into using relative imports for all imports
+    # Maybe spawn a subprocess where it converts all abs to rel
 
     # Blindly import EVERYTHING (all python modules) in the repo. This will add the functions to exposed_function_buffer
     # There will be a problem when you have stuff like `train.py` with no encapsulating classes/functions and just code
@@ -253,9 +257,42 @@ def compile(
     import_statements_list: List[str] = []
     function_code_list: List[str] = []
 
+    def check_name_conflicts(exposed_function: RANFunction) -> bool:
+        for exposed_function_2 in exposed_functions:
+            if (
+                exposed_function_2 != exposed_function
+                and exposed_function.function_name == exposed_function_2.function_name
+            ):
+                return True
+
+        return False
+
     for exposed_function in exposed_functions:
-        import_statements_list.append(exposed_function.as_import_statement())
-        # TODO: add to function_code_list
+        # Generate function name (avoid conflicts)
+        imported_func_name: str = ""
+        import_statement: str = ""
+        if check_name_conflicts(exposed_function):
+            imported_func_name = exposed_function.get_verbose_function_name()
+        else:
+            imported_func_name = exposed_function.function_name
+
+        func_name: str = "" + imported_func_name
+        imported_func_name += "_"  # add an _ so the imported function name doesnt conflict with the actual thing
+
+        import_statement = exposed_function.as_import_statement(
+            alias=imported_func_name
+        )
+
+        # Add to import statements
+        import_statements_list.append(import_statement)
+
+        # Generate function body (calls the original imported function)
+        generated_function_code: str = (
+            f"def {func_name}({exposed_function.params_str}):\n\t# Put any desired pre-call handling here\n\t\n\tresult = {imported_func_name}({exposed_function.parse_params_names_only()})\n\t# Put any desired post-call handling here\n\t\n\treturn result"
+        )
+
+        # Add to function_code_list
+        function_code_list.append(generated_function_code)
 
     # Import statements
     import_statements: str = "\n".join(import_statements_list)
