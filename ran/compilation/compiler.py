@@ -1,13 +1,279 @@
+import os
+import shutil
+
 from typing import List, Dict, Set, Union, Tuple
 from pydantic import BaseModel, Field
 
+from pydantic import (
+    parse_obj_as,  # for Pydantic V1
+    TypeAdapter,  # for Pydantic V2 (which we are using)
+)
+
+import json
 import subprocess
+
+import importlib.util
+
+from utils import find_all_python_files
+from state.pathutils import get_dotran_dir_path
+from compilation.schemas import RANFunction
+
+
+# The keys are the actual paper_id such as "attention_is_all_you_need"
+# When this buffer is flushed, it will go into .ran/ran-modules/_lib/.comptools/exposed_functions.json
+exposed_function_buffer: Dict[str, List[RANFunction]] = {}
+
+
+def convert_buffer_to_serializable(
+    buffer: Dict[str, List[RANFunction]]
+) -> Dict[str, List[Dict]]:
+    buffer_serializable: Dict[str, List[Dict]] = {}
+
+    for key, val_list in buffer.items():
+        buffer_serializable[key] = [val.dict() for val in val_list]
+
+    return buffer_serializable
+
+
+def combine_buffers(
+    buffer1: Dict[str, List], buffer2: Dict[str, List]
+) -> Dict[str, List]:
+    # Copy buffer1
+    combined_buffer: Dict[str, List[RANFunction]] = {k: v for (k, v) in buffer1.items()}
+
+    for key, value in buffer2.items():
+        if combined_buffer.get(key) is None:
+            # Set the key if it doesn't exist
+            combined_buffer[key] = value
+        else:
+            # Add all list items if the key already exists
+            combined_buffer[key] += value
+
+    return combined_buffer
+
+
+def read_saved_exposed_functions(json_filepath: str) -> Dict[str, List[RANFunction]]:
+    if not os.path.exists(json_filepath):
+        return dict()
+
+    with open(json_filepath, "r") as file:
+        # Dict[str, List[Dict]]
+        data = json.load(file)
+
+    ta = TypeAdapter(Dict[str, List[RANFunction]])
+    saved_exposed_functions: Dict[str, List[RANFunction]] = ta.validate_python(data)
+
+    return saved_exposed_functions
+
+
+def flush_exposed_function_buffer():
+    global exposed_function_buffer
+
+    filepath: str = (
+        f"{get_dotran_dir_path()}/ran_modules/_lib/.comptools/exposed_functions.json"
+    )
+
+    existing_buffer: Dict[str, List[RANFunction]] = read_saved_exposed_functions(
+        filepath
+    )
+
+    # Combine the buffers
+    combined_buffer: Dict[str, List[RANFunction]] = combine_buffers(
+        existing_buffer, exposed_function_buffer
+    )
+
+    # Write it to the json file
+    exposed_functions_dot_json: Dict[str, List[Dict]] = convert_buffer_to_serializable(
+        combined_buffer
+    )
+    with open(filepath, "w") as file:
+        json.dump(exposed_functions_dot_json, file)
+
+    # We don't need to reset the exposed_function_buffer as the next precompilation will do that
+
+
+def import_all_pymodules_from_directory(directory: str):
+    spec_list = []
+    for file_name in find_all_python_files(directory):
+        # Remove .py extension and convert slashes to dots
+        module_name = file_name[:-3].replace("/", ".")
+        print(module_name)
+        spec = importlib.util.spec_from_file_location(module_name, file_name)
+        spec_list.append(spec)
+
+    # Load all modules
+    # modules = {}
+    for spec in spec_list:
+        module = importlib.util.module_from_spec(spec)
+        # modules[spec.name] = module
+        spec.loader.exec_module(module)
+
+    # return modules
+
+
+def delete_redundant_stuff(repo_dir: str):
+    print("Removing BS...")
+    try:
+        # README
+        repo_readme_path: str = f"{repo_dir}/README.md"
+        if os.path.exists(repo_readme_path):
+            os.remove(repo_readme_path)
+
+        # LICENSE
+        repo_license_path: str = f"{repo_dir}/LICENSE"
+        if os.path.exists(repo_license_path):
+            os.remove(repo_license_path)
+
+        # .gitattributes
+        repo_gitattributes_path: str = f"{repo_dir}/.gitattributes"
+        if os.path.exists(repo_gitattributes_path):
+            os.remove(repo_gitattributes_path)
+
+        # .gitignore
+        repo_gitignore_path: str = f"{repo_dir}/.gitignore"
+        if os.path.exists(repo_gitignore_path):
+            os.remove(repo_gitignore_path)
+    except OSError as err:
+        print(f"OS Error when trying to clean BS: {err}")
+
+    # TODO: anything in the .ranignore
+
+
+def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
+    """Setup the paper_ids to add + Cleanup the ones to remove"""
+    global exposed_function_buffer
+
+    print("Precompiling...")
+
+    dotran_dir_path: str = get_dotran_dir_path()
+
+    # Create _lib directory if it doesn't already exist
+    _lib_dir_path: str = f"{dotran_dir_path}/ran_modules/_lib"
+
+    try:
+        os.mkdir(_lib_dir_path)
+        print(f"Directory '{_lib_dir_path}' created")
+    except FileExistsError:
+        print(f"Directory '{_lib_dir_path}' already exists")
+
+    # Create .comptools directory if it doesn't already exist
+    dotcomptools_dir_path: str = f"{_lib_dir_path}/.comptools"
+    try:
+        os.mkdir()
+        print(f"Directory '{dotcomptools_dir_path}' created")
+    except FileExistsError:
+        pass
+        # print(f"Directory '{_lib_dir_path}' already exists")
+
+    # Set up the new
+    exposed_function_buffer = {}
+
+    print("Fresh starting...")
+    for paper_id in to_add_paper_ids:
+        # Fresh start
+        exposed_function_buffer[paper_id] = []
+
+    # Cleanup the old to remove
+    # Also remove from the existing buffer and rewrite it
+    print("Cleaning up trash...")
+
+    existing_filepath: str = f"{_lib_dir_path}/.comptools/exposed_functions.json"
+
+    existing_buffer: Dict[str, List[RANFunction]] = read_saved_exposed_functions(
+        existing_filepath
+    )
+
+    existing_buffer_is_not_empty: bool = bool(existing_buffer)
+
+    for paper_id in to_remove_paper_ids:
+        folderpath: str = f"{dotran_dir_path}/ran_modules/_lib/{paper_id}"
+        modulepath: str = f"{dotran_dir_path}/ran_modules/{paper_id}.py"
+
+        # Remove the folder and module
+        try:
+            shutil.rmtree(folderpath, ignore_errors=True)
+            os.remove(modulepath)
+        except OSError as err:
+            print(f"OS Error when trying to cleanup paper_ids: {err}")
+
+        # Remove the associated paper_id from the saved function buffer
+        if existing_buffer_is_not_empty:
+            del existing_buffer[paper_id]
+
+    # Write the updated buffer
+    if existing_buffer_is_not_empty:
+        print("Writing buffer...")
+        existing_buffer_serializable: Dict[str, List[Dict]] = (
+            convert_buffer_to_serializable(existing_buffer)
+        )
+        with open(existing_filepath, "w") as file:
+            json.dump(existing_buffer_serializable, file)
 
 
 # TODO:
-def compile(compilation_parent_dir: str, compilation_target_subdir: str) -> List[str]:
+def compile(
+    paper_id: str, compilation_parent_dir: str, compilation_target_subdir: str
+) -> List[str]:
     """
     Returns compilation steps
+
+    compilation_parent_dir - typically the .ran/ran_modules dir
+    compilation_target_subdir - typically the folder that the repo was just cloned into, such as `mamba` in the context of .ran/ran_modules/mamba. However, this is NOT the paper_id
     """
 
-    pass
+    old_repo_dir: str = f"{compilation_parent_dir}/{compilation_target_subdir}"
+
+    # First: delete all the shit that don't matter
+    # README.md
+    # LICENSE
+    # .gitattributes
+    # .gitignore
+    delete_redundant_stuff(old_repo_dir)
+
+    # Also, rename the directory name to _lib/paper_id/*
+    repo_dir: str = f"{compilation_parent_dir}/_lib/{paper_id}"
+    subprocess.run(
+        f'mv "{old_repo_dir}" "{repo_dir}"',
+        shell=True,
+    )
+
+    # TODO: preprocess all python modules into using relative imports for all imports
+
+    # Blindly import EVERYTHING (all python modules) in the repo. This will add the functions to exposed_function_buffer
+    # There will be a problem when you have stuff like `train.py` with no encapsulating classes/functions and just code
+    # In those cases, we can rely on our users to just encapsulate them in functions and do if __name__ == "__main__" if they want to preserve the ability to run as a python file
+    # For cases where ppl wont budge on that, we can manually have a prompt-engineered LLM reformat it for them
+    import_all_pymodules_from_directory(repo_dir)
+
+    # Generate the python module based off of the stuff in the exposed_function_buffer[paper_id]
+    # Includes the import statements (don't need to do dynamic imports rn) as well as the linked functions
+    # At this point, exposed_function_buffer[paper_id] is filled up
+    exposed_functions: List[RANFunction] = exposed_function_buffer[paper_id]
+
+    import_statements_list: List[str] = []
+    function_code_list: List[str] = []
+
+    for exposed_function in exposed_functions:
+        import_statements_list.append(exposed_function.as_import_statement())
+        # TODO: add to function_code_list
+
+    # Import statements
+    import_statements: str = "\n".join(import_statements_list)
+    functions_str: str = "\n\n".join(function_code_list)
+
+    full_python_module_str: str = f"{import_statements}\n\n{functions_str}"
+
+    # Now make the actual python file
+    with open(f"{compilation_parent_dir}/{paper_id}.py", "w") as file:
+        file.write(full_python_module_str)
+
+    print(f"{paper_id} compilation complete.")
+
+    # Return compilation steps but who gives a fuck rn lmao
+    return []
+
+
+def postcompilation():
+    # Flush the buffer
+    print("Flushing compile buffer...")
+    flush_exposed_function_buffer()

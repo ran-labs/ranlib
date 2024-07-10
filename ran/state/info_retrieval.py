@@ -61,10 +61,7 @@ class PaperImplementationVersion(BaseModel):
 def load_registry(update_registry: bool = True) -> Dict:
     if update_registry:
         print("Updating Registry...")
-        try:
-            shutil.rmtree(f"{LIB_ROOT}/ran-registry")
-        except OSError:
-            pass
+        shutil.rmtree(f"{LIB_ROOT}/ran-registry", ignore_errors=True)
 
         # Clone
         Repo.clone_from(

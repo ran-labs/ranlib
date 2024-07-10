@@ -331,6 +331,12 @@ class DeltaLockData(BaseModel):
             for ran_paper_installation in self.ran_paper_installations
         ]
 
+    def get_paper_ids(self) -> List[str]:
+        return [
+            ran_paper_installation.paper_impl_id.paper_id
+            for ran_paper_installation in self.ran_paper_installations
+        ]
+
 
 class DeltaRanLock(BaseModel):
     to_add: DeltaLockData
@@ -362,6 +368,12 @@ class DeltaRanLock(BaseModel):
 
         compilation_steps: Dict[str, List[str]] = {}
 
+        # Step 0: precompilation - setup the new and cleanup the old
+        compiler.precompile(
+            to_add_paper_ids=self.to_add.get_paper_ids(),
+            to_remove_paper_ids=self.to_remove.get_paper_ids(),
+        )
+
         # First, clone and compile/transpile each paper. Compilation steps should be yielded as a result
         print("Fetching and compiling papers...")
         for ran_paper_installation in self.final_ran_paper_installations:
@@ -378,6 +390,7 @@ class DeltaRanLock(BaseModel):
 
                 # Add to compilation steps to be yielded as a result
                 comp_steps: List[str] = compiler.compile(
+                    paper_id=ran_paper_installation.paper_impl_id.paper_id,
                     compilation_parent_dir=ran_modules_path,
                     compilation_target_subdir=cloned_folder_name,
                 )
@@ -386,6 +399,9 @@ class DeltaRanLock(BaseModel):
             elif ran_paper_installation not in self.to_remove.ran_paper_installations:
                 key: str = str(paper_impl_id)
                 compilation_steps[key] = self.prev_ran_lock.compilation_steps[key]
+
+        # After compilation on each paper, run this to flush the buffer
+        compiler.postcompilation()
 
         # Next, install and remove packages
         print("Installing and removing packages...")
@@ -402,10 +418,6 @@ class DeltaRanLock(BaseModel):
         pkgs.install(
             self.to_add.pypackage_dependencies, package_manager=package_manager
         )
-
-        # Clean up by deleting modules that were removed
-        print("Cleaning up...")
-        # TODO:
 
         # Now, make the RanLock
         print("Generating lock...")
