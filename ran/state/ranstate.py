@@ -99,6 +99,15 @@ class RanPlatformParams(BaseModel):
     )
 
 
+# Dependencies
+class RanPaperDependencies(BaseModel):
+    # paper_impl_ids
+    papers: str = Field(
+        default="""
+"""
+    )  # fuck this formatter
+
+
 # settings
 # package manager (either 'pip', 'pipx', 'uv', 'uvx', 'poetry', 'conda', 'mamba', 'micromamba', 'pipenv')
 # package resolver (either 'auto' or 'isolate'). auto: if resolution fails, fallback to pipx/uvx (isolate mode)
@@ -110,11 +119,7 @@ class RanSettings(BaseModel):
 class RanTOML(BaseModel):
     RAN: RanPlatformParams = Field(default=RanPlatformParams())
 
-    # paper_impl_ids
-    papers: str = Field(
-        default="""
-"""
-    )  # fuck this formatter
+    dependencies: RanPaperDependencies = Field(default=RanPaperDependencies())
 
     settings: RanSettings = Field(default=RanSettings())
 
@@ -141,7 +146,7 @@ class RanTOML(BaseModel):
         """
 
         # Remove ALL whitespace
-        paper_impl_ids_no_whitespace: str = re.sub(r"\s", "", self.papers)
+        paper_impl_ids_no_whitespace: str = re.sub(r"\s", "", self.dependencies.papers)
 
         # Separate by hyphens
         paper_impl_ids_list: List[str] = paper_impl_ids_no_whitespace.split("-")
@@ -209,7 +214,9 @@ class RanTOML(BaseModel):
         )
 
         # Add 'em
-        self.papers = "".join([self.papers, new_papers_serialized, "\n"])
+        self.dependencies.papers = "".join(
+            [self.dependencies.papers, new_papers_serialized, "\n"]
+        )
 
     # Do this by paper_impl_id
     def remove_paper_installations(self, to_remove_paper_impl_ids: List[PaperImplID]):
@@ -226,7 +233,9 @@ class RanTOML(BaseModel):
         ]
 
         # Reserialize and set
-        self.papers = RanTOML.serialize_paper_installations(_installed_papers_)
+        self.dependencies.papers = RanTOML.serialize_paper_installations(
+            _installed_papers_
+        )
 
 
 def generate_ran_toml():
@@ -238,7 +247,7 @@ def generate_ran_toml():
     if lockfile_exists():
         # Generate off the lockfile
         ran_lock: RanLock = read_lock()
-        ran_toml_obj.papers = RanTOML.serialize_paper_installations(
+        ran_toml_obj.dependencies.papers = RanTOML.serialize_paper_installations(
             ran_lock.get_as_paper_installations()
         )
 
@@ -378,6 +387,7 @@ class DeltaRanLock(BaseModel):
         print("Fetching and compiling papers...")
         for ran_paper_installation in self.final_ran_paper_installations:
             paper_impl_id: PaperImplID = ran_paper_installation.paper_impl_id
+            key: str = str(paper_impl_id)
             if ran_paper_installation in self.to_add.ran_paper_installations:
                 # Clone & compile/transpile the paper
                 ran_modules_path: str = f"{get_dotran_dir_path()}/ran_modules"
@@ -395,26 +405,28 @@ class DeltaRanLock(BaseModel):
                     compilation_target_subdir=cloned_folder_name,
                 )
 
-                compilation_steps[str(paper_impl_id)] = comp_steps
+                compilation_steps[key] = comp_steps
             elif ran_paper_installation not in self.to_remove.ran_paper_installations:
-                key: str = str(paper_impl_id)
+                # These are the ones that are kept (so not added or removed)
                 compilation_steps[key] = self.prev_ran_lock.compilation_steps[key]
 
         # After compilation on each paper, run this to flush the buffer
         compiler.postcompilation()
 
         # Next, install and remove packages
-        print("Installing and removing packages...")
+        print("Updating packages...")
 
         ## Try to find the package manager used. If not found, default to pip
         package_manager: str = pkgs.detect_package_manager()
 
+        print("Removing packages...")
         pkgs.remove(
             self.to_remove.pypackage_dependencies,
             package_manager=package_manager,
             lenient=True,
         )
 
+        print("Installing packages...")
         pkgs.install(
             self.to_add.pypackage_dependencies, package_manager=package_manager
         )
@@ -502,13 +514,15 @@ def produce_delta_lock(
     )
 
 
-def produce_delta_lock_from_ran_toml(ran_toml: RanTOML) -> DeltaRanLock:
+def produce_delta_lock_from_ran_toml(
+    ran_toml: RanTOML, prev_lock: RanLock = None
+) -> DeltaRanLock:
     """Produce a DeltaRanLock from ran.toml (pre-resolve packages as well)"""
     paper_installations: List[PaperInstallation] = (
         ran_toml.deserialize_paper_installations()
     )
 
-    return produce_delta_lock(paper_installations)
+    return produce_delta_lock(paper_installations, prev_lock=prev_lock)
 
 
 def produce_delta_lock_from_ran_lock(
@@ -521,6 +535,8 @@ def produce_delta_lock_from_ran_lock(
 
 
 def apply_delta_lock(delta_lock: DeltaRanLock):
+    """Applies changes within the project and writes them to a lockfile"""
+
     # 1.) (Clone + Compile/Transpile if needed), Package installation. Literally just follow what is described in lock: RanLock
     lock: RanLock = delta_lock.run_and_produce_updated_lock()
 
@@ -528,18 +544,31 @@ def apply_delta_lock(delta_lock: DeltaRanLock):
     write_to_lockfile(lock)
 
 
-def apply_ran_toml(ran_toml: RanTOML):
+def apply_ran_toml(
+    ran_toml: RanTOML, from_zero: bool = False, write_to_randottoml: bool = True
+):
+    prev_lock: RanLock = None
+    if from_zero:
+        prev_lock = RanLock.empty()
+
     # 1.) Make a DeltaRanLock
-    delta_ran_lock: DeltaRanLock = produce_delta_lock_from_ran_toml(ran_toml)
+    delta_ran_lock: DeltaRanLock = produce_delta_lock_from_ran_toml(
+        ran_toml, prev_lock=prev_lock
+    )
 
     # 2.) Apply the DeltaRanLock
     apply_delta_lock(delta_ran_lock)
+
+    # 3.) Write to RanTOML
+    if write_to_randottoml:
+        write_to_ran_toml(ran_toml)
 
 
 def apply_lock(lock: RanLock, from_zero: bool = False):
     prev_lock: RanLock = None
     if from_zero:
         prev_lock = RanLock.empty()
+    # no need for an else statement here since produce_delta_lock will automatically get the prior lock if it's not specified as anything but None
 
     # 1.) Make a DeltaRanLock
     delta_ran_lock: DeltaRanLock = produce_delta_lock_from_ran_lock(

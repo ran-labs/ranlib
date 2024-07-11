@@ -66,13 +66,15 @@ def init_from_lockfile():
         ranstate.generate_ran_toml()
 
 
-def init_from_ran_toml():
+def init_from_ran_toml(force_fresh_install: bool = True):
     """Initialize from ran.toml"""
     # 1.) Read RanTOML
     ran_toml: RanTOML = ranstate.read_ran_toml()
 
-    # 2.) Apply RanTOML
-    ranstate.apply_ran_toml(ran_toml)
+    # 2.) Apply RanTOML (we don't want to rewrite it since we are applying the same thing)
+    ranstate.apply_ran_toml(
+        ran_toml, from_zero=force_fresh_install, write_to_randottoml=False
+    )
 
 
 def full_init_from_scratch():

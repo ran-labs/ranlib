@@ -1,12 +1,14 @@
+import os
+import sys
+
 from typing import List, Dict, Union, Set
 
 import typer
-import os
-import sys
 
 from state.ranstate import PaperImplID, RanTOML, RanLock
 from cli import initialization as init
 from cli import modify_papers
+from cli.utils import manifest_project_root
 from cli.integrations import Integration, setup_integration
 
 from constants import DEFAULT_ISOLATION_VALUE
@@ -14,12 +16,15 @@ from constants import DEFAULT_ISOLATION_VALUE
 
 app = typer.Typer()
 
-os.chdir(".ran/ran_modules")
-sys.path.append(os.path.join(os.getcwd()))
-from ran import mamba
+
+# os.chdir(".ran/ran_modules")
+# sys.path.append(os.path.join(os.getcwd()))
+# from ran import mamba
+
 
 # ran setup
 @app.command()
+@manifest_project_root
 def setup(
     papers: List[str] = [],
     isolated: bool = DEFAULT_ISOLATION_VALUE,
@@ -34,6 +39,7 @@ def setup(
           - else if ran.toml, init from there
           - else, do a full initialization
     """
+    # TODO: ran setup github should not reinitialize the project
 
     if override:
         init.full_init_from_scratch()
@@ -44,6 +50,8 @@ def setup(
     if integration != "none":
         setup_integration(integration)
 
+    # TODO: make the isolated value change the default isolation value on the ran.toml
+
     # Setup the papers
     if len(papers) > 0:
         modify_papers.add_papers(papers, isolated)
@@ -51,21 +59,43 @@ def setup(
 
 # ran install
 @app.command()
+@manifest_project_root
 def install(from_rantoml: bool = False):
     """Installs the papers from the lockfile, unless the user specifies to be from ran.toml. If lockfile not found, try ran.toml"""
+    # This will ALWAYS fresh install
+
     if from_rantoml:
         init.init_from_ran_toml()
-    else:
-        init.smart_init(allow_init_from_scratch=False)
+        return
+
+    init.smart_init(allow_init_from_scratch=False)
+
+
+# ran update
+@app.command()
+@manifest_project_root
+def update():
+    """Installs from the ran.toml file. In case the user wants to use this. This will NOT fresh install everything unless there is no lockfile"""
+    init.init_from_ran_toml(force_fresh_install=False)
+
+
+# ran loadstate
+@app.command()
+@manifest_project_root
+def loadstate():
+    """Load from the lockfile that is in .ran/ran-lock.json"""
+    # init_from_lockfile will always be from zero since otherwise nothing would happpen (x - x = 0, but x - 0 = x)
+    init.init_from_lockfile()
 
 
 # ran use
 @app.command()
+@manifest_project_root
 def use(paper_impl_ids: List[str], isolated: bool = False):
     """Installs a paper library/module (or multiple), updates the lockfile, then updates ran.toml"""
 
     if not init.appears_to_be_initialized():
-        print("RAN appears not to be initialized. Initializing first...")
+        print("RAN does not appear to be initialized. Initializing first...")
         init.smart_init()
 
     # Convert papers to PaperImplID
@@ -79,6 +109,7 @@ def use(paper_impl_ids: List[str], isolated: bool = False):
 
 # ran remove
 @app.command()
+@manifest_project_root
 def remove(paper_impl_ids: List[str]):
     """Removes a paper installation (or multiple), updates the lockfile, then updates ran.toml"""
     # Remove modules from .ran/ran_modules
@@ -95,16 +126,10 @@ def remove(paper_impl_ids: List[str]):
     modify_papers.remove_papers(paper_implementation_ids)
 
 
-# ran loadstate
-@app.command()
-def loadstate():
-    """Load from the lockfile that is in .ran/ran-lock.json"""
-    init.init_from_lockfile()
-
-
 # TODO:
 # ran push
 @app.command()
+@manifest_project_root
 def push(compile: bool = False):
     """
     Optionally compile the code and push to the specified remote.
@@ -121,7 +146,7 @@ def push(compile: bool = False):
 # ran help
 @app.command()
 def help():
-    """ran help"""
+    """Print all the help commands"""
     pass
 
 

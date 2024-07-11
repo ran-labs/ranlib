@@ -1,4 +1,29 @@
+import os
 from pathlib import Path
+
+import functools
+
+from state.pathutils import find_root_path, set_root_path, add_root_path
+
+
+def manifest_project_root(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        """Manifest the User Project Root before every single command."""
+        root_path: str = find_root_path()
+
+        if root_path is None:
+            root_path = os.getcwd()
+            add_root_path(root_path)
+
+        set_root_path(root_path)
+
+        # Execute the actual function
+        result = func(*args, **kwargs)
+
+        return result
+
+    return wrapper
 
 
 def append_to_gitignore(item, gitignore_path=".gitignore"):

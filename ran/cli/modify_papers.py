@@ -18,11 +18,8 @@ def add_papers(paper_impl_ids: List[PaperImplID], isolated: bool):
         ]
     )
 
-    # Apply the RanTOML (runs it and updates the lockfile)
+    # Apply the RanTOML (runs it, updates the lockfile, and writes it to ran.toml)
     ranstate.apply_ran_toml(ran_toml)
-
-    # Update ran.toml
-    ranstate.write_to_ran_toml(ran_toml)
 
 
 # ran remove
@@ -34,8 +31,5 @@ def remove_papers(paper_impl_ids: List[PaperImplID]):
     # Remove from RanTOML
     ran_toml.remove_paper_installations(paper_impl_ids)
 
-    # Apply the RanTOML (runs it and updates the lockfile)
+    # Apply the RanTOML (runs it, updates the lockfile, and writes it to ran.toml)
     ranstate.apply_ran_toml(ran_toml)
-
-    # Update ran.toml
-    ranstate.write_to_ran_toml(ran_toml)
