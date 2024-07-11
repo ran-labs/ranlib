@@ -6,9 +6,13 @@ import inspect
 from compilation.compiler import exposed_function_buffer
 from compilation.schemas import RANFunction
 
+from constants import PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME
+
 
 def infer_paper_id(source_filepath: str) -> str:
-    root: str = "_lib/"
+    """Infer paper_id via the filepath of a .py file by checking its directory substring"""
+
+    root: str = PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME + "/"
 
     paper_id_and_beyond: str = source_filepath[
         source_filepath.index(root) + len(root) :
@@ -27,8 +31,11 @@ def expose(func):
     source_filepath: str = inspect.getsourcefile(func)
     paper_id: str = infer_paper_id(source_filepath)
 
-    # Get the module name
-    module_name: str = inspect.getmodule(func).module_name
+    # print("EXPOSE FUNCTION NAME:")
+    # print(func.__name__)
+
+    # Get the module name of where the function was imported from
+    module_name: str = inspect.getmodule(func).__name__
 
     # Get the function name
     function_name: str = func.__name__

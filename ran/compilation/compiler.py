@@ -18,6 +18,8 @@ from utils import find_all_python_files
 from state.pathutils import get_dotran_dir_path
 from compilation.schemas import RANFunction
 
+from constants import PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME
+
 
 # The keys are the actual paper_id such as "attention_is_all_you_need"
 # When this buffer is flushed, it will go into .ran/ran-modules/_lib/.comptools/exposed_functions.json
@@ -70,7 +72,7 @@ def flush_exposed_function_buffer():
     global exposed_function_buffer
 
     filepath: str = (
-        f"{get_dotran_dir_path()}/ran_modules/_lib/.comptools/exposed_functions.json"
+        f"{get_dotran_dir_path()}/ran_modules/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
     )
 
     existing_buffer: Dict[str, List[RANFunction]] = read_saved_exposed_functions(
@@ -148,7 +150,7 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
     dotran_dir_path: str = get_dotran_dir_path()
 
     # Create _lib directory if it doesn't already exist
-    _lib_dir_path: str = f"{dotran_dir_path}/ran_modules/_lib"
+    _lib_dir_path: str = f"{dotran_dir_path}/ran_modules/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}"
 
     try:
         os.mkdir(_lib_dir_path)
@@ -190,7 +192,7 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
     existing_buffer_is_not_empty: bool = bool(existing_buffer)
 
     for paper_id in to_remove_paper_ids:
-        folderpath: str = f"{dotran_dir_path}/ran_modules/_lib/{paper_id}"
+        folderpath: str = f"{dotran_dir_path}/ran_modules/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
         modulepath: str = f"{dotran_dir_path}/ran_modules/{paper_id}.py"
 
         # Remove the folder and module
@@ -235,7 +237,8 @@ def compile(
 
     # Also, rename the directory name to _lib/paper_id/*
     # Maybe move this off of subprocess later (security issue)
-    repo_dir: str = f"{compilation_parent_dir}/_lib/{paper_id}"
+    repo_dir: str = f"{compilation_parent_dir}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
+    # print(f'MOVING "{old_repo_dir}" TO "{repo_dir}"')
     subprocess.run(
         f'mv "{old_repo_dir}" "{repo_dir}"',
         shell=True,

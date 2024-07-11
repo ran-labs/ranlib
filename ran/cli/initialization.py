@@ -68,6 +68,10 @@ def init_from_lockfile():
 
 def init_from_ran_toml(force_fresh_install: bool = True):
     """Initialize from ran.toml"""
+    # 0.) Check if .ran/ was initialized correctly, because in order for a lock to be written that's the condition
+    if not lockfile_exists():
+        dotran.generate_dotran_dir()
+
     # 1.) Read RanTOML
     ran_toml: RanTOML = ranstate.read_ran_toml()
 

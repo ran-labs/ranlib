@@ -52,7 +52,9 @@ def setup_integration(integration: Integration):
         or integration == Integration.GITLAB
     ):
         # Just make a .ran/.gitignore and put the ran_modules/ directory in there
-        append_to_gitignore(".ran/ran_modules/", gitignore_path=".gitignore")
+        # append_to_gitignore(".ran/ran_modules/", gitignore_path=".gitignore")
+        # TODO: append necessary stuff to the gitignore
+        pass
 
     # Exclusives
     if integration in GIT_INTEGRATONS:

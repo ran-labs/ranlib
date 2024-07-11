@@ -2,6 +2,8 @@
 
 RAN Library
 
+NOTE: DELETE `ran/ran.py` IN PROD
+
 ## Philosophy & Tenants
 
 For any paper:

@@ -21,6 +21,9 @@ def stringify_packages(packages: List[PythonPackageDependency]) -> str:
 
 
 def install(packages: List[PythonPackageDependency], package_manager: str):
+    if len(packages) == 0:
+        return
+
     install_cmd: str = ""
 
     if package_manager == "poetry":

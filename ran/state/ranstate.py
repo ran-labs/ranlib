@@ -368,10 +368,11 @@ class DeltaRanLock(BaseModel):
     prev_ran_lock: RanLock
 
     def make_ran_lock(self, compilation_steps: Dict[str, List[str]]) -> RanLock:
+        prev_deps_set = frozenset(self.prev_ran_lock.preresolved_python_dependencies)
+        to_add_deps_set = frozenset(self.to_add.pypackage_dependencies)
+        to_remove_deps_set = frozenset(self.to_remove.pypackage_dependencies)
         preresolved_python_dependencies: List[PythonPackageDependency] = list(
-            set(self.prev_ran_lock.preresolved_python_dependencies)
-            + set(self.to_add.pypackage_dependencies)
-            - set(self.to_remove.pypackage_dependencies)
+            prev_deps_set.union(to_add_deps_set).difference(to_remove_deps_set)
         )
 
         return RanLock(
@@ -405,11 +406,10 @@ class DeltaRanLock(BaseModel):
                 # Clone & compile/transpile the paper
                 ran_modules_path: str = f"{get_dotran_dir_path()}/ran_modules"
                 repo_url: str = fetch_repo_url(paper_impl_id)
-                Repo.clone_from(repo_url, ran_modules_path)
 
-                cloned_folder_name: str = repo_url[
-                    repo_url.rindex("/") + 1 : repo_url.rindex(".git")
-                ]
+                cloned_folder_name: str = ran_paper_installation.paper_impl_id.paper_id
+                cloned_folder_path: str = f"{ran_modules_path}/{cloned_folder_name}"
+                Repo.clone_from(repo_url, cloned_folder_path)
 
                 # Add to compilation steps to be yielded as a result
                 comp_steps: List[str] = compiler.compile(
@@ -439,7 +439,6 @@ class DeltaRanLock(BaseModel):
             lenient=True,
         )
 
-        print("Installing packages...")
         pkgs.install(
             self.to_add.pypackage_dependencies, package_manager=package_manager
         )
