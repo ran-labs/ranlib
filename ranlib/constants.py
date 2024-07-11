@@ -5,7 +5,10 @@ from pathlib import Path
 LIB_ROOT: str = str(Path(__file__).parent.parent)
 
 # Naming conventions
-RAN_MODULES_FOLDER_NAME: str = "ran"  # Used to be "ran_modules"
+DOTRAN_FOLDER_NAME: str = "ran"  # Used to be .ran/
+# RAN_MODULES_FOLDER_NAME: str = (
+#     "."  # This is for the relative paths  # Used to be "ran_modules"
+# )
 PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME: str = "_lib"
 
 # Project Constants

@@ -28,7 +28,7 @@ def appears_to_be_initialized() -> bool:
 
 def smart_init(allow_init_from_scratch: bool = True):
     """
-    - if .ran/ran-lock.json, install from there
+    - if ran/ran-lock.json, install from there
     - else if ran.toml, install from there
     - else, full init from scratch (if allowed)
 
@@ -51,7 +51,7 @@ def smart_init(allow_init_from_scratch: bool = True):
 
 def init_from_lockfile():
     """
-    Initialize from lockfile (.ran/ran-lock.json)
+    Initialize from lockfile (ran/ran-lock.json)
 
     if no ran.toml, also generate that
     """
@@ -85,8 +85,8 @@ def full_init_from_scratch():
     """
     Fully Initialize the project from scratch. By the end, there will be:
     - a ran.toml file
-    - .ran/
-    - .ran/ran-lock.json
+    - ran/
+    - ran/ran-lock.json
     """
     # Generate the .ran/ directory with the .ran/ran_modules/
     dotran.generate_dotran_dir()

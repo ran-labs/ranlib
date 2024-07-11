@@ -16,9 +16,14 @@ import importlib.util
 
 from utils import find_all_python_files
 from state.pathutils import get_dotran_dir_path
-from compilation.schemas import RANFunction
 
-from constants import PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME, RAN_MODULES_FOLDER_NAME
+from compilation.schemas import RANFunction
+from compilation.rawabs2rel import rawabs2rel as rawabs2rel_fn
+
+from constants import (
+    DOTRAN_FOLDER_NAME,
+    PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME,
+)  # , RAN_MODULES_FOLDER_NAME
 
 
 # The keys are the actual paper_id such as "attention_is_all_you_need"
@@ -32,7 +37,7 @@ def read_exposed_functions_from_cache() -> Dict[str, List[RANFunction]]:
         return exposed_functions_cache
 
     filepath: str = (
-        f"{get_dotran_dir_path()}/{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
+        f"{get_dotran_dir_path()}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
     )
 
     return read_saved_exposed_functions(filepath)
@@ -94,7 +99,7 @@ def read_saved_exposed_functions(json_filepath: str) -> Dict[str, List[RANFuncti
 
 def write_exposed_functions(exposed_buffer: Dict[str, List[RANFunction]]):
     filepath: str = (
-        f"{get_dotran_dir_path()}/{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
+        f"{get_dotran_dir_path()}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
     )
 
     existing_buffer: Dict[str, List[RANFunction]] = read_saved_exposed_functions(
@@ -117,12 +122,10 @@ def write_exposed_functions(exposed_buffer: Dict[str, List[RANFunction]]):
 def import_all_pymodules_from_directory(directory: str):
     for file_name in find_all_python_files(directory):
         module_name: str = file_name[
-            file_name.index(
-                f"{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/"
-            ) : -3
+            file_name.index(f"{DOTRAN_FOLDER_NAME}/") : -3
         ].replace("/", ".")
 
-        print(module_name)
+        # print(module_name)
 
         importlib.import_module(module_name)
 
@@ -163,9 +166,7 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
     dotran_dir_path: str = get_dotran_dir_path()
 
     # Create _lib directory if it doesn't already exist
-    _lib_dir_path: str = (
-        f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}"
-    )
+    _lib_dir_path: str = f"{dotran_dir_path}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}"
 
     try:
         os.mkdir(_lib_dir_path)
@@ -200,9 +201,9 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
 
     for paper_id in to_remove_paper_ids:
         folderpath: str = (
-            f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
+            f"{dotran_dir_path}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
         )
-        modulepath: str = f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/{paper_id}.py"
+        modulepath: str = f"{dotran_dir_path}/{paper_id}.py"
 
         # Remove the folder and module
         try:
@@ -256,10 +257,7 @@ def compile(
     )
 
     # Preprocess all python modules into using relative imports for all imports
-    # Spawn a subprocess where it converts all abs to rel
-    # Maybe change this later
-    # TODO: fix this
-    subprocess.run(f'cd "{repo_dir}" && rawabs2rel', shell=True)
+    rawabs2rel_fn(src=repo_dir)
 
     # Blindly import EVERYTHING (all python modules) in the repo. This will add the functions to exposed_function_buffer
     # There will be a problem when you have stuff like `train.py` with no encapsulating classes/functions and just code
@@ -295,6 +293,11 @@ def compile(
         import_statement: str = ""
         if check_name_conflicts(exposed_function):
             imported_func_name = exposed_function.get_verbose_function_name()
+
+            # The +2 is there for the '__'
+            imported_func_name = imported_func_name[
+                imported_func_name.index(paper_id) + len(paper_id) + 2 :
+            ]
         else:
             imported_func_name = exposed_function.function_name
 
@@ -310,7 +313,7 @@ def compile(
 
         # Generate function body (calls the original imported function)
         generated_function_code: str = (
-            f"def {func_name}({exposed_function.params_str}):\n\t# Put any desired pre-call handling here\n\t\n\tresult = {imported_func_name}({exposed_function.parse_params_names_only()})\n\t\n\t# Put any desired post-call handling here\n\t\n\treturn result\n"
+            f"def {func_name}({exposed_function.params_str}):\n\t# Put any desired pre-call handling here\n\t\n\tresult = {imported_func_name}({exposed_function.parse_params_names_only()})\n\t\n\t# Put any desired post-call handling here\n\t\n\treturn result"
         )
 
         # Add to function_code_list
@@ -318,7 +321,7 @@ def compile(
 
     # Import statements
     import_statements: str = "\n".join(import_statements_list) + "\n"
-    functions_str: str = "\n\n".join(function_code_list)
+    functions_str: str = "\n\n\n".join(function_code_list)
 
     full_python_module_str: str = f"{import_statements}\n\n{functions_str}"
 

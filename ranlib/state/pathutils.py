@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-from constants import LIB_ROOT
+from constants import LIB_ROOT, DOTRAN_FOLDER_NAME
 
 
 # NOTE: NO PATHS CAN END WITH A SLASH (/)
@@ -9,7 +9,7 @@ ROOT_PATH: str = ""
 
 
 def DOTRAN_DIR_PATH() -> str:
-    return f"{ROOT_PATH}/.ran"
+    return f"{ROOT_PATH}/{DOTRAN_FOLDER_NAME}"
 
 
 def RAN_TOML_PATH() -> str:
@@ -17,7 +17,7 @@ def RAN_TOML_PATH() -> str:
 
 
 def LOCKFILE_PATH() -> str:
-    return f"{ROOT_PATH}/.ran/ran-lock.json"
+    return f"{ROOT_PATH}/{DOTRAN_FOLDER_NAME}/ran-lock.json"
 
 
 def find_root_path() -> str:

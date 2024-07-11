@@ -1,6 +1,6 @@
 .ranprojects
 ran-registry
-ranlib/.ran
+ranlib/ran
 ranlib/ran.toml
 
 

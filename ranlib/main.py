@@ -83,7 +83,7 @@ def update():
 @app.command()
 @manifest_project_root
 def loadstate(epilog=":rocket: [orange]Skyrocket[/orange] your Research"):
-    """Load from the lockfile that is in .ran/ran-lock.json"""
+    """Load from the lockfile that is in ran/ran-lock.json"""
     # init_from_lockfile will always be from zero since otherwise nothing would happpen (x - x = 0, but x - 0 = x)
     init.init_from_lockfile()
 
@@ -112,7 +112,7 @@ def use(paper_impl_ids: List[str], isolated: bool = False):
 @manifest_project_root
 def remove(paper_impl_ids: List[str]):
     """Removes a paper installation (or multiple), updates the lockfile, then updates ran.toml"""
-    # Remove modules from .ran/ran_modules
+    # Remove modules from ran/ran_modules
     # Remove its entry in ran.toml
     # For any isolated packages associated with the module(s), remove 'em
     # Generate/Update lockfile
@@ -168,7 +168,7 @@ def reset():
     import shutil
 
     shutil.rmtree(get_dotran_dir_path())
-    print("Removed .ran/")
+    print("Removed ran/")
 
     os.remove(get_ran_toml_path())
     print("Removed ran.toml")

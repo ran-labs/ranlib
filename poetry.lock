@@ -485,17 +485,6 @@ files = [
 ]
 
 [[package]]
-name = "rawabs2rel"
-version = "1.1.0"
-description = "Yo Mama"
-optional = false
-python-versions = "*"
-files = [
-    {file = "rawabs2rel-1.1.0-py2.py3-none-any.whl", hash = "sha256:7e3ed7617ed68a1e9db501e8c4095521efced7315c3298b17f6a4dbf182e2488"},
-    {file = "rawabs2rel-1.1.0.tar.gz", hash = "sha256:1b4781512a8a536eae186abb6e09e8d5ec489bdc9da9a199f4f3514a9faf4cf0"},
-]
-
-[[package]]
 name = "rich"
 version = "13.7.1"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
@@ -608,4 +597,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "7db7b2aec2a366b5639b3c08f8cf1f38a05c0cfa4be000ba842fe771a392caa9"
+content-hash = "dfa142d393aa56fe333e66417210d42f1014de436bdbfc4c7a36cc9bd4cc19c4"
