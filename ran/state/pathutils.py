@@ -45,7 +45,7 @@ def find_root_path() -> str:
         return None
 
     # Check which .ranprojects path is a substring of the current_path starting at 0
-    for root_path in root_paths:
+    for root_path in reversed(root_paths):  # start from the end for more recency
         if current_path.startswith(root_path):
             return root_path
 
