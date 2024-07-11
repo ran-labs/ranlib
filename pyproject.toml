@@ -5,6 +5,11 @@ description = ""
 authors = ["Ameer Arsala <ameer@anemo.ai>"]
 readme = "README.md"
 
+
+[tool.poetry.scripts]
+ran = "ran.main:app"
+
+
 [tool.poetry.dependencies]
 python = "^3.9"
 gitpython = "^3.1.43"
@@ -17,6 +22,7 @@ tomli = "^2.0.1"
 tomli-w = "^1.0.0"
 pyyaml = "^6.0.1"
 rawabs2rel = "^1.1.0"
+rich = "^13.7.1"
 
 
 [build-system]

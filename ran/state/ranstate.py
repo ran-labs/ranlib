@@ -55,7 +55,7 @@ class PaperImplID(BaseModel):
         return PaperImplID(author=author, paper_id=paper_id, tag=tag)
 
     def __str__(self) -> str:
-        return f"{self.author}/{self.paper_id}:{self.processed_tag}"
+        return f"{self.author}/{self.paper_id}:{self.tag}"
 
     def __eq__(self, other):
         # Check if 'other' is an instance of the same class
@@ -63,10 +63,13 @@ class PaperImplID(BaseModel):
             return (
                 self.paper_id == other.paper_id
                 and self.author == other.author
-                and self.processed_tag == other.processed_tag
+                and self.tag == other.tag
             )
 
         return False
+
+    def __hash__(self) -> int:
+        return hash((self.author, self.paper_id, self.tag))
 
 
 class PaperInstallation(BaseModel):
@@ -146,7 +149,11 @@ class RanTOML(BaseModel):
         """
 
         # Remove ALL whitespace
-        paper_impl_ids_no_whitespace: str = re.sub(r"\s", "", self.dependencies.papers)
+        paper_impl_ids_no_whitespace: str = re.sub(r"\s+", "", self.dependencies.papers)
+
+        # Remove the first hyphen if there is one
+        if paper_impl_ids_no_whitespace[0] == "-":
+            paper_impl_ids_no_whitespace = paper_impl_ids_no_whitespace[1:]
 
         # Separate by hyphens
         paper_impl_ids_list: List[str] = paper_impl_ids_no_whitespace.split("-")
@@ -285,10 +292,16 @@ class PythonPackageDependency(BaseModel):
     version: str
     isolated: bool
 
+    def __hash__(self) -> int:
+        return hash((self.package_name, self.version, self.isolated))
+
 
 class RanPaperInstallation(BaseModel):
     paper_impl_id: PaperImplID
     package_dependencies: List[PythonPackageDependency]
+
+    def __hash__(self) -> int:
+        return hash((self.paper_impl_id, *self.package_dependencies))
 
 
 class RanLock(BaseModel):
@@ -306,7 +319,7 @@ class RanLock(BaseModel):
         return RanLock(
             ran_paper_installations=[],
             compilation_steps={},
-            preresolved_package_dependencies=[],
+            preresolved_python_dependencies=[],
         )
 
     def get_as_paper_installations(self) -> List[PaperInstallation]:
@@ -470,10 +483,10 @@ def produce_delta_lock(
         paper_installations
     )
 
-    ran_paper_installations_set: Set[RanPaperInstallation] = set(
+    ran_paper_installations_set: Set[RanPaperInstallation] = frozenset(
         ran_paper_installations
     )
-    prev_ran_paper_installations_set: Set[RanPaperInstallation] = set(
+    prev_ran_paper_installations_set: Set[RanPaperInstallation] = frozenset(
         prev_ran_paper_installations
     )
 
@@ -492,7 +505,7 @@ def produce_delta_lock(
         preresolution.preresolve_dependencies(ran_paper_installations)
     )
     prev_preresolved_pkg_deps: List[PythonPackageDependency] = (
-        prev_ran_lock.preresolved_package_dependencies
+        prev_ran_lock.preresolved_python_dependencies
     )
 
     # Inter-preresolution

@@ -84,11 +84,11 @@ def full_init_from_scratch():
     - .ran/
     - .ran/ran-lock.json
     """
-    # Generate the ran.toml
-    ranstate.generate_ran_toml()
-
-    # Now, generate the .ran/ directory with the .ran/ran_modules/
+    # Generate the .ran/ directory with the .ran/ran_modules/
     dotran.generate_dotran_dir()
 
     # Generate the .ran/ran-lock.json
     ranstate.generate_ran_lock()
+
+    # Generate the ran.toml (make this last)
+    ranstate.generate_ran_toml()

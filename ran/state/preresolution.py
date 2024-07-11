@@ -59,8 +59,8 @@ def resolve_to_deltas(
     """
     Returns a tuple of (to_add, to_remove)
     """
-    pkg_deps_new_set: Set[PythonPackageDependency] = set(pkg_deps_new)
-    pkg_deps_old_set: Set[PythonPackageDependency] = set(pkg_deps_old)
+    pkg_deps_new_set: Set[PythonPackageDependency] = frozenset(pkg_deps_new)
+    pkg_deps_old_set: Set[PythonPackageDependency] = frozenset(pkg_deps_old)
 
     to_add_packages: List[PythonPackageDependency] = list(
         pkg_deps_new_set - pkg_deps_old_set

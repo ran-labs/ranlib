@@ -58,10 +58,10 @@ def setup_integration(integration: Integration):
     if integration in GIT_INTEGRATONS:
         # TODO:
         # maybe also do some pre-commit stuff like compilation?
-        pass
+        print("git integration")
     elif integration in GITHUB_INTEGRATIONS:
         # TODO: github CI compilation pipeline
-        pass
+        print("github integration")
     elif integration == "gitlab":
         # TODO: gitlab CI compilation pipeline
-        pass
+        print("gitlab integration")

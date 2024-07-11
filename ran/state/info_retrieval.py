@@ -65,7 +65,7 @@ def load_registry(update_registry: bool = True) -> Dict:
 
         # Clone
         Repo.clone_from(
-            RAN_REGISTRY_GIT_HTTPS_URL, LIB_ROOT
+            RAN_REGISTRY_GIT_HTTPS_URL, f"{LIB_ROOT}/ran-registry"
         )  # clones into LIB_ROOT/ran-registry/*
 
     with open(f"{LIB_ROOT}/ran-registry/registry.yaml") as registry_file:

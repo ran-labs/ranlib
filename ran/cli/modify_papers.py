@@ -13,7 +13,7 @@ def add_papers(paper_impl_ids: List[PaperImplID], isolated: bool):
     # Add to RanTOML
     ran_toml.add_paper_installations(
         [
-            PaperInstallation(paper_impl_id, isolate=isolated)
+            PaperInstallation(paper_impl_id=paper_impl_id, isolate=isolated)
             for paper_impl_id in paper_impl_ids
         ]
     )

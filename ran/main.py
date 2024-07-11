@@ -2,6 +2,7 @@ import os
 import sys
 
 from typing import List, Dict, Union, Set
+from typing_extensions import Annotated
 
 import typer
 
@@ -13,8 +14,10 @@ from cli.integrations import Integration, setup_integration
 
 from constants import DEFAULT_ISOLATION_VALUE
 
+# import rich
 
-app = typer.Typer()
+
+app = typer.Typer(rich_markup_mode="rich")
 
 
 # os.chdir(".ran/ran_modules")
@@ -23,7 +26,7 @@ app = typer.Typer()
 
 
 # ran setup
-@app.command()
+@app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
 @manifest_project_root
 def setup(
     papers: List[str] = [],
@@ -60,7 +63,7 @@ def setup(
 
 
 # ran install
-@app.command()
+@app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
 @manifest_project_root
 def install(from_rantoml: bool = False):
     """Installs the papers from the lockfile, unless the user specifies to be from ran.toml. If lockfile not found, try ran.toml"""
@@ -68,7 +71,7 @@ def install(from_rantoml: bool = False):
 
     if from_rantoml:
         init.init_from_ran_toml()
-        return
+        raise typer.Exit()  # used to be 'return'
 
     init.smart_init(allow_init_from_scratch=False)
 
@@ -84,7 +87,7 @@ def update():
 # ran loadstate
 @app.command()
 @manifest_project_root
-def loadstate():
+def loadstate(epilog=":rocket: [orange]Skyrocket[/orange] your Research"):
     """Load from the lockfile that is in .ran/ran-lock.json"""
     # init_from_lockfile will always be from zero since otherwise nothing would happpen (x - x = 0, but x - 0 = x)
     init.init_from_lockfile()
@@ -149,8 +152,31 @@ def remove(paper_impl_ids: List[str]):
 # ran help
 @app.command()
 def help():
-    """Print all the help commands"""
+    """All the help commands"""
     pass
+
+
+@app.command()
+def test():
+    """Just stuff to test with as typer is being learned"""
+    typer.echo("I just echoed!")
+
+    something: str = typer.prompt("Say something")
+    print(f"You just said: {something}")
+
+
+@app.command()
+@manifest_project_root
+def reset():
+    """ONLY FOR DEBUGGING PURPOSES. DO NOT RELEASE IN PROD"""
+    from state.pathutils import get_dotran_dir_path, get_ran_toml_path
+    import shutil
+
+    shutil.rmtree(get_dotran_dir_path())
+    print("Removed .ran/")
+
+    os.remove(get_ran_toml_path())
+    print("Removed ran.toml")
 
 
 # Start Typer CLI

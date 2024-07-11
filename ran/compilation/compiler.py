@@ -155,7 +155,7 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
         print(f"Directory '{_lib_dir_path}' created")
 
         # Make the __init__.py
-        with open(f"{_lib_dir_path}/__init__.py") as initfile:
+        with open(f"{_lib_dir_path}/__init__.py", "w") as initfile:
             initfile.write(" ")
     except FileExistsError:
         print(f"Directory '{_lib_dir_path}' already exists")
@@ -163,7 +163,7 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
     # Create .comptools directory if it doesn't already exist
     dotcomptools_dir_path: str = f"{_lib_dir_path}/.comptools"
     try:
-        os.mkdir()
+        os.mkdir(dotcomptools_dir_path)
         print(f"Directory '{dotcomptools_dir_path}' created")
     except FileExistsError:
         pass
