@@ -7,7 +7,7 @@ readme = "README.md"
 
 
 [tool.poetry.scripts]
-ran = "ran.main:app"
+ran = "ranlib.main:app"
 
 
 [tool.poetry.dependencies]
