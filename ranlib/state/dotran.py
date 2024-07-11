@@ -1,6 +1,9 @@
 import os
+import sys
 
 from state.pathutils import get_dotran_dir_path
+from constants import RAN_MODULES_FOLDER_NAME
+
 from __init__ import __version__
 
 
@@ -13,11 +16,14 @@ def generate_dotran_dir():
         os.makedirs(dotran_dir_path, exist_ok=True)
         print("Directory '.ran/' created successfully.")
 
-        os.makedirs(f"{dotran_dir_path}/ran_modules", exist_ok=True)
-        print("Directory '.ran/ran_modules' created successfully.")
+        os.makedirs(f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}", exist_ok=True)
+        print(f"Directory '.ran/{RAN_MODULES_FOLDER_NAME}' created successfully.") 
+
+        # This way, we can do from ran import <paper_id>
+        sys.path.append(dotran_dir_path)
     except OSError as error:
         print(f"Directory '.ran/' cannot be created successfully. Error: {error}")
 
     # Generate a RANFILE (.ran/ran_modules/RANFILE) [lightweight lil file that doesnt do much]
-    with open(f"{dotran_dir_path}/ran_modules/RANFILE", "w") as ranfile:
+    with open(f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/RANFILE", "w") as ranfile:
         ranfile.write(f"RANLIB Version {__version__}")

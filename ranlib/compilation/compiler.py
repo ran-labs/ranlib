@@ -18,7 +18,7 @@ from utils import find_all_python_files
 from state.pathutils import get_dotran_dir_path
 from compilation.schemas import RANFunction
 
-from constants import PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME
+from constants import PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME, RAN_MODULES_FOLDER_NAME
 
 
 # The keys are the actual paper_id such as "attention_is_all_you_need"
@@ -72,7 +72,7 @@ def flush_exposed_function_buffer():
     global exposed_function_buffer
 
     filepath: str = (
-        f"{get_dotran_dir_path()}/ran_modules/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
+        f"{get_dotran_dir_path()}/{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
     )
 
     existing_buffer: Dict[str, List[RANFunction]] = read_saved_exposed_functions(
@@ -150,7 +150,7 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
     dotran_dir_path: str = get_dotran_dir_path()
 
     # Create _lib directory if it doesn't already exist
-    _lib_dir_path: str = f"{dotran_dir_path}/ran_modules/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}"
+    _lib_dir_path: str = f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}"
 
     try:
         os.mkdir(_lib_dir_path)
@@ -192,8 +192,8 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
     existing_buffer_is_not_empty: bool = bool(existing_buffer)
 
     for paper_id in to_remove_paper_ids:
-        folderpath: str = f"{dotran_dir_path}/ran_modules/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
-        modulepath: str = f"{dotran_dir_path}/ran_modules/{paper_id}.py"
+        folderpath: str = f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
+        modulepath: str = f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/{paper_id}.py"
 
         # Remove the folder and module
         try:

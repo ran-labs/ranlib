@@ -10,7 +10,7 @@ import re
 
 from git import Repo
 
-from constants import DEFAULT_ISOLATION_VALUE, RAN_DEFAULT_AUTHOR_NAME
+from constants import DEFAULT_ISOLATION_VALUE, RAN_DEFAULT_AUTHOR_NAME, RAN_MODULES_FOLDER_NAME
 
 from state.pathutils import (
     find_root_path,
@@ -404,7 +404,7 @@ class DeltaRanLock(BaseModel):
             key: str = str(paper_impl_id)
             if ran_paper_installation in self.to_add.ran_paper_installations:
                 # Clone & compile/transpile the paper
-                ran_modules_path: str = f"{get_dotran_dir_path()}/ran_modules"
+                ran_modules_path: str = f"{get_dotran_dir_path()}/{RAN_MODULES_FOLDER_NAME}"
                 repo_url: str = fetch_repo_url(paper_impl_id)
 
                 cloned_folder_name: str = ran_paper_installation.paper_impl_id.paper_id

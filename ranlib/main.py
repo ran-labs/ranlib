@@ -20,11 +20,6 @@ from constants import DEFAULT_ISOLATION_VALUE
 app = typer.Typer(rich_markup_mode="rich")
 
 
-# os.chdir(".ran/ran_modules")
-# sys.path.append(os.path.join(os.getcwd()))
-# from ran import mamba
-
-
 # ran setup
 @app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
 @manifest_project_root
