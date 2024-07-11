@@ -10,7 +10,10 @@ import re
 
 from git import Repo
 
-from constants import DEFAULT_ISOLATION_VALUE, RAN_DEFAULT_AUTHOR_NAME#, RAN_MODULES_FOLDER_NAME
+from constants import (
+    DEFAULT_ISOLATION_VALUE,
+    RAN_DEFAULT_AUTHOR_NAME,
+)  # , RAN_MODULES_FOLDER_NAME
 
 from state.pathutils import (
     find_root_path,
@@ -85,7 +88,6 @@ class PaperInstallation(BaseModel):
 # RAN username
 # paper name/id
 # tag
-# version
 # description
 # readme
 class RanPlatformParams(BaseModel):
@@ -93,7 +95,6 @@ class RanPlatformParams(BaseModel):
     username: str = Field(default="")
     paper_id_name: str = Field(default="")  # e.g. 'attention_is_all_you_need'
     tag: str = Field(default="")
-    version: str = Field(default="1")
     description: str = Field(default="")
     readme: str = Field(
         default_factory=(
