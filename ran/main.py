@@ -5,7 +5,7 @@ from typing import List, Dict, Union, Set
 
 import typer
 
-from state.ranstate import PaperImplID, RanTOML, RanLock
+from state.ranstate import PaperImplID, RanTOML, RanLock, read_ran_toml
 from cli import initialization as init
 from cli import modify_papers
 from cli.utils import manifest_project_root
@@ -50,7 +50,9 @@ def setup(
     if integration != "none":
         setup_integration(integration)
 
-    # TODO: make the isolated value change the default isolation value on the ran.toml
+    # Make the isolated value change the default isolation value on the ran.toml
+    ran_toml: RanTOML = read_ran_toml()
+    ran_toml.settings.isolate_dependencies = isolated
 
     # Setup the papers
     if len(papers) > 0:
@@ -126,20 +128,21 @@ def remove(paper_impl_ids: List[str]):
     modify_papers.remove_papers(paper_implementation_ids)
 
 
-# TODO:
+# NOTE: this is not needed unless we have our own repo hosting system
+# As of right now, git push should auto-push to ran if need-be
 # ran push
-@app.command()
-@manifest_project_root
-def push(compile: bool = False):
-    """
-    Optionally compile the code and push to the specified remote.
-    What IS required though is that a compilation tree/dump is produced and written to a file, so that a user can easily recompile on their own machine
-    When this project is setup with git / github / gitlab integrations, this will run on pushing to those
-    """
-    # 1.) Optionally compile
-    # 2.) Update lockfile
-    # 3.) git push
-    pass
+# @app.command()
+# @manifest_project_root
+# def push(compile: bool = False):
+#     """
+#     Optionally compile the code and push to the specified remote.
+#     What IS required though is that a compilation tree/dump is produced and written to a file, so that a user can easily recompile on their own machine
+#     When this project is setup with git / github / gitlab integrations, this will run on pushing to those
+#     """
+#     # 1.) Optionally compile (for now, not needed on push)
+#     # 2.) Update lockfile for compilation steps if compile
+#     # 3.) git push
+#     pass
 
 
 # TODO:
