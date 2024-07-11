@@ -96,6 +96,7 @@ class RanPlatformParams(BaseModel):
     paper_id_name: str = Field(default="")  # e.g. 'attention_is_all_you_need'
     tag: str = Field(default="")
     description: str = Field(default="")
+    repo_url: str = Field(default="")  # TODO: auto-fill if a git url is detected
     readme: str = Field(
         default_factory=(
             lambda: f"{find_root_path()}/README.md" if readme_exists() else ""
@@ -387,7 +388,7 @@ class DeltaRanLock(BaseModel):
         """Above says it all. However, as compilation steps are done after receiving the stuff, they will be recorded and changed with this method"""
         # This assumes post-preresolution of what should be added and removed
         # And if something gets recompiled (perhaps due to a different package version?), the compilation steps WILL be replaced (desired behavior)
-        from state.info_retrieval import fetch_repo_url
+        from state.paper_info_retrieval import fetch_repo_url
         import state.package_installation as pkgs
 
         compilation_steps: Dict[str, List[str]] = {}
@@ -462,7 +463,7 @@ def produce_delta_lock(
     """
 
     # I HATE PYTHON
-    from state.info_retrieval import fetch_dependencies
+    from state.paper_info_retrieval import fetch_dependencies
     from state import preresolution
 
     prev_ran_lock: RanLock = None

@@ -2,7 +2,11 @@
 name = "ranlib"
 version = "0.1.0"
 description = ""
-authors = ["Ameer Arsala <ameer@anemo.ai>"]
+authors = [
+  "Anemo AI <anemo@anemo.ai>",
+  "Ameer Arsala <ameer@anemo.ai>",
+  "Ishan Meher <sean@anemo.ai>",
+]
 readme = "README.md"
 
 
