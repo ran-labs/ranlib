@@ -17,7 +17,7 @@ def generate_dotran_dir():
         print("Directory '.ran/' created successfully.")
 
         os.makedirs(f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}", exist_ok=True)
-        print(f"Directory '.ran/{RAN_MODULES_FOLDER_NAME}' created successfully.") 
+        print(f"Directory '.ran/{RAN_MODULES_FOLDER_NAME}' created successfully.")
 
         # This way, we can do from ran import <paper_id>
         sys.path.append(dotran_dir_path)
@@ -27,3 +27,9 @@ def generate_dotran_dir():
     # Generate a RANFILE (.ran/ran_modules/RANFILE) [lightweight lil file that doesnt do much]
     with open(f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/RANFILE", "w") as ranfile:
         ranfile.write(f"RANLIB Version {__version__}")
+
+    # Generate __init__.py
+    with open(
+        f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/__init__.py", "w"
+    ) as hackyworkaroundfile:
+        hackyworkaroundfile.write("from ranlib import *")

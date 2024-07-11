@@ -52,3 +52,6 @@ class RANFunction(BaseModel):
         # Remove the last SEP
         parsed_params_str: str = SEP.join(parsed_params)
         return parsed_params_str
+
+    def __hash__(self) -> int:
+        return hash((self.module_name, self.function_name, self.params_str))

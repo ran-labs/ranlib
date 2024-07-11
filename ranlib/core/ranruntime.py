@@ -3,7 +3,7 @@ from typing import List, Dict, Tuple, Set
 import functools
 import inspect
 
-from compilation.compiler import exposed_function_buffer
+from compilation.compiler import write_exposed_functions  # , exposed_function_buffer
 from compilation.schemas import RANFunction
 
 from constants import PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME
@@ -50,12 +50,8 @@ def expose(func):
         module_name=module_name, function_name=function_name, params_str=params_str
     )
 
-    # The exposed_function_buffer by default already starts with empty lists for each paper_id, so no need to check
-    ran_functions_buffer: List[RANFunction] = exposed_function_buffer[paper_id]
-
-    # Only add if it's not already added
-    if ran_function not in ran_functions_buffer:
-        ran_functions_buffer.append(ran_function)
+    # Combine to update the JSON
+    write_exposed_functions({paper_id: [ran_function]})
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):

@@ -1,7 +1,8 @@
 .ranprojects
 ran-registry
-ran/.ran
-ran/ran.toml
+ranlib/.ran
+ranlib/ran.toml
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -2,7 +2,7 @@
 
 RAN Library
 
-NOTE: DELETE `ran/ran.py` IN PROD
+NOTE: DELETE `ranlib/ranlib.py` IN PROD
 
 ## Philosophy & Tenants
 

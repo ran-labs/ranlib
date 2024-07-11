@@ -22,8 +22,20 @@ from constants import PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME, RAN_MODULES_FOLDER
 
 
 # The keys are the actual paper_id such as "attention_is_all_you_need"
-# When this buffer is flushed, it will go into .ran/ran-modules/_lib/.comptools/exposed_functions.json
-exposed_function_buffer: Dict[str, List[RANFunction]] = {}
+# This is from .ran/ran-modules/_lib/.comptools/exposed_functions.json
+exposed_functions_cache: Dict[str, List[RANFunction]] = {}
+
+
+def read_exposed_functions_from_cache() -> Dict[str, List[RANFunction]]:
+    if exposed_functions_cache:
+        # if not empty, return it
+        return exposed_functions_cache
+
+    filepath: str = (
+        f"{get_dotran_dir_path()}/{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
+    )
+
+    return read_saved_exposed_functions(filepath)
 
 
 def convert_buffer_to_serializable(
@@ -44,19 +56,31 @@ def combine_buffers(
     combined_buffer: Dict[str, List[RANFunction]] = {k: v for (k, v) in buffer1.items()}
 
     for key, value in buffer2.items():
-        if combined_buffer.get(key) is None:
+        # key: str
+        # value: List[RANFunction]
+
+        combined_list: List[RANFunction] = combined_buffer.get(key)
+        if combined_list is None:
             # Set the key if it doesn't exist
             combined_buffer[key] = value
         else:
             # Add all list items if the key already exists
-            combined_buffer[key] += value
+            # No duplicates tho
+            combined_buffer[key] = list(
+                frozenset(combined_list).union(frozenset(value))
+            )
 
     return combined_buffer
 
 
 def read_saved_exposed_functions(json_filepath: str) -> Dict[str, List[RANFunction]]:
     if not os.path.exists(json_filepath):
-        return dict()
+        # Make a new one
+        new_exposed_functions = dict()
+        with open(json_filepath, "w") as file:
+            json.dump(new_exposed_functions, file)
+
+        return new_exposed_functions
 
     with open(json_filepath, "r") as file:
         # Dict[str, List[Dict]]
@@ -68,9 +92,7 @@ def read_saved_exposed_functions(json_filepath: str) -> Dict[str, List[RANFuncti
     return saved_exposed_functions
 
 
-def flush_exposed_function_buffer():
-    global exposed_function_buffer
-
+def write_exposed_functions(exposed_buffer: Dict[str, List[RANFunction]]):
     filepath: str = (
         f"{get_dotran_dir_path()}/{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
     )
@@ -81,7 +103,7 @@ def flush_exposed_function_buffer():
 
     # Combine the buffers
     combined_buffer: Dict[str, List[RANFunction]] = combine_buffers(
-        existing_buffer, exposed_function_buffer
+        existing_buffer, exposed_buffer
     )
 
     # Write it to the json file
@@ -91,26 +113,18 @@ def flush_exposed_function_buffer():
     with open(filepath, "w") as file:
         json.dump(exposed_functions_dot_json, file)
 
-    # We don't need to reset the exposed_function_buffer as the next precompilation will do that
-
 
 def import_all_pymodules_from_directory(directory: str):
-    spec_list = []
     for file_name in find_all_python_files(directory):
-        # Remove .py extension and convert slashes to dots
-        module_name = file_name[:-3].replace("/", ".")
+        module_name: str = file_name[
+            file_name.index(
+                f"{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/"
+            ) : -3
+        ].replace("/", ".")
+
         print(module_name)
-        spec = importlib.util.spec_from_file_location(module_name, file_name)
-        spec_list.append(spec)
 
-    # Load all modules
-    # modules = {}
-    for spec in spec_list:
-        module = importlib.util.module_from_spec(spec)
-        # modules[spec.name] = module
-        spec.loader.exec_module(module)
-
-    # return modules
+        importlib.import_module(module_name)
 
 
 def delete_redundant_stuff(repo_dir: str):
@@ -143,14 +157,15 @@ def delete_redundant_stuff(repo_dir: str):
 
 def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
     """Setup the paper_ids to add + Cleanup the ones to remove"""
-    global exposed_function_buffer
 
     print("Precompiling...")
 
     dotran_dir_path: str = get_dotran_dir_path()
 
     # Create _lib directory if it doesn't already exist
-    _lib_dir_path: str = f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}"
+    _lib_dir_path: str = (
+        f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}"
+    )
 
     try:
         os.mkdir(_lib_dir_path)
@@ -171,14 +186,6 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
         pass
         # print(f"Directory '{_lib_dir_path}' already exists")
 
-    # Set up the new
-    exposed_function_buffer = {}
-
-    print("Fresh starting...")
-    for paper_id in to_add_paper_ids:
-        # Fresh start
-        exposed_function_buffer[paper_id] = []
-
     # Cleanup the old to remove
     # Also remove from the existing buffer and rewrite it
     print("Cleaning up trash...")
@@ -192,7 +199,9 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
     existing_buffer_is_not_empty: bool = bool(existing_buffer)
 
     for paper_id in to_remove_paper_ids:
-        folderpath: str = f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
+        folderpath: str = (
+            f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
+        )
         modulepath: str = f"{dotran_dir_path}/{RAN_MODULES_FOLDER_NAME}/{paper_id}.py"
 
         # Remove the folder and module
@@ -237,7 +246,9 @@ def compile(
 
     # Also, rename the directory name to _lib/paper_id/*
     # Maybe move this off of subprocess later (security issue)
-    repo_dir: str = f"{compilation_parent_dir}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
+    repo_dir: str = (
+        f"{compilation_parent_dir}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
+    )
     # print(f'MOVING "{old_repo_dir}" TO "{repo_dir}"')
     subprocess.run(
         f'mv "{old_repo_dir}" "{repo_dir}"',
@@ -247,6 +258,7 @@ def compile(
     # Preprocess all python modules into using relative imports for all imports
     # Spawn a subprocess where it converts all abs to rel
     # Maybe change this later
+    # TODO: fix this
     subprocess.run(f'cd "{repo_dir}" && rawabs2rel', shell=True)
 
     # Blindly import EVERYTHING (all python modules) in the repo. This will add the functions to exposed_function_buffer
@@ -258,7 +270,11 @@ def compile(
     # Generate the python module based off of the stuff in the exposed_function_buffer[paper_id]
     # Includes the import statements (don't need to do dynamic imports rn) as well as the linked functions
     # At this point, exposed_function_buffer[paper_id] is filled up
-    exposed_functions: List[RANFunction] = exposed_function_buffer[paper_id]
+
+    exposed_functions_dict: Dict[str, List[RANFunction]] = (
+        read_exposed_functions_from_cache()
+    )
+    exposed_functions: List[RANFunction] = exposed_functions_dict[paper_id]
 
     import_statements_list: List[str] = []
     function_code_list: List[str] = []
@@ -294,14 +310,14 @@ def compile(
 
         # Generate function body (calls the original imported function)
         generated_function_code: str = (
-            f"def {func_name}({exposed_function.params_str}):\n\t# Put any desired pre-call handling here\n\t\n\tresult = {imported_func_name}({exposed_function.parse_params_names_only()})\n\t# Put any desired post-call handling here\n\t\n\treturn result"
+            f"def {func_name}({exposed_function.params_str}):\n\t# Put any desired pre-call handling here\n\t\n\tresult = {imported_func_name}({exposed_function.parse_params_names_only()})\n\t\n\t# Put any desired post-call handling here\n\t\n\treturn result\n"
         )
 
         # Add to function_code_list
         function_code_list.append(generated_function_code)
 
     # Import statements
-    import_statements: str = "\n".join(import_statements_list)
+    import_statements: str = "\n".join(import_statements_list) + "\n"
     functions_str: str = "\n\n".join(function_code_list)
 
     full_python_module_str: str = f"{import_statements}\n\n{functions_str}"
@@ -317,6 +333,8 @@ def compile(
 
 
 def postcompilation():
-    # Flush the buffer
-    print("Flushing compile buffer...")
-    flush_exposed_function_buffer()
+    """Postcompilatin of ALL papers"""
+    # Clear the cache
+    global exposed_functions_cache
+
+    exposed_functions_cache = {}
