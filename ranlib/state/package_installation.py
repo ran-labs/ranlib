@@ -3,14 +3,17 @@ from pydantic import BaseModel, Field
 
 import subprocess
 
-from state.ranstate import (
-    PythonPackageDependency,
-    read_ran_toml,
-    RanTOML
-)
+from state.ranstate import PythonPackageDependency, read_ran_toml, RanTOML
 
 
-def _stringify_packages(packages: List[PythonPackageDependency], include_versions: bool = True, separator: str = " ") -> str:
+# TODO: Enforce isolation
+
+
+def _stringify_packages(
+    packages: List[PythonPackageDependency],
+    include_versions: bool = True,
+    separator: str = " ",
+) -> str:
     pkgs_str: str = ""
     for package in packages:
         package_str: str = str(package)
@@ -34,7 +37,7 @@ def install(packages: List[PythonPackageDependency]):
     if len(packages) == 0:
         print("No packages to install.")
         return
-    
+
     pre_run()
 
     # Install the packages
@@ -42,9 +45,7 @@ def install(packages: List[PythonPackageDependency]):
 
     # Install the non-pypi packages
     conda_packages: List[PythonPackageDependency] = [
-        package
-        for package in packages
-        if package.package_type == "non-pypi"
+        package for package in packages if package.package_type == "non-pypi"
     ]
     if len(conda_packages) > 0:
         subprocess.run(
@@ -53,13 +54,13 @@ def install(packages: List[PythonPackageDependency]):
 
     # Install the pypi packages
     pypi_packages: List[PythonPackageDependency] = [
-        package
-        for package in packages
-        if package.package_type == "pypi"
+        package for package in packages if package.package_type == "pypi"
     ]
     if len(pypi_packages) > 0:
         subprocess.run(
-            f"pixi add {_stringify_packages(pypi_packages)} --pypi", shell=True, check=True
+            f"pixi add {_stringify_packages(pypi_packages)} --pypi",
+            shell=True,
+            check=True,
         )
 
 
@@ -67,31 +68,30 @@ def remove(packages: List[PythonPackageDependency]):
     if len(packages) == 0:
         print("No packages to remove")
         return
-    
+
     pre_run()
 
     # Uninstall / Remove the packages
     print("Removing packages...")
 
-
     # Remove the non-pypi packages
     conda_packages: List[PythonPackageDependency] = [
-        package
-        for package in packages
-        if package.package_type == "non-pypi"
+        package for package in packages if package.package_type == "non-pypi"
     ]
     if len(conda_packages) > 0:
         subprocess.run(
-            f"pixi remove {_stringify_packages(conda_packages, include_versions=False)} --no-install", shell=True, check=True
+            f"pixi remove {_stringify_packages(conda_packages, include_versions=False)} --no-install",
+            shell=True,
+            check=True,
         )
 
     # Remove the pypi packages
     pypi_packages: List[PythonPackageDependency] = [
-        package
-        for package in packages
-        if package.package_type == "pypi"
+        package for package in packages if package.package_type == "pypi"
     ]
     if len(pypi_packages) > 0:
         subprocess.run(
-            f"pixi remove {_stringify_packages(pypi_packages, include_versions=False)} --no-install --pypi", shell=True, check=True
+            f"pixi remove {_stringify_packages(pypi_packages, include_versions=False)} --no-install --pypi",
+            shell=True,
+            check=True,
         )

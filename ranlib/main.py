@@ -135,22 +135,21 @@ def remove(paper_impl_ids: List[str]):
     modify_papers.remove_papers(paper_implementation_ids)
 
 
-# NOTE: this is not needed unless we have our own repo hosting system
 # As of right now, git push should auto-push to ran if need-be
 # ran push
-# @app.command()
-# @check_pixi_installation
-# @manifest_project_root
-# def push(compile: bool = False):
-#     """
-#     Optionally compile the code and push to the specified remote.
-#     What IS required though is that a compilation tree/dump is produced and written to a file, so that a user can easily recompile on their own machine
-#     When this project is setup with git / github / gitlab integrations, this will run on pushing to those
-#     """
-#     # 1.) Optionally compile (for now, not needed on push)
-#     # 2.) Update lockfile for compilation steps if compile
-#     # 3.) git push
-#     pass
+@app.command()
+@check_pixi_installation
+@manifest_project_root
+def push(compile: bool = False):
+    """
+    Optionally compile the code and push to the specified remote.
+    What IS required though is that a compilation tree/dump is produced and written to a file, so that a user can easily recompile on their own machine
+    When this project is setup with git / github / gitlab integrations, this will run on pushing to those
+    """
+    # 1.) Optionally compile (for now, not needed on push)
+    # 2.) Update lockfile for compilation steps if compile
+    # 3.) git push
+    pass
 
 
 # TODO:

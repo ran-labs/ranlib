@@ -36,27 +36,64 @@ def check_pixi_installation(func):
             subprocess.run("pixi --version", shell=True, check=True)
         except subprocess.CalledProcessError:
             print("Pixi is not installed. Installing pixi...")
-            
+
             # Install pixi
-            subprocess.run("curl -fsSL https://pixi.sh/install.sh | bash", shell=True, check=True)
-            
+            subprocess.run(
+                "curl -fsSL https://pixi.sh/install.sh | bash", shell=True, check=True
+            )
+
             # Also installs the autocompletion for the respective shell
             # Maybe remove this if it becomes a problem
-            subprocess.run("eval \"$(pixi completion --shell bash)\"", shell=True, check=True)
-            subprocess.run("eval \"$(pixi completion --shell zsh)\"", shell=True, check=True)
-            subprocess.run("eval \"$(pixi completion --shell fish | source)\"", shell=True, check=True)
-            subprocess.run("eval \"$(pixi completion --shell elvish | slurp)\"", shell=True, check=True)
+            subprocess.run(
+                'eval "$(pixi completion --shell bash)"', shell=True, check=True
+            )
+            subprocess.run(
+                'eval "$(pixi completion --shell zsh)"', shell=True, check=True
+            )
+            subprocess.run(
+                'eval "$(pixi completion --shell fish | source)"',
+                shell=True,
+                check=True,
+            )
+            subprocess.run(
+                'eval "$(pixi completion --shell elvish | slurp)"',
+                shell=True,
+                check=True,
+            )
 
-        try:
-            subprocess.run("pixi --version", shell=True, check=True)
-        except subprocess.CalledProcessError:
-            print("Pixi is not installed. Installing it now...")
-            subprocess.run("pip install pixi", shell=True, check=True)
-
+            _init_pixi_project_raw()
         # Execute the actual function
         result = func(*args, **kwargs)
 
         return result
+
+
+# This is usually not due to CLI, so I didn't add the autocompletion hooks
+def init_pixi_project():
+    try:
+        subprocess.run("pixi --version", shell=True, check=True)
+    except subprocess.CalledProcessError:
+        print("Pixi is not installed. Installing pixi...")
+
+        # Install pixi
+        subprocess.run(
+            "curl -fsSL https://pixi.sh/install.sh | bash", shell=True, check=True
+        )
+
+        _init_pixi_project_raw()
+
+
+def _init_pixi_project_raw():
+    # Initialize a pixi project
+    init_cmd: str = "pixi init"
+    root_path: str = find_root_path()
+    if os.path.exists(f"{root_path}/environment.yml"):
+        print(
+            "Conda project detected. Converting to Pixi...(don't worry it's better and easier to use with more functionality)"
+        )
+        init_cmd += f" --import {root_path}/environment.yml"
+
+        subprocess.run(init_cmd, shell=True, check=True)
 
 
 def append_to_gitignore(item, gitignore_path=".gitignore"):

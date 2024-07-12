@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from typing import List, Dict, Set, Union
+from typing import List, Dict, Set, Union, Literal
 from pydantic import BaseModel, Field
 
 from state.ranstate import PaperInstallation, PaperImplID
@@ -64,6 +64,12 @@ class PaperImplementationVersion(BaseModel):
 
             # trim all whitespace
             dependency: str = re.sub(r"\s+", "", dependency_)
+            dependency = dependency.replace('"', "")  # remove any quotation marks
+
+            """
+            Example `dependency`:
+                noisolate:"conda-forge::numpy>=1.23.1,<1.24.0"
+            """
 
             if dependency.startswith("isolate:"):
                 default_isolation = True
@@ -80,7 +86,7 @@ class PaperImplementationVersion(BaseModel):
                 version_start_idx = equals_idx
             elif dependency.find(">=") != -1:
                 version_start_idx = dependency.find(">=")
-            
+
             version = PackageVersion.from_str(dependency[version_start_idx:])
 
             package_type: Literal["pypi", "non-pypi"] = "non-pypi"
@@ -101,11 +107,11 @@ class PaperImplementationVersion(BaseModel):
 
             pypackage_deps.append(
                 PythonPackageDependency(
-                    package_name=package_name, 
+                    package_name=package_name,
                     version=version,
                     package_type=package_type,
                     channel=channel,
-                    isolated=isolated
+                    isolated=isolated,
                 )
             )
 

@@ -1,4 +1,4 @@
-from typing import List, Dict, Set, Union
+from typing import List, Dict, Set, Union, Literal
 from pydantic import BaseModel, Field
 
 import tomli
@@ -284,6 +284,7 @@ def write_to_ran_toml(ran_toml: RanTOML):
 
 # -- RAN LOCK STUFF (LOCKFILE) --
 
+
 class PackageVersion(BaseModel):
     lower_bound: str
     upper_bound: str
@@ -295,7 +296,7 @@ class PackageVersion(BaseModel):
             upper_bound: str = lower_bound
         elif version_str.startswith(">="):
             lower_bound: str = version_str[2:]
-            upper_bound: str = version_str[version_str.find(",") + 1:]
+            upper_bound: str = version_str[version_str.find(",") + 1 :]
         else:
             raise ValueError("Invalid version string")
 
@@ -308,7 +309,7 @@ class PackageVersion(BaseModel):
         if self.lower_bound == self.upper_bound:
             return "=" + self.lower_bound
         else:
-            return f">={self.lower_bound},<{self.upper_bound}" 
+            return f">={self.lower_bound},<{self.upper_bound}"
 
 
 class PythonPackageDependency(BaseModel):
@@ -319,22 +320,30 @@ class PythonPackageDependency(BaseModel):
     isolated: bool
 
     def __hash__(self) -> int:
-        return hash((self.package_name, self.version, self.package_type, self.channel, self.isolated))
+        return hash(
+            (
+                self.package_name,
+                self.version,
+                self.package_type,
+                self.channel,
+                self.isolated,
+            )
+        )
 
     def __str__(self) -> str:
         # Other than beginning with 'isolate:' or 'noisolate:', the rest is the same as a shell install
         # This will also not include whether it is pypi or not explicitly, but can implicitly be seen since the conda channels will always be shown
         # Therefore, if there is no channel, it is a pypi package
-        
+
         isolation: str = "isolate" if self.isolated else "noisolate"
 
         dependency_str: str = self.package_name + str(self.version)
-        
+
         if self.package_type == "non-pypi" and self.channel != "":
             dependency_str = self.channel + "::" + dependency_str
 
         # Example: isolate:"conda-forge::numpy=1.23.1" or noisolate:"conda-forge::numpy>=1.23.1,<1.24.0"
-        return f"{isolation}:\"{dependency_str}\""
+        return f'{isolation}:"{dependency_str}"'
 
 
 class RanPaperInstallation(BaseModel):
@@ -470,13 +479,9 @@ class DeltaRanLock(BaseModel):
         # Next, install and remove packages
         print("Updating packages...")
 
-        pkgs.remove(
-            self.to_remove.pypackage_dependencies
-        )
+        pkgs.remove(self.to_remove.pypackage_dependencies)
 
-        pkgs.install(
-            self.to_add.pypackage_dependencies
-        )
+        pkgs.install(self.to_add.pypackage_dependencies)
 
         # Now, make the RanLock
         print("Generating lock...")
