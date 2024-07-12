@@ -28,44 +28,34 @@ def manifest_project_root(func):
     return wrapper
 
 
-def check_pixi_installation(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        """Check if pixi is installed and install it if not."""
-        try:
-            subprocess.run("pixi --version", shell=True, check=True)
-        except subprocess.CalledProcessError:
-            print("Pixi is not installed. Installing pixi...")
+def check_pixi_installation():
+    """Check if pixi is installed and install it if not."""
+    try:
+        subprocess.run("pixi --version", shell=True, check=True)
+    except subprocess.CalledProcessError:
+        print("Pixi is not installed. Installing pixi...")
 
-            # Install pixi
-            subprocess.run(
-                "curl -fsSL https://pixi.sh/install.sh | bash", shell=True, check=True
-            )
+        # Install pixi
+        subprocess.run(
+            "curl -fsSL https://pixi.sh/install.sh | bash", shell=True, check=True
+        )
 
-            # Also installs the autocompletion for the respective shell
-            # Maybe remove this if it becomes a problem
-            subprocess.run(
-                'eval "$(pixi completion --shell bash)"', shell=True, check=True
-            )
-            subprocess.run(
-                'eval "$(pixi completion --shell zsh)"', shell=True, check=True
-            )
-            subprocess.run(
-                'eval "$(pixi completion --shell fish | source)"',
-                shell=True,
-                check=True,
-            )
-            subprocess.run(
-                'eval "$(pixi completion --shell elvish | slurp)"',
-                shell=True,
-                check=True,
-            )
+        # Also installs the autocompletion for the respective shell
+        # Maybe remove this if it becomes a problem
+        subprocess.run('eval "$(pixi completion --shell bash)"', shell=True, check=True)
+        subprocess.run('eval "$(pixi completion --shell zsh)"', shell=True, check=True)
+        subprocess.run(
+            'eval "$(pixi completion --shell fish | source)"',
+            shell=True,
+            check=True,
+        )
+        subprocess.run(
+            'eval "$(pixi completion --shell elvish | slurp)"',
+            shell=True,
+            check=True,
+        )
 
-            _init_pixi_project_raw()
-        # Execute the actual function
-        result = func(*args, **kwargs)
-
-        return result
+        _init_pixi_project_raw()
 
 
 # This is usually not due to CLI, so I didn't add the autocompletion hooks

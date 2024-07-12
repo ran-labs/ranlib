@@ -29,8 +29,8 @@ from state.ranstate import (
     PaperImplID,
     RanTOML,
     RanLock,
-    PackageManager,
     PythonPackageDependency,
+    PackageVersion,
 )
 from state.ranstate import read_ran_toml, read_lock
 
@@ -38,8 +38,6 @@ from state.pathutils import find_root_path
 from state import package_installation as pypkgs
 
 from cli.utils import init_pixi_project
-
-from publish import dependency_parsing as dep_parsing
 
 
 class RegistryPaperImplEntry(BaseModel):
@@ -104,14 +102,14 @@ def gather_dependencies() -> List[str]:
 
     # In all cases, add all to `dependencies`
     if os.path.exists(f"{root_path}/pixi.toml"):
-        dependencies += _parse_pixi_dot_toml(root_path)
+        dependencies += _read_pixi_dot_toml(root_path)
 
     if os.path.exists(f"{root_path}/pyproject.toml"):
         # Parse all 3 forms
-        dependencies += _parse_pyproject_dot_toml(root_path)
+        dependencies += _read_pyproject_dot_toml(root_path)
 
     if os.path.exists(f"{root_path}/requirements.txt"):
-        dependencies += _parse_requirements_dot_txt(root_path)
+        dependencies += _read_requirements_dot_txt(root_path)
 
     # Remove duplicates
     dependencies = list(frozenset(dependencies))
@@ -122,20 +120,93 @@ def gather_dependencies() -> List[str]:
     return dependencies_strs
 
 
-def _parse_pixi_dot_toml(root_path: str) -> List[PythonPackageDependency]:
-    pass
+def _read_pixi_dot_toml(root_path: str) -> List[PythonPackageDependency]:
+    dependencies: List[PythonPackageDependency] = []
+
+    with open(f"{root_path}/pixi.toml", "rb") as file:
+        pixi_toml: Dict = tomli.load(file)
+
+    # Non-pypi Packages
+    default_channel: str = pixi_toml["project"]["channels"][0]
+
+    if pixi_toml.get("dependencies") is not None:
+        for pkg_name, value in pixi_toml["dependencies"].items():
+            channel: str = ""
+            version: str = ""
+            if isinstance(value, str):
+                version = value
+                channel = default_channel
+            else:
+                # Dict assumed
+                version = value["version"]
+                channel = value["channel"]
+
+            dependencies.append(
+                PythonPackageDependency(
+                    package_name=pkg_name,
+                    version=PackageVersion.from_str(version),
+                    package_type="non-pypi",
+                    channel=channel,
+                    isolated=False,  # don't isolate on push
+                )
+            )
+
+    # Pypi packages
+    if pixi_toml.get("pypi-dependencies") is not None:
+        for pkg_name, version in pixi_toml["pypi-dependencies"].items():
+            dependencies.append(
+                PythonPackageDependency(
+                    package_name=pkg_name,
+                    version=PackageVersion.from_str(version),
+                    package_type="pypi",
+                    channel="",  # empty when pypi
+                    isolated=False,  # don't isolate on push
+                )
+            )
 
 
-def _parse_pyproject_dot_toml(root_path: str) -> List[PythonPackageDependency]:
+def _read_pyproject_dot_toml(root_path: str) -> List[PythonPackageDependency]:
     """
     Parse all forms:
-        - (pixi)
+        - [COMING SOON] (pixi)
         - (poetry)
-        - (pdm)
+        - Not gonna support pdm due to conflicts with pixi
     """
-    pass
+    dependencies: List[PythonPackageDependency] = []
+
+    # Read pyproject.toml
+    with open(f"{root_path}/pixi.toml", "rb") as file:
+        pyproject_toml: Dict = tomli.load(file)
+
+    tool: Dict = pyproject_toml.get("tool")
+
+    # TODO:
+    # Try pixi's pyproject.toml for pypi packages
+    # project: Dict = pyproject_toml.get("project")
+    # if project is not None and project.get("dependencies") is not None:
+    #     for
+
+    # TODO:
+    # Try pixi's pyproject.toml for non-pypi packages
+
+    # Try poetry's pyproject.toml
+    poetry: Dict = tool.get("poetry")
+    if poetry is not None and poetry.get("dependencies") is not None:
+        for pkg_name, ver in poetry["dependencies"].items():
+            version: str = ver.replace("^", ">=")
+
+            dependencies.append(
+                PythonPackageDependency(
+                    package_name=pkg_name,
+                    version=PackageVersion.from_str(version),
+                    package_type="pypi",
+                    channel="",  # empty when pypi
+                    isolated=False,  # don't isolate on push
+                )
+            )
 
 
-def _parse_requirements_dot_txt(root_path: str) -> List[PythonPackageDependency]:
+def _read_requirements_dot_txt(root_path: str) -> List[PythonPackageDependency]:
     # Possibly look into pipenv source to see how they did it?
-    pass
+    # TODO:
+    return []

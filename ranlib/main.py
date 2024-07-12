@@ -22,7 +22,7 @@ app = typer.Typer(rich_markup_mode="rich")
 
 # ran setup
 @app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
-@check_pixi_installation
+# @check_pixi_installation
 @manifest_project_root
 def setup(
     papers: List[str] = [],
@@ -38,6 +38,7 @@ def setup(
           - else if ran.toml, init from there
           - else, do a full initialization
     """
+    check_pixi_installation()
     # TODO: ran setup github should not reinitialize the project
 
     if override:
@@ -60,11 +61,12 @@ def setup(
 
 # ran install
 @app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
-@check_pixi_installation
+# @check_pixi_installation
 @manifest_project_root
 def install(from_rantoml: bool = False):
     """Installs the papers from the lockfile, unless the user specifies to be from ran.toml. If lockfile not found, try ran.toml"""
     # This will ALWAYS fresh install
+    check_pixi_installation()
 
     if from_rantoml:
         init.init_from_ran_toml()
@@ -87,7 +89,7 @@ def sync():
 
 # ran loadstate
 @app.command()
-@check_pixi_installation
+# @check_pixi_installation
 @manifest_project_root
 def loadstate(epilog=":rocket: [orange]Skyrocket[/orange] your Research"):
     """Load from the lockfile that is in ran/ran-lock.json"""
@@ -97,10 +99,11 @@ def loadstate(epilog=":rocket: [orange]Skyrocket[/orange] your Research"):
 
 # ran use
 @app.command()
-@check_pixi_installation
+# @check_pixi_installation
 @manifest_project_root
 def use(paper_impl_ids: List[str], isolated: bool = False):
     """Installs a paper library/module (or multiple), updates the lockfile, then updates ran.toml"""
+    check_pixi_installation()
 
     if not init.appears_to_be_initialized():
         print("RAN does not appear to be initialized. Initializing first...")
@@ -117,7 +120,7 @@ def use(paper_impl_ids: List[str], isolated: bool = False):
 
 # ran remove
 @app.command()
-@check_pixi_installation
+# @check_pixi_installation
 @manifest_project_root
 def remove(paper_impl_ids: List[str]):
     """Removes a paper installation (or multiple), updates the lockfile, then updates ran.toml"""
@@ -125,6 +128,7 @@ def remove(paper_impl_ids: List[str]):
     # Remove its entry in ran.toml
     # For any isolated packages associated with the module(s), remove 'em
     # Generate/Update lockfile
+    check_pixi_installation()
 
     # Convert papers to PaperImplID
     paper_implementation_ids: List[PaperImplID] = [
@@ -138,7 +142,7 @@ def remove(paper_impl_ids: List[str]):
 # As of right now, git push should auto-push to ran if need-be
 # ran push
 @app.command()
-@check_pixi_installation
+# @check_pixi_installation
 @manifest_project_root
 def push(compile: bool = False):
     """
@@ -149,7 +153,9 @@ def push(compile: bool = False):
     # 1.) Optionally compile (for now, not needed on push)
     # 2.) Update lockfile for compilation steps if compile
     # 3.) git push
-    pass
+    check_pixi_installation()
+
+    # TODO:
 
 
 # TODO:
