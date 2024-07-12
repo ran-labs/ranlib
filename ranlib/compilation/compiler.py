@@ -18,7 +18,9 @@ from utils import find_all_python_files
 from state.pathutils import get_dotran_dir_path
 
 from compilation.schemas import RANFunction
-from compilation.rawabs2rel import rawabs2rel as rawabs2rel_fn
+from compilation.abs2relimports import replace_imports
+
+# from compilation.rawabs2rel import rawabs2rel as rawabs2rel_fn
 
 from constants import (
     DOTRAN_FOLDER_NAME,
@@ -257,7 +259,7 @@ def compile(
     )
 
     # Preprocess all python modules into using relative imports for all imports
-    rawabs2rel_fn(src=repo_dir)
+    replace_imports(repo_dir)
 
     # Blindly import EVERYTHING (all python modules) in the repo. This will add the functions to exposed_function_buffer
     # There will be a problem when you have stuff like `train.py` with no encapsulating classes/functions and just code
