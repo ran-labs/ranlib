@@ -5,7 +5,7 @@ from typing import List, Dict, Set, Union
 from pydantic import BaseModel, Field
 
 from state.ranstate import PaperInstallation, PaperImplID
-from state.ranstate import RanPaperInstallation, PythonPackageDependency
+from state.ranstate import RanPaperInstallation, PythonPackageDependency, PackageVersion
 
 from constants import (
     LIB_ROOT,
@@ -72,15 +72,40 @@ class PaperImplementationVersion(BaseModel):
                 default_isolation = False
                 package_start_idx = len("noisolate:")
 
-            equals_idx: int = dependency.index("==")
+            version: PackageVersion = None
+            version_start_idx: int = 0
 
-            package_name: str = dependency[package_start_idx:equals_idx]
-            version: str = dependency[equals_idx + 2 :]
+            equals_idx: int = dependency.index("=")
+            if dependency.find("=") != -1:
+                version_start_idx = equals_idx
+            elif dependency.find(">=") != -1:
+                version_start_idx = dependency.find(">=")
+            
+            version = PackageVersion.from_str(dependency[version_start_idx:])
+
+            package_type: Literal["pypi", "non-pypi"] = "non-pypi"
+            channel: str = ""
+            if "::" in dependency[package_start_idx:version_start_idx]:
+                package_type = "non-pypi"
+
+                # NOTE: It is important that things go in this order
+                channel_divider_idx: int = dependency.index("::")
+                channel = dependency[package_start_idx:channel_divider_idx]
+
+                package_start_idx = channel_divider_idx + 2
+            else:
+                package_type = "pypi"
+
+            package_name: str = dependency[package_start_idx:version_start_idx]
             isolated: bool = force_isolation or default_isolation
 
             pypackage_deps.append(
                 PythonPackageDependency(
-                    package_name=package_name, version=version, isolated=isolated
+                    package_name=package_name, 
+                    version=version,
+                    package_type=package_type,
+                    channel=channel,
+                    isolated=isolated
                 )
             )
 
@@ -148,7 +173,7 @@ def fetch_dependencies(
     paper_installations: List[PaperInstallation], update_registry: bool = True
 ) -> List[RanPaperInstallation]:
     """
-    Fetch from DB to get the required python package names and versions, then return the as List[RanPaperInstallation]
+    Fetch from remote to get the required python package names and versions, then return the as List[RanPaperInstallation]
 
     Actually, for now we could just have a public git repo to be pulled from that would contain all the papers as yaml or json
     """

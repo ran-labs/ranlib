@@ -37,14 +37,21 @@ def preresolve_dependencies(
             # First, prioritize the isolated ones
             if package.isolated != existing_pkg.isolated:
                 if package.isolated:
+                    # Copy the dominant properties
                     existing_pkg.isolated = True
                     existing_pkg.version = package.version  # potential bug here
                     # the package names are already the same, so no need to change that
+                    existing_pkg.package_type = package.package_type
+                    existing_pkg.channel = package.channel
             else:
                 # Otherwise, prioritize the lower versions
-                existing_pkg.version = min(
-                    parse(existing_pkg.version), parse(package.version)
-                )
+
+                # Find which package has the lowest version
+                if parse(package.version.lower_bound) < parse(existing_pkg.version.lower_bound):
+                    # If the existing package has the lowest version, then use that
+                    existing_pkg.version = package.version
+                    existing_pkg.package_type = package.package_type
+                    existing_pkg.channel = package.channel
         else:
             # If not already added, then add
             preresolved_dependencies.append(package)

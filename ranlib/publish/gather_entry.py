@@ -79,14 +79,15 @@ def gather_registry_entry(dependencies: List[str]) -> RegistryPaperImplEntry:
     return registry_entry
 
 
-# Stringify a List of PythonPackageDependency
+# Stringify a List of PythonPackageDependency because it will format correctly
 def gather_dependencies() -> List[str]:
     """
     Auto-figure out the dependencies to be put in the RANFile; prioritize in order of:
-        - [NOT SUPPORTED RN] environment.yml (conda, mamba, micromamba); actually, on pushing, a lock WILL be generated of this but rn we do not support it
-        - poetry.lock (poetry)
+        - [COMING SOON] pixi.lock
+        - environment.yml (conda, mamba, micromamba); actually, on pushing, a lock WILL be generated of this by switching to pixi with https://prefix.dev/blog/pixi_a_fast_conda_alternative
+        - [NOT SUPPORTED RN] poetry.lock (poetry)
         - [NOT SUPPORTED RN] pdm.lock (pdm)
-        - Pipfile.lock (pipenv)
+        - [NOT SUPPORTED RN] Pipfile.lock (pipenv)
         - requirements.txt (pip, uv, etc.)
         - ran-lock.json (ran; can also see which are isolated here)
         then manually (going around the python files and checking their imports)
@@ -95,24 +96,20 @@ def gather_dependencies() -> List[str]:
     dependencies: List[str] = []
 
     root_path: str = find_root_path()
-    ran_toml: RanTOML = read_ran_toml()
-
-    package_manager: PackageManager = ran_toml.settings.package_manager
-
+    #ran_toml: RanTOML = read_ran_toml()
+    
     # Assume all packages are from the specified package manager unless there's a library imported that was never specified via the respective dependency/lockfile in which case default to pip or uv if that's specified
     # Get ALL dependencies from the respective dependency file
-    if package_manager == "poetry":
+    #if package_manager == "poetry":
         # Search for poetry.lock
-        pass
-    elif package_manager == "pipenv":
+    #    pass
+    #elif package_manager == "pipenv":
         # Search for Pipfile.lock
-        pass
-    else:
+    #    pass
+    #else:
         # Assume pip / uv
-        pass
+    #    pass
 
         # Search for requirements.txt
 
         # Also add on everything from ran-lock.json
-
-        # Catch any stray packages with pip/uv

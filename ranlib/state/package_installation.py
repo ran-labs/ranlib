@@ -6,68 +6,92 @@ import subprocess
 from state.ranstate import (
     PythonPackageDependency,
     read_ran_toml,
-    RanTOML,
-    PackageManager,
+    RanTOML
 )
 
 
-def detect_package_manager() -> PackageManager:
-    ran_toml: RanTOML = read_ran_toml()
-
-    return ran_toml.settings.package_manager
-
-
-def stringify_packages(packages: List[PythonPackageDependency]) -> str:
+def _stringify_packages(packages: List[PythonPackageDependency], include_versions: bool = True, separator: str = " ") -> str:
     pkgs_str: str = ""
     for package in packages:
-        pkgs_str += f"{package.package_name}=={package.version} "
+        package_str: str = str(package)
+
+        # For now, remove the isolation notation
+        # NOTE: Order matters here
+        package_str = package_str.replace("noisolate:", "")
+        package_str = package_str.replace("isolate:", "")
+
+        pkgs_str += package_str + separator
 
     return pkgs_str
 
 
-# NOTE: perhaps take a more OOP-oriented approach to these PackageManagers
+def pre_run():
+    # Use the correct pixi shell to avoid errors
+    subprocess.run("pixi shell --change-ps1=false", shell=True, check=True)
 
 
-def install(packages: List[PythonPackageDependency], package_manager: PackageManager):
+def install(packages: List[PythonPackageDependency]):
     if len(packages) == 0:
         print("No packages to install.")
         return
+    
+    pre_run()
 
-    install_cmd: str = ""
-
-    if package_manager in {"poetry", "pdm"}:
-        install_cmd = "add"
-    else:
-        install_cmd = "install"
-
-    # Run this
+    # Install the packages
     print("Installing Packages...")
-    subprocess.run(
-        f"{package_manager} {install_cmd} {stringify_packages(packages)}", shell=True
-    )
+
+    # Install the non-pypi packages
+    conda_packages: List[PythonPackageDependency] = [
+        package
+        for package in packages
+        if package.package_type == "non-pypi"
+    ]
+    if len(conda_packages) > 0:
+        subprocess.run(
+            f"pixi add {_stringify_packages(conda_packages)}", shell=True, check=True
+        )
+
+    # Install the pypi packages
+    pypi_packages: List[PythonPackageDependency] = [
+        package
+        for package in packages
+        if package.package_type == "pypi"
+    ]
+    if len(pypi_packages) > 0:
+        subprocess.run(
+            f"pixi add {_stringify_packages(pypi_packages)} --pypi", shell=True, check=True
+        )
 
 
-def remove(
-    packages: List[PythonPackageDependency],
-    package_manager: PackageManager,
-    lenient: bool = False,
-):
+def remove(packages: List[PythonPackageDependency]):
     if len(packages) == 0:
         print("No packages to remove")
         return
+    
+    pre_run()
 
-    remove_cmd: str = ""
+    # Uninstall / Remove the packages
+    print("Removing packages...")
 
-    if package_manager in {"poetry", "conda", "mamba", "micromamba", "pdm"}:
-        remove_cmd = "remove"
-    else:
-        remove_cmd = "uninstall"
 
-    lockfile_packages: Set[PackageManager] = {"poetry", "pipenv", "pdm"}
+    # Remove the non-pypi packages
+    conda_packages: List[PythonPackageDependency] = [
+        package
+        for package in packages
+        if package.package_type == "non-pypi"
+    ]
+    if len(conda_packages) > 0:
+        subprocess.run(
+            f"pixi remove {_stringify_packages(conda_packages, include_versions=False)} --no-install", shell=True, check=True
+        )
 
-    for package in packages:
-        if lenient is False or (
-            package.isolated or package_manager in lockfile_packages
-        ):
-            # Uninstall / Remove the package
-            subprocess.run(f"{package_manager} {remove_cmd} {package.package_name}")
+    # Remove the pypi packages
+    pypi_packages: List[PythonPackageDependency] = [
+        package
+        for package in packages
+        if package.package_type == "pypi"
+    ]
+    if len(pypi_packages) > 0:
+        subprocess.run(
+            f"pixi remove {_stringify_packages(pypi_packages, include_versions=False)} --no-install --pypi", shell=True, check=True
+        )

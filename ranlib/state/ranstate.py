@@ -1,8 +1,6 @@
 from typing import List, Dict, Set, Union
 from pydantic import BaseModel, Field
 
-from enum import Enum
-
 import tomli
 import tomli_w
 import json
@@ -83,29 +81,6 @@ class PaperInstallation(BaseModel):
     # remote_only: bool
 
 
-class PackageManager(str, Enum):
-    # pip-like
-    pip = "pip"
-    uv = "uv"
-
-    # Isolated pips
-    # pipx = "pipx"
-    # uvx = "uvx"
-
-    pipenv = "pipenv"
-
-    poetry = "poetry"
-
-    # NOT SUPPORTED RN
-    pdm = "pdm"
-
-    # conda-like
-    # NOT SUPPORTED RN
-    conda = "conda"
-    mamba = "mamba"
-    micromamba = "micromamba"
-
-
 # -- ran.toml reqs --
 
 
@@ -137,7 +112,6 @@ class RanPaperDependencies(BaseModel):
 # package manager (either 'pip', 'pipx', 'uv', 'uvx', 'poetry', 'conda', 'mamba', 'micromamba', 'pipenv')
 # package resolver (either 'auto' or 'isolate'). auto: if resolution fails, fallback to pipx/uvx (isolate mode)
 class RanSettings(BaseModel):
-    package_manager: PackageManager = Field(default="pip")
     isolate_dependencies: bool = Field(default=DEFAULT_ISOLATION_VALUE)
 
 
@@ -309,18 +283,58 @@ def write_to_ran_toml(ran_toml: RanTOML):
 
 
 # -- RAN LOCK STUFF (LOCKFILE) --
+
+class PackageVersion(BaseModel):
+    lower_bound: str
+    upper_bound: str
+
+    def from_str(version_str: str):
+        """Create a PackageVersion object from its string version."""
+        if version_str.startswith("="):
+            lower_bound: str = version_str[1:]
+            upper_bound: str = lower_bound
+        elif version_str.startswith(">="):
+            lower_bound: str = version_str[2:]
+            upper_bound: str = version_str[version_str.find(",") + 1:]
+        else:
+            raise ValueError("Invalid version string")
+
+        return PackageVersion(lower_bound=lower_bound, upper_bound=upper_bound)
+
+    def __hash__(self) -> int:
+        return hash((self.lower_bound, self.upper_bound))
+
+    def __str__(self) -> str:
+        if self.lower_bound == self.upper_bound:
+            return "=" + self.lower_bound
+        else:
+            return f">={self.lower_bound},<{self.upper_bound}" 
+
+
 class PythonPackageDependency(BaseModel):
     package_name: str
-    version: str
+    version: PackageVersion  # This should not be a range, but given the nature of the pixi.toml files, it probably will be
+    package_type: Literal["pypi", "non-pypi"]  # Non-pypi is for conda-like stuff
+    channel: str  # For non-pypi
     isolated: bool
 
     def __hash__(self) -> int:
-        return hash((self.package_name, self.version, self.isolated))
+        return hash((self.package_name, self.version, self.package_type, self.channel, self.isolated))
 
     def __str__(self) -> str:
+        # Other than beginning with 'isolate:' or 'noisolate:', the rest is the same as a shell install
+        # This will also not include whether it is pypi or not explicitly, but can implicitly be seen since the conda channels will always be shown
+        # Therefore, if there is no channel, it is a pypi package
+        
         isolation: str = "isolate" if self.isolated else "noisolate"
 
-        return f"{isolation}:{self.package_name}=={self.version}"
+        dependency_str: str = self.package_name + str(self.version)
+        
+        if self.package_type == "non-pypi" and self.channel != "":
+            dependency_str = self.channel + "::" + dependency_str
+
+        # Example: isolate:"conda-forge::numpy=1.23.1" or noisolate:"conda-forge::numpy>=1.23.1,<1.24.0"
+        return f"{isolation}:\"{dependency_str}\""
 
 
 class RanPaperInstallation(BaseModel):
@@ -456,18 +470,12 @@ class DeltaRanLock(BaseModel):
         # Next, install and remove packages
         print("Updating packages...")
 
-        ## Try to find the package manager used. If not found, default to pip
-        package_manager: str = pkgs.detect_package_manager()
-
-        print("Removing packages...")
         pkgs.remove(
-            self.to_remove.pypackage_dependencies,
-            package_manager=package_manager,
-            lenient=True,
+            self.to_remove.pypackage_dependencies
         )
 
         pkgs.install(
-            self.to_add.pypackage_dependencies, package_manager=package_manager
+            self.to_add.pypackage_dependencies
         )
 
         # Now, make the RanLock
