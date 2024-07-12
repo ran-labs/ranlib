@@ -1,6 +1,8 @@
 from typing import List, Dict, Set, Union
 from pydantic import BaseModel, Field
 
+from enum import Enum
+
 import tomli
 import tomli_w
 import json
@@ -81,6 +83,29 @@ class PaperInstallation(BaseModel):
     # remote_only: bool
 
 
+class PackageManager(str, Enum):
+    # pip-like
+    pip = "pip"
+    uv = "uv"
+
+    # Isolated pips
+    # pipx = "pipx"
+    # uvx = "uvx"
+
+    pipenv = "pipenv"
+
+    poetry = "poetry"
+
+    # NOT SUPPORTED RN
+    pdm = "pdm"
+
+    # conda-like
+    # NOT SUPPORTED RN
+    conda = "conda"
+    mamba = "mamba"
+    micromamba = "micromamba"
+
+
 # -- ran.toml reqs --
 
 
@@ -94,14 +119,9 @@ class RanPlatformParams(BaseModel):
     # potential feature down the line: cache last user name and auto fill
     username: str = Field(default="")
     paper_id_name: str = Field(default="")  # e.g. 'attention_is_all_you_need'
-    tag: str = Field(default="")
+    tag: str = Field(default="v1")
     description: str = Field(default="")
     repo_url: str = Field(default="")  # TODO: auto-fill if a git url is detected
-    readme: str = Field(
-        default_factory=(
-            lambda: f"{find_root_path()}/README.md" if readme_exists() else ""
-        )
-    )
 
 
 # Dependencies
@@ -117,7 +137,7 @@ class RanPaperDependencies(BaseModel):
 # package manager (either 'pip', 'pipx', 'uv', 'uvx', 'poetry', 'conda', 'mamba', 'micromamba', 'pipenv')
 # package resolver (either 'auto' or 'isolate'). auto: if resolution fails, fallback to pipx/uvx (isolate mode)
 class RanSettings(BaseModel):
-    package_manager: str = Field(default="pip")
+    package_manager: PackageManager = Field(default="pip")
     isolate_dependencies: bool = Field(default=DEFAULT_ISOLATION_VALUE)
 
 
@@ -296,6 +316,11 @@ class PythonPackageDependency(BaseModel):
 
     def __hash__(self) -> int:
         return hash((self.package_name, self.version, self.isolated))
+
+    def __str__(self) -> str:
+        isolation: str = "isolate" if self.isolated else "noisolate"
+
+        return f"{isolation}:{self.package_name}=={self.version}"
 
 
 class RanPaperInstallation(BaseModel):

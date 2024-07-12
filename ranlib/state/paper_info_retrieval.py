@@ -7,10 +7,17 @@ from pydantic import BaseModel, Field
 from state.ranstate import PaperInstallation, PaperImplID
 from state.ranstate import RanPaperInstallation, PythonPackageDependency
 
-from constants import LIB_ROOT, RAN_REGISTRY_GIT_HTTPS_URL, RAN_DEFAULT_AUTHOR_NAME
+from constants import (
+    LIB_ROOT,
+    RAN_REGISTRY_GIT_HTTPS_URL,
+    RAN_DEFAULT_AUTHOR_NAME,
+    DEFAULT_ISOLATION_VALUE,
+)
 
 from git import Repo
 import yaml
+
+import re
 
 
 # Example registry.yaml
@@ -36,18 +43,40 @@ attention_is_all_you_need:
 class PaperImplementationVersion(BaseModel):
     tag: str
     repo_url: str
+    description: str
     dependencies: List[str]
 
     def as_python_package_dependencies(
-        self, isolated: bool
+        self, force_isolation: bool
     ) -> List[PythonPackageDependency]:
+        """
+        Parse the dependencies: List[str] -> List[PythonPackageDependency]
+
+        isolation will only be enforced if force_isolation is True
+        """
+
         pypackage_deps: List[PythonPackageDependency] = []
 
-        for dependency in self.dependencies:
+        # NOTE: Each dependency MUST start with either 'isolate:' or 'noisolate:'
+        for dependency_ in self.dependencies:
+            default_isolation: bool = DEFAULT_ISOLATION_VALUE
+            package_start_idx: int = 0
+
+            # trim all whitespace
+            dependency: str = re.sub(r"\s+", "", dependency_)
+
+            if dependency.startswith("isolate:"):
+                default_isolation = True
+                package_start_idx = len("isolate:")
+            elif dependency.startswith("noisolate:"):
+                default_isolation = False
+                package_start_idx = len("noisolate:")
+
             equals_idx: int = dependency.index("==")
 
-            package_name: str = dependency[0:equals_idx]
+            package_name: str = dependency[package_start_idx:equals_idx]
             version: str = dependency[equals_idx + 2 :]
+            isolated: bool = force_isolation or default_isolation
 
             pypackage_deps.append(
                 PythonPackageDependency(
@@ -143,7 +172,7 @@ def fetch_dependencies(
 
         # Fetch dependencies
         package_dependencies: List[PythonPackageDependency] = (
-            version.as_python_package_dependencies(isolate_packages)
+            version.as_python_package_dependencies(force_isolation=isolate_packages)
         )
 
         ran_paper_installations.append(

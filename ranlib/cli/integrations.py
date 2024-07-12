@@ -28,6 +28,7 @@ def auto_detect_integration() -> Integration:
         repo = Repo(".")
 
         # If successful, you know it's a git repo
+        print("Git repo detected.")
         return Integration.GIT
     except Exception:
         # Not in a git repo
