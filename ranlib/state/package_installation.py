@@ -34,7 +34,8 @@ def pre_run():
 
 
 def install(packages: List[PythonPackageDependency]):
-    if len(packages) == 0:
+    num_packages: int = len(packages)
+    if num_packages == 0:
         print("No packages to install.")
         return
 
@@ -63,9 +64,12 @@ def install(packages: List[PythonPackageDependency]):
             check=True,
         )
 
+    print(f"Installed {num_packages} packages.")
+
 
 def remove(packages: List[PythonPackageDependency]):
-    if len(packages) == 0:
+    num_packages: int = len(packages)
+    if num_packages == 0:
         print("No packages to remove")
         return
 
@@ -95,3 +99,5 @@ def remove(packages: List[PythonPackageDependency]):
             shell=True,
             check=True,
         )
+
+    print(f"Removed {num_packages} packages.")

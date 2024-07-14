@@ -29,6 +29,9 @@ def auto_detect_integration() -> Integration:
 
         # If successful, you know it's a git repo
         print("Git repo detected.")
+
+        # TODO: add publish on git push
+
         return Integration.GIT
     except Exception:
         # Not in a git repo

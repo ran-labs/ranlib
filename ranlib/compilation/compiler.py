@@ -163,8 +163,6 @@ def delete_redundant_stuff(repo_dir: str):
 def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
     """Setup the paper_ids to add + Cleanup the ones to remove"""
 
-    print("Precompiling...")
-
     dotran_dir_path: str = get_dotran_dir_path()
 
     # Create _lib directory if it doesn't already exist

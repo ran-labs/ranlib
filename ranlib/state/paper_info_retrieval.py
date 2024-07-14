@@ -120,7 +120,7 @@ class PaperImplementationVersion(BaseModel):
 
 def load_registry(update_registry: bool = True) -> Dict:
     if update_registry:
-        print("Updating Registry...")
+        print("Retrieving Latest Registry...")
         shutil.rmtree(f"{LIB_ROOT}/ran-registry", ignore_errors=True)
 
         # Clone

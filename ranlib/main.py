@@ -1,5 +1,6 @@
 import os
-import sys
+
+# import sys
 
 from typing import List, Dict, Union, Set
 from typing_extensions import Annotated
@@ -12,6 +13,8 @@ from cli import modify_papers
 from cli.utils import manifest_project_root, check_pixi_installation
 from cli.integrations import Integration, setup_integration
 
+from publish.push_entry import push_to_registry
+
 from constants import DEFAULT_ISOLATION_VALUE
 
 # import rich
@@ -22,7 +25,6 @@ app = typer.Typer(rich_markup_mode="rich")
 
 # ran setup
 @app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
-# @check_pixi_installation
 @manifest_project_root
 def setup(
     papers: List[str] = [],
@@ -39,7 +41,6 @@ def setup(
           - else, do a full initialization
     """
     check_pixi_installation()
-    # TODO: ran setup github should not reinitialize the project
 
     if override:
         init.full_init_from_scratch()
@@ -59,9 +60,18 @@ def setup(
         modify_papers.add_papers(papers, isolated)
 
 
+@app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
+@manifest_project_root
+def integrate(integration: Integration = "auto"):
+    """Setup integrations such as git, github, etc."""
+
+    # Setup the integration
+    if integration != "none":
+        setup_integration(integration)
+
+
 # ran install
 @app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
-# @check_pixi_installation
 @manifest_project_root
 def install(from_rantoml: bool = False):
     """Installs the papers from the lockfile, unless the user specifies to be from ran.toml. If lockfile not found, try ran.toml"""
@@ -75,10 +85,10 @@ def install(from_rantoml: bool = False):
     init.smart_init(allow_init_from_scratch=False)
 
 
-# ran sync
+# ran update
 @app.command()
 @manifest_project_root
-def sync():
+def update():
     """
     Installs from the ran.toml file. In case the user wants to use this. This will NOT fresh install everything unless there is no lockfile
 
@@ -89,7 +99,6 @@ def sync():
 
 # ran loadstate
 @app.command()
-# @check_pixi_installation
 @manifest_project_root
 def loadstate(epilog=":rocket: [orange]Skyrocket[/orange] your Research"):
     """Load from the lockfile that is in ran/ran-lock.json"""
@@ -99,7 +108,6 @@ def loadstate(epilog=":rocket: [orange]Skyrocket[/orange] your Research"):
 
 # ran use
 @app.command()
-# @check_pixi_installation
 @manifest_project_root
 def use(paper_impl_ids: List[str], isolated: bool = False):
     """Installs a paper library/module (or multiple), updates the lockfile, then updates ran.toml"""
@@ -120,7 +128,6 @@ def use(paper_impl_ids: List[str], isolated: bool = False):
 
 # ran remove
 @app.command()
-# @check_pixi_installation
 @manifest_project_root
 def remove(paper_impl_ids: List[str]):
     """Removes a paper installation (or multiple), updates the lockfile, then updates ran.toml"""
@@ -139,23 +146,19 @@ def remove(paper_impl_ids: List[str]):
     modify_papers.remove_papers(paper_implementation_ids)
 
 
-# As of right now, git push should auto-push to ran if need-be
 # ran push
+# As of right now, git push should auto-push to ran if need-be
 @app.command()
-# @check_pixi_installation
 @manifest_project_root
-def push(compile: bool = False):
+def publish():
     """
-    Optionally compile the code and push to the specified remote.
+    Push to the specified remote.
     What IS required though is that a compilation tree/dump is produced and written to a file, so that a user can easily recompile on their own machine
     When this project is setup with git / github / gitlab integrations, this will run on pushing to those
     """
-    # 1.) Optionally compile (for now, not needed on push)
-    # 2.) Update lockfile for compilation steps if compile
-    # 3.) git push
     check_pixi_installation()
 
-    # TODO:
+    push_to_registry()
 
 
 # TODO:
@@ -166,7 +169,7 @@ def help():
     pass
 
 
-################ IGNORE THE BELOW FOR NOW ################
+################ IGNORE THE BELOW FOR NOW; DO NOT RELEASE IN PROD ################
 
 
 @app.command()

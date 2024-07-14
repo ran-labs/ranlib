@@ -442,10 +442,18 @@ class DeltaRanLock(BaseModel):
         compilation_steps: Dict[str, List[str]] = {}
 
         # Step 0: precompilation - setup the new and cleanup the old
+        print("Precompiling...")
         compiler.precompile(
             to_add_paper_ids=self.to_add.get_paper_ids(),
             to_remove_paper_ids=self.to_remove.get_paper_ids(),
         )
+
+        # Next, install and remove packages
+        print("Updating packages...")
+
+        pkgs.remove(self.to_remove.pypackage_dependencies)
+
+        pkgs.install(self.to_add.pypackage_dependencies)
 
         # First, clone and compile/transpile each paper. Compilation steps should be yielded as a result
         print("Fetching and compiling papers...")
@@ -473,15 +481,8 @@ class DeltaRanLock(BaseModel):
                 # These are the ones that are kept (so not added or removed)
                 compilation_steps[key] = self.prev_ran_lock.compilation_steps[key]
 
-        # After compilation on each paper, run this to flush the buffer
+        # After compilation on each paper, run this to clear the cache
         compiler.postcompilation()
-
-        # Next, install and remove packages
-        print("Updating packages...")
-
-        pkgs.remove(self.to_remove.pypackage_dependencies)
-
-        pkgs.install(self.to_add.pypackage_dependencies)
 
         # Now, make the RanLock
         print("Generating lock...")

@@ -14,6 +14,7 @@ from publish.gather_entry import (
 
 def push_entry_to_registry(entry: RegistryPaperImplEntry):
     # Push to the RAN Registry
+    # TODO:
     pass
 
 
@@ -30,4 +31,4 @@ def push_to_registry():
 
     # Then push this to the remote registry
     # Afterwards, push to the git remote by making a request to the server
-    # TODO:
+    push_entry_to_registry(registry_entry)
