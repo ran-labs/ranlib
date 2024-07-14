@@ -485,7 +485,7 @@ class DeltaRanLock(BaseModel):
         compiler.postcompilation()
 
         # Now, make the RanLock
-        print("Generating lock...")
+        print("Generating lock from deltas...")
         return self.make_ran_lock(compilation_steps=compilation_steps)
 
 

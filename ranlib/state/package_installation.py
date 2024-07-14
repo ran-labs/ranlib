@@ -28,18 +28,11 @@ def _stringify_packages(
     return pkgs_str
 
 
-def pre_run():
-    # Use the correct pixi shell to avoid errors
-    subprocess.run("pixi shell --change-ps1=false", shell=True, check=True)
-
-
 def install(packages: List[PythonPackageDependency]):
     num_packages: int = len(packages)
     if num_packages == 0:
         print("No packages to install.")
         return
-
-    pre_run()
 
     # Install the packages
     print("Installing Packages...")
@@ -72,8 +65,6 @@ def remove(packages: List[PythonPackageDependency]):
     if num_packages == 0:
         print("No packages to remove")
         return
-
-    pre_run()
 
     # Uninstall / Remove the packages
     print("Removing packages...")

@@ -42,18 +42,18 @@ def check_pixi_installation():
 
         # Also installs the autocompletion for the respective shell
         # Maybe remove this if it becomes a problem
-        subprocess.run('eval "$(pixi completion --shell bash)"', shell=True, check=True)
-        subprocess.run('eval "$(pixi completion --shell zsh)"', shell=True, check=True)
-        subprocess.run(
-            'eval "$(pixi completion --shell fish | source)"',
-            shell=True,
-            check=True,
-        )
-        subprocess.run(
-            'eval "$(pixi completion --shell elvish | slurp)"',
-            shell=True,
-            check=True,
-        )
+        # subprocess.run('eval "$(pixi completion --shell bash)"', shell=True, check=True)
+        # subprocess.run('eval "$(pixi completion --shell zsh)"', shell=True, check=True)
+        # subprocess.run(
+        #     'eval "$(pixi completion --shell fish | source)"',
+        #     shell=True,
+        #     check=True,
+        # )
+        # subprocess.run(
+        #     'eval "$(pixi completion --shell elvish | slurp)"',
+        #     shell=True,
+        #     check=True,
+        # )
 
         _init_pixi_project_raw()
 
@@ -83,7 +83,7 @@ def _init_pixi_project_raw():
         )
         init_cmd += f" --import {root_path}/environment.yml"
 
-        subprocess.run(init_cmd, shell=True, check=True)
+    subprocess.run(init_cmd, shell=True, check=True)
 
 
 def append_to_gitignore(item, gitignore_path=".gitignore"):

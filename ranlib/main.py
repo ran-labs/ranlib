@@ -6,6 +6,7 @@ from typing import List, Dict, Union, Set
 from typing_extensions import Annotated
 
 import typer
+import subprocess
 
 from state.ranstate import PaperImplID, RanTOML, RanLock, read_ran_toml
 from cli import initialization as init
@@ -159,6 +160,16 @@ def publish():
     check_pixi_installation()
 
     push_to_registry()
+
+
+# ran shell
+@app.command()
+def shell():
+    """
+    Enters the correct pixi shell (to fix bugs). Really, all this does is run `pixi shell --change-ps1=false`
+    """
+    # Use the correct pixi shell to avoid errors
+    subprocess.run("pixi shell --change-ps1=false", shell=True, check=True)
 
 
 # TODO:

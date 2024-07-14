@@ -16,17 +16,17 @@ For any paper:
 - No strings attached
 - No extra setup needed
 
-- Just drop-in and start using it
+Just drop-in and start using it
+
+## Info for Users
+
+- Users of ranlib who use other papers will have to use pixi (setup is automatic)
+- However, if all you wanna do is publish your implementation of a paper, pixi will try to be as invisible as possible
 
 ## Setup
 
-This project uses micromamba as an environment manager with poetry as the main dependency manager
+This project uses pixi[https://pixi.sh]
 
 ```
-micromamba create -f environment.yml
-micromamba activate ranlib-env
-```
-
-```
-poetry install
+pixi install
 ```
