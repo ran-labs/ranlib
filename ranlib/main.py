@@ -1,10 +1,11 @@
 import os
 import sys
 
+
+import typer
 from typing import List, Dict, Union, Set
 from typing_extensions import Annotated
 
-import typer
 
 from state.ranstate import PaperImplID, RanTOML, RanLock, read_ran_toml
 from cli import initialization as init
@@ -14,7 +15,7 @@ from cli.integrations import Integration, setup_integration
 
 from constants import DEFAULT_ISOLATION_VALUE
 
-# import rich
+import rich
 
 
 app = typer.Typer(rich_markup_mode="rich")
