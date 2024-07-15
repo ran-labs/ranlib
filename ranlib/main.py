@@ -1,6 +1,6 @@
 import os
 import sys
-
+import requests
 
 import typer
 from typing import List, Dict, Union, Set
@@ -8,16 +8,16 @@ from typing_extensions import Annotated
 
 
 from state.ranstate import PaperImplID, RanTOML, RanLock, read_ran_toml
+from models.paper_sync_model import RegistryPaperImplEntry
 from cli import initialization as init
 from cli import modify_papers
 from cli.utils import manifest_project_root
 from cli.integrations import Integration, setup_integration
-
-from constants import DEFAULT_ISOLATION_VALUE
+from constants import DEFAULT_ISOLATION_VALUE, RAN_REGISTRY_SERVER_URL
 
 import rich
-
-
+import requests
+import json
 app = typer.Typer(rich_markup_mode="rich")
 
 
@@ -143,6 +143,43 @@ def remove(paper_impl_ids: List[str]):
 #     # 3.) git push
 #     pass
 
+@app.command()
+@manifest_project_root
+def push(compile: bool = False):
+    """
+    Optionally compile the code and push to the specified remote.
+    What IS required though is that a compilation tree/dump is produced and written to a file, so that a user can easily recompile on their own machine
+    When this project is setup with git / github / gitlab integrations, this will run on pushing to those
+    """
+    # 1.) Optionally compile (for now, not needed on push)
+    # 2.) Update lockfile for compilation steps if compile
+    # 3.) git push
+    url = RAN_REGISTRY_SERVER_URL.format(resource="publish_to_registry")
+    #TODO: Get access to paper from user
+    payload: RegistryPaperImplEntry = {
+        "paper_id": "graphIndex",
+        "username": "sanner",
+        "paper_impl_version": {
+            "tag": "v0.0.1",
+            "description": "Test Description",
+            "repo_url": "",
+            "dependencies": [
+            ""
+            ]
+        }
+    }
+
+    serialized_json_payload = json.dumps(payload)
+
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    
+    try:
+        response = requests.request("POST", url, headers=headers, data=serialized_json_payload)
+        print(response.text)
+    except requests.exceptions.RequestException as e:
+        print(e)
 
 # TODO:
 # ran help
