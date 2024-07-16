@@ -3,7 +3,7 @@ name = "ranlib"
 version = "0.1.0"
 description = "Add a short description here"
 authors = [{name = "ShanMehr", email = "ishanmeher25@gmail.com"}]
-requires-python = ">= 3.11"
+requires-python = ">= 3.9"
 dependencies = []
 
 [build-system]
@@ -30,3 +30,4 @@ python-dotenv = ">=1.0.1,<1.1"
 pytest = ">=8.2.2,<8.3"
 requests = ">=2.32.3,<2.33"
 numpy = { version = ">=1.23.1,<1.24.0", channel = "conda-forge" }
+regex = ">=2024.5.15,<2024.6"

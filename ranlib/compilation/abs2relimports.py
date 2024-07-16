@@ -1,7 +1,9 @@
 import os
+from typing import List, Dict, Set, Optional
 
+from constants import DOTRAN_FOLDER_NAME
 
-def find_all_python_files(directory: str):
+def find_all_python_files(directory: str) -> List[str]:
     """
     Recursively finds all Python files in the given directory and its subdirectories.
 
@@ -17,25 +19,48 @@ def find_all_python_files(directory: str):
 
 
 def replace_imports(directory: str) -> None:
-    allFiles = find_all_python_files(directory)
-
+    allFiles: List[str] = find_all_python_files(directory)
+    repository_files = set()
     for fileName in allFiles:
+        file_to_add = fileName.split("/")[-1]
+        repository_files.add(file_to_add)
+    print(repository_files)
+    #TODO: why cannot these files be found?
+    print("Files:",allFiles)
+    for fileName in allFiles:
+        print(fileName)
         f = open(fileName, "r")
         newf = open(fileName + ".temp", "w")
         lines = f.readlines()
         for l in lines:
-            words = l.split(" ")
-
+            # TODO: The strip is problematic because spaces are removed from the line
+            # Ex: outputs jso.py instead of json.py however, works for repo files as expected
+            words = l.strip().split(" ")
+            # if len(words) > 2:
+            #     print("test",words[1] in repository_files,words[1])
             if (
+                len(words) > 2 and
                 words[0] == "from"
                 and words[2] == "import"
                 and not words[1].startswith(".")
+                and (words[1]+".py") in repository_files
             ):  # non library import
+                print("Words",words,words[1])
                 try:
-                    testf = open("/".join(words[1].split(".")) + ".py", "r")
+                    #TODO: consider navigating to the file we want creating and leaving
+                    # TODO: Why do we want to do this?
+                    # TODO: What is the purpose of this code?
+                    file_path_test: str = directory+"/"+words[1]+".py"
+                    file_path_test_list: List[str] = file_path_test.split("/")
+                    ran_path_index:int = file_path_test_list.index(DOTRAN_FOLDER_NAME)
+                    ran_path = "/".join(file_path_test_list[ran_path_index:])
+                    new_file:str = "/".join(words[1].split("."))+".py"
+                    testf = open(ran_path,"r")
                     testf.close()
                     currentPath = words[1].split(".")
                     myPath = fileName.split("/")[1:]
+                    print(f"Observing Path Traversal of {words[1]}")
+                    print(currentPath,myPath)
                     index = 0
                     while currentPath[index] == myPath[index]:
                         index += 1
@@ -44,17 +69,25 @@ def replace_imports(directory: str) -> None:
                     else:
                         numParents = len(myPath) - index
                         newPath = ""
-                        for i in range(numParents):
+                        # for i in range(1):
+                        #     newPath += "."
+                        # newPath += ".".join(currentPath[index:])
+                        for i in range(index+1):
                             newPath += "."
                         newPath += ".".join(currentPath[index:])
                     newLine = "from " + newPath + " import " + words[3]
+                    print(directory)
+                    print(newLine)
                     newf.write(newLine)
-                except:
-                    newf.write(l)
+                except Exception as e:
+                    # print("Exception (File Unable to be read):",e)
+                    # print(l.strip())
+                    newf.write(l.strip())
+                    print("File Does Not Exist Writing File:",l.strip())
             elif words[0] == "import" and not words[1].startswith("."):
                 try:
-                    newString = "/".join(words[1].split("."))[:-1] + ".py"
-                    print(newString)
+                    newString = "/".join(words[1].split(".")) + ".py"
+                    print("Import",newString)
                     testf = open(newString, "r")
                     testf.close()
                     currentPath = words[1].split(".")
@@ -72,9 +105,9 @@ def replace_imports(directory: str) -> None:
                         newPath += ".".join(currentPath[index:])
                     newLine = "import " + newPath
                     newf.write(newLine)
-                except:
+                except Exception as e:
+                    # print("Exception:",e)
                     newf.write(l)
-
             else:
                 newf.write(l)
         newf.close()
