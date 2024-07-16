@@ -25,7 +25,7 @@ from ranlib.state.pathutils import (
     get_dotran_dir_path,
 )
 
-from compilation import compiler
+from ranlib.compilation import compiler
 
 
 """This file is about the ran.toml file and lockfile (.ran/ran-lock.json)"""
