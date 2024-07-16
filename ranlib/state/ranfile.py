@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 from ranlib.state.pathutils import get_dotran_dir_path
 
-from __init__ import __version__
+from ranlib.__init__ import __version__
 
 
 RANLIB_VERSION_PREFIX: str = "RANLib Version "
