@@ -4,8 +4,8 @@ from typing import List, Dict, Set, Optional, Union, Literal
 
 import requests
 
-from state.ranfile import RANFILE
-from publish.gather_entry import (
+from ranlib.state.ranfile import RANFILE
+from ranlib.publish.gather_entry import (
     RegistryPaperImplEntry,
     gather_dependencies,
     gather_registry_entry,

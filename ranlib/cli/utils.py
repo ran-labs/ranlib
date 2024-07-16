@@ -3,7 +3,7 @@ from pathlib import Path
 
 import functools
 
-from state.pathutils import find_root_path, set_root_path, add_root_path
+from ranlib.state.pathutils import find_root_path, set_root_path, add_root_path
 
 import subprocess
 

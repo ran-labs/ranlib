@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-from constants import LIB_ROOT, DOTRAN_FOLDER_NAME
+from ranlib.constants import LIB_ROOT, DOTRAN_FOLDER_NAME
 
 
 # NOTE: NO PATHS CAN END WITH A SLASH (/)

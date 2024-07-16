@@ -14,15 +14,13 @@ import subprocess
 
 import importlib.util
 
-from utils import find_all_python_files
-from state.pathutils import get_dotran_dir_path
+from ranlib.utils import find_all_python_files
+from ranlib.state.pathutils import get_dotran_dir_path
 
-from compilation.schemas import RANFunction
-from compilation.abs2relimports import replace_imports
+from ranlib.compilation.schemas import RANFunction
+from ranlib.compilation.abs2relimports import replace_imports
 
-# from compilation.rawabs2rel import rawabs2rel as rawabs2rel_fn
-
-from constants import (
+from ranlib.constants import (
     DOTRAN_FOLDER_NAME,
     PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME,
 )  # , RAN_MODULES_FOLDER_NAME

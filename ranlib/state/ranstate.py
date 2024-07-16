@@ -10,12 +10,12 @@ import re
 
 from git import Repo
 
-from constants import (
+from ranlib.constants import (
     DEFAULT_ISOLATION_VALUE,
     RAN_DEFAULT_AUTHOR_NAME,
 )  # , RAN_MODULES_FOLDER_NAME
 
-from state.pathutils import (
+from ranlib.state.pathutils import (
     find_root_path,
     readme_exists,
     ran_toml_exists,

@@ -3,10 +3,10 @@ from typing import List, Dict, Tuple, Set
 import functools
 import inspect
 
-from compilation.compiler import write_exposed_functions  # , exposed_function_buffer
-from compilation.schemas import RANFunction
+from ranlib.compilation.compiler import write_exposed_functions  # , exposed_function_buffer
+from ranlib.compilation.schemas import RANFunction
 
-from constants import PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME
+from ranlib.constants import PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME
 
 
 def infer_paper_id(source_filepath: str) -> str:

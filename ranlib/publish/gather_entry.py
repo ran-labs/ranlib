@@ -23,21 +23,21 @@ from pydantic import BaseModel, Field
 import tomli
 
 # Registry object
-from state.paper_info_retrieval import PaperImplementationVersion
+from ranlib.state.paper_info_retrieval import PaperImplementationVersion
 
-from state.ranstate import (
+from ranlib.state.ranstate import (
     PaperImplID,
     RanTOML,
     RanLock,
     PythonPackageDependency,
     PackageVersion,
 )
-from state.ranstate import read_ran_toml, read_lock
+from ranlib.state.ranstate import read_ran_toml, read_lock
 
-from state.pathutils import find_root_path
-from state import package_installation as pypkgs
+from ranlib.state.pathutils import find_root_path
+from ranlib.state import package_installation as pypkgs
 
-from cli.utils import init_pixi_project
+from ranlib.cli.utils import init_pixi_project
 
 
 class RegistryPaperImplEntry(BaseModel):
