@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.pixi.project]
 channels = ["conda-forge"]
-platforms = ["linux-64"]
+platforms = ["linux-64", "osx-arm64"]
 
 
 [tool.pixi.tasks]
