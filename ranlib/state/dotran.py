@@ -2,10 +2,10 @@ import os
 
 # import sys
 
-from state.pathutils import get_dotran_dir_path
-from constants import DOTRAN_FOLDER_NAME
+from ranlib.state.pathutils import get_dotran_dir_path
+from ranlib.constants import DOTRAN_FOLDER_NAME
 
-from state.ranfile import RANFILE
+from ranlib.state.ranfile import RANFILE
 
 
 # -- .ran/ --

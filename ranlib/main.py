@@ -8,15 +8,15 @@ from typing_extensions import Annotated
 import typer
 import subprocess
 
-from state.ranstate import PaperImplID, RanTOML, RanLock, read_ran_toml
-from cli import initialization as init
-from cli import modify_papers
-from cli.utils import manifest_project_root, check_pixi_installation
-from cli.integrations import Integration, setup_integration
+from ranlib.state.ranstate import PaperImplID, RanTOML, RanLock, read_ran_toml
+from ranlib.cli import initialization as init
+from ranlib.cli import modify_papers
+from ranlib.cli.utils import manifest_project_root, check_pixi_installation
+from ranlib.cli.integrations import Integration, setup_integration
 
-from publish.push_entry import push_to_registry
+from ranlib.publish.push_entry import push_to_registry
 
-from constants import DEFAULT_ISOLATION_VALUE
+from ranlib.constants import DEFAULT_ISOLATION_VALUE
 
 # import rich
 

@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 import subprocess
 
-from state.ranstate import PythonPackageDependency, read_ran_toml, RanTOML
+from ranlib.state.ranstate import PythonPackageDependency, read_ran_toml, RanTOML
 
 
 # TODO: Enforce isolation

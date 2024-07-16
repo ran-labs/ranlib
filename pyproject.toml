@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ran = "ranlib.main:app"
+ran = "__main__:app"
 
 [build-system]
 requires = ["hatchling"]

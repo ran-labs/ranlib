@@ -1,7 +1,7 @@
 import os
 from typing import List, Dict, Set, Optional
 
-from constants import DOTRAN_FOLDER_NAME
+from ranlib.constants import DOTRAN_FOLDER_NAME
 
 def find_all_python_files(directory: str) -> List[str]:
     """

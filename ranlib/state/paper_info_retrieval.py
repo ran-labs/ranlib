@@ -4,10 +4,10 @@ import shutil
 from typing import List, Dict, Set, Union, Literal
 from pydantic import BaseModel, Field
 
-from state.ranstate import PaperInstallation, PaperImplID
-from state.ranstate import RanPaperInstallation, PythonPackageDependency, PackageVersion
+from ranlib.state.ranstate import PaperInstallation, PaperImplID
+from ranlib.state.ranstate import RanPaperInstallation, PythonPackageDependency, PackageVersion
 
-from constants import (
+from ranlib.constants import (
     LIB_ROOT,
     RAN_REGISTRY_GIT_HTTPS_URL,
     RAN_DEFAULT_AUTHOR_NAME,

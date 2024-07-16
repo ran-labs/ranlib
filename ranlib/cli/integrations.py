@@ -3,7 +3,7 @@ from enum import Enum
 
 from git import Repo
 
-from cli.utils import append_to_gitignore
+from ranlib.cli.utils import append_to_gitignore
 
 
 class Integration(str, Enum):
