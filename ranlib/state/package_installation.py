@@ -11,13 +11,12 @@ from ranlib.state.ranstate import PythonPackageDependency, read_ran_toml, RanTOM
 
 def _stringify_packages(
     packages: List[PythonPackageDependency],
-    is_pypi: bool,
     include_versions: bool = True,
     separator: str = " ",
 ) -> str:
     pkgs_str: str = ""
     for package in packages:
-        package_str: str = package.as_installable_str(is_pypi)
+        package_str: str = str(package)
 
         # For now, remove the isolation notation
         # NOTE: Order matters here
@@ -44,7 +43,7 @@ def install(packages: List[PythonPackageDependency]):
     ]
     if len(conda_packages) > 0:
         subprocess.run(
-            f"pixi add {_stringify_packages(conda_packages, is_pypi=False)}",
+            f"pixi add {_stringify_packages(conda_packages)}",
             shell=True,
             check=True,
         )
@@ -55,7 +54,7 @@ def install(packages: List[PythonPackageDependency]):
     ]
     if len(pypi_packages) > 0:
         subprocess.run(
-            f"pixi add {_stringify_packages(pypi_packages, is_pypi=True)} --pypi",
+            f"pixi add {_stringify_packages(pypi_packages)} --pypi",
             shell=True,
             check=True,
         )
@@ -78,7 +77,7 @@ def remove(packages: List[PythonPackageDependency]):
     ]
     if len(conda_packages) > 0:
         subprocess.run(
-            f"pixi remove {_stringify_packages(conda_packages, is_pypi=False, include_versions=False)} --no-install",
+            f"pixi remove {_stringify_packages(conda_packages, include_versions=False)} --no-install",
             shell=True,
             check=True,
         )
@@ -89,7 +88,7 @@ def remove(packages: List[PythonPackageDependency]):
     ]
     if len(pypi_packages) > 0:
         subprocess.run(
-            f"pixi remove {_stringify_packages(pypi_packages, is_pypi=True, include_versions=False)} --no-install --pypi",
+            f"pixi remove {_stringify_packages(pypi_packages, include_versions=False)} --no-install --pypi",
             shell=True,
             check=True,
         )

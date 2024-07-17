@@ -354,7 +354,9 @@ class PythonPackageDependency(BaseModel):
 
         isolation: str = "isolate" if self.isolated else "noisolate"
 
-        dependency_str: str = self.package_name + str(self.version)
+        dependency_str: str = self.package_name + self.version.as_installable_str(
+            self.package_type == "pypi"
+        )
 
         if self.package_type == "non-pypi" and self.channel != "":
             dependency_str = self.channel + "::" + dependency_str
