@@ -292,7 +292,11 @@ class PackageVersion(BaseModel):
     def from_str(version_str: str):
         """Create a PackageVersion object from its string version."""
         if version_str.startswith("="):
-            lower_bound: str = version_str[1:]
+            if version_str.startswith("=="):
+                lower_bound: str = version_str[2:]
+            else:
+                lower_bound: str = version_str[1:]
+
             upper_bound: str = lower_bound
         elif version_str.startswith(">="):
             lower_bound: str = version_str[2:]
