@@ -55,6 +55,9 @@ def check_pixi_installation():
         #     check=True,
         # )
 
+    # If pixi project not initialized (no pixi.toml), then do this
+    root_path: str = find_root_path()
+    if not os.path.exists(f"{root_path}/pixi.toml"):
         _init_pixi_project_raw()
 
 
