@@ -42,22 +42,42 @@ def install(packages: List[PythonPackageDependency]):
         package for package in packages if package.package_type == "non-pypi"
     ]
     if len(conda_packages) > 0:
-        subprocess.run(
-            f"pixi add {_stringify_packages(conda_packages)}",
-            shell=True,
-            check=True,
-        )
+        try:
+            subprocess.run(
+                f"pixi add {_stringify_packages(conda_packages)}",
+                shell=True,
+                check=True,
+            )
+        except Exception as err:
+            print(
+                "Couldn't use exact conda package versions. Trying approximate ones..."
+            )
+            subprocess.run(
+                f"pixi add {_stringify_packages(conda_packages, include_versions=False)}",
+                shell=True,
+                check=True,
+            )
 
     # Install the pypi packages
     pypi_packages: List[PythonPackageDependency] = [
         package for package in packages if package.package_type == "pypi"
     ]
     if len(pypi_packages) > 0:
-        subprocess.run(
-            f"pixi add {_stringify_packages(pypi_packages)} --pypi",
-            shell=True,
-            check=True,
-        )
+        try:
+            subprocess.run(
+                f"pixi add {_stringify_packages(pypi_packages)} --pypi",
+                shell=True,
+                check=True,
+            )
+        except Exception as err:
+            print(
+                "Couldn't use exact pypi package versions. Trying approximate ones..."
+            )
+            subprocess.run(
+                f"pixi add {_stringify_packages(pypi_packages, include_versions=False)} --pypi",
+                shell=True,
+                check=True,
+            )
 
     print(f"Installed {num_packages} packages.")
 
