@@ -23,6 +23,11 @@ def _stringify_packages(
         package_str = package_str.replace("noisolate:", "")
         package_str = package_str.replace("isolate:", "")
 
+        if not include_versions:
+            package_str = package.package_name
+            if package.package_type == "non-pypi":
+                package_str = package.channel + package_str
+
         pkgs_str += package_str + separator
 
     return pkgs_str
