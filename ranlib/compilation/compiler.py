@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 
 from typing import List, Dict, Set, Union, Tuple
@@ -15,7 +16,7 @@ import subprocess
 import importlib.util
 
 from ranlib.utils import find_all_python_files
-from ranlib.state.pathutils import get_dotran_dir_path
+from ranlib.state.pathutils import get_dotran_dir_path, find_root_path
 
 from ranlib.compilation.schemas import RANFunction
 from ranlib.compilation.abs2relimports import replace_imports
@@ -122,7 +123,7 @@ def write_exposed_functions(exposed_buffer: Dict[str, List[RANFunction]]):
 def import_all_pymodules_from_directory(directory: str):
     for file_name in find_all_python_files(directory):
         module_name: str = file_name[
-            file_name.index(f"{DOTRAN_FOLDER_NAME}/") : -3
+            file_name.index(f"{DOTRAN_FOLDER_NAME}/") : -3  # ignore the .py
         ].replace("/", ".")
 
         # print(module_name)
@@ -222,6 +223,10 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
         )
         with open(existing_filepath, "w") as file:
             json.dump(existing_buffer_serializable, file)
+
+    # Temporarily add user project root path to the sys path
+    project_root_path: str = find_root_path()
+    sys.path.append(project_root_path)
 
 
 def compile(
@@ -339,3 +344,6 @@ def postcompilation():
     global exposed_functions_cache
 
     exposed_functions_cache = {}
+
+    # Remove the user project root path after compilation
+    sys.path.remove(find_root_path())
