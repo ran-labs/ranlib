@@ -172,14 +172,6 @@ def shell():
     subprocess.run("pixi shell --change-ps1=false", shell=True, check=True)
 
 
-# TODO:
-# ran help
-@app.command()
-def help():
-    """All the help commands"""
-    pass
-
-
 ################ IGNORE THE BELOW FOR NOW; DO NOT RELEASE IN PROD ################
 
 
@@ -196,7 +188,7 @@ def test():
 @manifest_project_root
 def reset():
     """ONLY FOR DEBUGGING PURPOSES. DO NOT RELEASE IN PROD"""
-    from state.pathutils import get_dotran_dir_path, get_ran_toml_path
+    from ranlib.state.pathutils import get_dotran_dir_path, get_ran_toml_path
     import shutil
 
     shutil.rmtree(get_dotran_dir_path())
