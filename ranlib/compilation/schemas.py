@@ -1,8 +1,7 @@
 from typing import List, Dict, Set, Union, Tuple
 from pydantic import BaseModel, Field
 
-
-# NOTE: dynamic importing may not be needed since we already have the correct format for modules
+import re
 
 
 class RANFunction(BaseModel):
@@ -29,10 +28,14 @@ class RANFunction(BaseModel):
         Before| param1: int, param2: int = 42, param3=None
         After | param1, param2, param3
         """
+        print(f"ON: {self.params_str}")
 
-        SEP: str = ", "
+        SEP_IN: str = ","
+        SEP_OUT: str = ", "
 
-        params: List[str] = self.params_str.split(SEP)
+        params_no_whitespace: str = re.sub(r"\s+", "", self.params_str)
+
+        params: List[str] = params_no_whitespace.split(SEP_IN)
         parsed_params: List[str] = []
 
         for param in params:
@@ -49,8 +52,10 @@ class RANFunction(BaseModel):
                 parsed_params.append(param[:equals_idx])
                 continue
 
+            parsed_params.append(param)
+
         # Remove the last SEP
-        parsed_params_str: str = SEP.join(parsed_params)
+        parsed_params_str: str = SEP_OUT.join(parsed_params)
         return parsed_params_str
 
     def __hash__(self) -> int:
