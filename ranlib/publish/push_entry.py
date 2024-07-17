@@ -3,6 +3,7 @@
 from typing import List, Dict, Set, Optional, Union, Literal
 
 import requests
+import json
 
 from ranlib.state.ranfile import RANFILE
 from ranlib.publish.gather_entry import (
@@ -12,10 +13,28 @@ from ranlib.publish.gather_entry import (
 )
 
 
+from ranlib.constants import RAN_API_SERVER_URL
+
+
 def push_entry_to_registry(entry: RegistryPaperImplEntry):
     # Push to the RAN Registry
-    # TODO:
-    pass
+    print("Publishing...")
+
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.post(
+        url=f"{RAN_API_SERVER_URL}/publish_to_registry",
+        data=json.dumps(entry.dict()),
+        headers=headers,
+    )
+
+    if response.status_code != 200:
+        # Request failed
+        print("Request failed with status code:", response.status_code)
+    else:
+        # TODO: with the api server, make it so that it returns the paper_impl_id and then make a message like:
+        # "Published! Use this paper with: ran use ameerarsala/attention_is_all_you_need"
+        print("Published!")
 
 
 def push_to_registry():
