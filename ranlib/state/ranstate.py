@@ -309,6 +309,19 @@ class PackageVersion(BaseModel):
     def __hash__(self) -> int:
         return hash((self.lower_bound, self.upper_bound))
 
+    def as_installable_str(self, is_pypi: bool) -> str:
+        if self.lower_bound != self.upper_bound:
+            return f">={self.lower_bound},<{self.upper_bound}"
+
+        # Otherwise, they are =
+        equals: str = ""
+        if is_pypi:
+            equals = "=="
+        else:
+            equals = "="
+
+        return equals + self.lower_bound
+
     def __str__(self) -> str:
         if self.lower_bound == self.upper_bound:
             return "=" + self.lower_bound
