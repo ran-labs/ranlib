@@ -2,8 +2,6 @@
 
 RAN Library
 
-NOTE: DELETE `ranlib/ranlib.py` IN PROD
-
 ## Philosophy & Tenants
 
 For any paper:
@@ -34,11 +32,13 @@ pixi install
 ### Building from source
 
 First of all, you must have `hatch` installed and probably also want to install pipx
+
 ```
 pipx install hatch
 ```
 
 Now, build it. Refer to the next section (Local Installation) in order to install this now.
+
 ```
 hatch build .
 ```
@@ -46,6 +46,7 @@ hatch build .
 ### Local Installation
 
 There already exist some pre-built versions with this repo (for now) that can be installed if you have not built them. (We should probably move this to releases). Whether you re-built or not, you can install ran with this command:
+
 ```
 pip install ./ranlib-0.1.0-py3-none-any.whl
 ```
