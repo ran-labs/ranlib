@@ -25,7 +25,7 @@ Just drop-in and start using it
 
 ## Setup
 
-This project uses pixi[https://pixi.sh]
+This project uses [pixi](https://pixi.sh)
 
 ```
 pixi install
