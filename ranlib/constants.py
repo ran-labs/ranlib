@@ -1,3 +1,4 @@
+from typing import List
 from pathlib import Path
 
 
@@ -17,3 +18,16 @@ RAN_DEFAULT_AUTHOR_NAME: str = "randefault"
 
 RAN_REGISTRY_GIT_HTTPS_URL: str = "https://github.com/anemo-ai/ran-registry.git"
 RAN_API_SERVER_URL: str = "https://ranlib-api.onrender.com"
+
+DEPENDENCIES_NAMES: List[str] = [
+    "typer",
+    "pydantic",
+    "tomli",
+    "tomli-w",
+    "gitpython",
+    "pre-commit",
+    "rich",
+    "python-dotenv",
+    "pytest",
+    "requests",
+]

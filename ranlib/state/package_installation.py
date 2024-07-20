@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 import subprocess
 
 from ranlib.state.ranstate import PythonPackageDependency, read_ran_toml, RanTOML
+from ranlib.constants import DEPENDENCIES_NAMES
 
 
 # TODO: Enforce isolation
@@ -33,8 +34,19 @@ def _stringify_packages(
     return pkgs_str
 
 
+def _ignore_ranlib_dependencies(
+    packages: List[PythonPackageDependency],
+) -> List[PythonPackageDependency]:
+    return [
+        package
+        for package in packages
+        if package.package_name not in DEPENDENCIES_NAMES
+    ]
+
+
 def install(packages: List[PythonPackageDependency]):
-    num_packages: int = len(packages)
+    pkgs: List[PythonPackageDependency] = _ignore_ranlib_dependencies(packages)
+    num_packages: int = len(pkgs)
     if num_packages == 0:
         print("No packages to install.")
         return
@@ -44,7 +56,7 @@ def install(packages: List[PythonPackageDependency]):
 
     # Install the non-pypi packages
     conda_packages: List[PythonPackageDependency] = [
-        package for package in packages if package.package_type == "non-pypi"
+        package for package in pkgs if package.package_type == "non-pypi"
     ]
     if len(conda_packages) > 0:
         try:
@@ -65,7 +77,7 @@ def install(packages: List[PythonPackageDependency]):
 
     # Install the pypi packages
     pypi_packages: List[PythonPackageDependency] = [
-        package for package in packages if package.package_type == "pypi"
+        package for package in pkgs if package.package_type == "pypi"
     ]
     if len(pypi_packages) > 0:
         try:
@@ -88,7 +100,8 @@ def install(packages: List[PythonPackageDependency]):
 
 
 def remove(packages: List[PythonPackageDependency]):
-    num_packages: int = len(packages)
+    pkgs: List[PythonPackageDependency] = _ignore_ranlib_dependencies(packages)
+    num_packages: int = len(pkgs)
     if num_packages == 0:
         print("No packages to remove")
         return
@@ -98,7 +111,7 @@ def remove(packages: List[PythonPackageDependency]):
 
     # Remove the non-pypi packages
     conda_packages: List[PythonPackageDependency] = [
-        package for package in packages if package.package_type == "non-pypi"
+        package for package in pkgs if package.package_type == "non-pypi"
     ]
     if len(conda_packages) > 0:
         subprocess.run(
@@ -109,7 +122,7 @@ def remove(packages: List[PythonPackageDependency]):
 
     # Remove the pypi packages
     pypi_packages: List[PythonPackageDependency] = [
-        package for package in packages if package.package_type == "pypi"
+        package for package in pkgs if package.package_type == "pypi"
     ]
     if len(pypi_packages) > 0:
         subprocess.run(
