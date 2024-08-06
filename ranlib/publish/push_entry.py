@@ -34,20 +34,26 @@ def push_entry_to_registry(entry: RegistryPaperImplEntry):
     else:
         # TODO: with the api server, make it so that it returns the paper_impl_id and then make a message like:
         # "Published! Use this paper with: ran use ameerarsala/attention_is_all_you_need"
-        print("Published!")
-
+        json_response = json.loads(response)
+        username = json_response.get("username")
+        paper_id = json_response.get("paper_id")
+        print(f"Published! Use this paper with: ran use {username}/{paper_id}")
 
 def push_to_registry():
     # Gather the dependencies
     dependencies: List[str] = gather_dependencies()
 
-    # Write the dependencies to the RANFILE
+    # # Write the dependencies to the RANFILE
     ranfile: RANFILE = RANFILE(python_dependencies=dependencies)
     ranfile.write_to_ranfile()
 
-    # Get the registry entry
+    # # Get the registry entry
     registry_entry: RegistryPaperImplEntry = gather_registry_entry(dependencies)
 
     # Then push this to the remote registry
     # Afterwards, push to the git remote by making a request to the server
+
+    
     push_entry_to_registry(registry_entry)
+
+    print("Pushing to registry")
