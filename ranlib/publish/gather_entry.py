@@ -17,7 +17,7 @@ Here's how to use:
 
 import os
 
-from typing import List, Dict
+from typing import List, Dict, Union
 from pydantic import BaseModel, Field
 
 import tomli
