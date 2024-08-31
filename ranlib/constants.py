@@ -17,8 +17,9 @@ DEFAULT_ISOLATION_VALUE: bool = False
 RAN_DEFAULT_AUTHOR_NAME: str = "randefault"
 
 RAN_REGISTRY_GIT_HTTPS_URL: str = "https://github.com/anemo-ai/ran-registry.git"
-RAN_API_SERVER_URL: str = "https://ranlib-api-server.onrender.com"
+RAN_API_SERVER_URL: str = "https://lib.ran.so"
 
+# TODO: do something about this
 DEPENDENCIES_NAMES: List[str] = [
     "typer",
     "pydantic",
@@ -29,5 +30,5 @@ DEPENDENCIES_NAMES: List[str] = [
     "rich",
     "python-dotenv",
     "pytest",
-    "requests",
+    "httpx",
 ]

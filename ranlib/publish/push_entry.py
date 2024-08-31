@@ -43,7 +43,8 @@ def push_entry_to_registry(entry: RegistryPaperImplEntry):
 def push_to_registry():
     # Gather the dependencies
     dependencies: List[str] = gather_dependencies()
-
+    
+    # TODO: maybe deprecate the RANFILE or make it a ranrc at the very most
     # Write the dependencies to the RANFILE
     ranfile: RANFILE = RANFILE(python_dependencies=dependencies)
     ranfile.write_to_ranfile()

@@ -5,6 +5,8 @@ import tomli
 import tomli_w
 import json
 
+import uuid
+
 # RegEx
 import re
 
@@ -89,12 +91,11 @@ class PaperInstallation(BaseModel):
 # paper name/id
 # tag
 # description
-# readme
 class RanPlatformParams(BaseModel):
     # potential feature down the line: cache last user name and auto fill
     username: str = Field(default="")
     paper_id_name: str = Field(default="")  # e.g. 'attention_is_all_you_need'
-    tag: str = Field(default="v1")
+    tag: str = Field(default_factory=lambda: str(uuid.uuid4())[:13].replace("-", ""))
     description: str = Field(default="")
     repo_url: str = Field(default="")  # TODO: auto-fill if a git url is detected
 
@@ -115,13 +116,15 @@ class RanSettings(BaseModel):
     isolate_dependencies: bool = Field(default=DEFAULT_ISOLATION_VALUE)
 
 
+# Field names are intentional and correspond to the TOML file
 class RanTOML(BaseModel):
     RAN: RanPlatformParams = Field(default=RanPlatformParams())
 
     dependencies: RanPaperDependencies = Field(default=RanPaperDependencies())
 
     settings: RanSettings = Field(default=RanSettings())
-
+    
+    # TODO: remove serialization and just use regular TOML lists
     # Yeah, I'm gonna be a bitch about this unless the users complain
     def deserialize_paper_installations(self) -> List[PaperInstallation]:
         """
@@ -174,7 +177,8 @@ class RanTOML(BaseModel):
             paper_installations.append(paper_installation)
 
         return paper_installations
-
+    
+    # TODO: remove serialization and just use regular TOML lists
     def serialize_paper_installations(
         paper_installations: List[PaperInstallation],
     ) -> str:
