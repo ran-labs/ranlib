@@ -81,7 +81,8 @@ class PaperInstallation(BaseModel):
 
 
 # -- ran.toml reqs --
-
+def generate_default_tag_hash() -> str:
+    return str(uuid.uuid4())[:13].replace("-", "")
 
 # For pushers [optional]
 # RAN username
@@ -92,7 +93,7 @@ class RanPlatformParams(BaseModel):
     # potential feature down the line: cache last user name and auto fill
     username: str = Field(default="")
     paper_id_name: str = Field(default="")  # e.g. 'attention_is_all_you_need'
-    tag: str = Field(default_factory=lambda: str(uuid.uuid4())[:13].replace("-", ""))
+    tag: str = Field(default_factory=generate_default_tag_hash)
     description: str = Field(default="")
     repo_url: str = Field(default="")  # TODO: auto-fill if a git url is detected
 

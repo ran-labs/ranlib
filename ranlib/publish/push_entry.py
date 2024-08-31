@@ -5,6 +5,7 @@ from typing import List, Dict, Set, Optional, Union, Literal
 import httpx
 import json
 
+from ranlib.state.ranstate import generate_default_tag_hash
 from ranlib.state.ranfile import RANFILE
 from ranlib.publish.gather_entry import (
     RegistryPaperImplEntry,
@@ -20,6 +21,16 @@ def push_entry_to_registry(entry: RegistryPaperImplEntry):
     # Push to the RAN Registry
     print("Publishing...")
 
+    registry_entry: Dict = entry.dict()
+    
+    tag: str = entry.paper_impl_version.tag
+    if tag == "latest":
+        # If user puts 'latest' for version, just generate a random tag
+        registry_entry["paper_impl_version"]["tag"] = generate_default_tag_hash()
+    elif tag == "earliest":
+        # Reject if the user puts 'earliest' for version
+        raise Exception("Invalid tag name. You are not allowed to put 'earliest' as your tag name.")
+        
     response = httpx.post(
         url=f"{RAN_API_SERVER_URL}/publish_to_registry",
         headers={"Content-Type": "application/json"},
