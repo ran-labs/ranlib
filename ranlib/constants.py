@@ -1,6 +1,5 @@
-from typing import List
 from pathlib import Path
-
+from ranlib.generated.dependencies import DEPENDENCIES_NAMES
 
 # Paths
 LIB_ROOT: str = str(Path(__file__).parent.parent)
@@ -17,17 +16,3 @@ DEFAULT_ISOLATION_VALUE: bool = False
 RAN_DEFAULT_AUTHOR_NAME: str = "$randefault"
 
 RAN_API_SERVER_URL: str = "https://lib.ran.so"
-
-# TODO: do something about this
-DEPENDENCIES_NAMES: List[str] = [
-    "typer",
-    "pydantic",
-    "tomli",
-    "tomli-w",
-    "gitpython",
-    "pre-commit",
-    "rich",
-    "python-dotenv",
-    "pytest",
-    "httpx",
-]

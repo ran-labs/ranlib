@@ -15,6 +15,9 @@ import subprocess
 
 import importlib.util
 
+# TODO: use this to write more maintainable code
+import textwrap
+
 from ranlib.utils import find_all_python_files
 from ranlib.state.pathutils import get_dotran_dir_path, find_root_path
 
