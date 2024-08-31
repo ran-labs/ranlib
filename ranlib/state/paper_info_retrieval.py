@@ -44,9 +44,7 @@ class PaperImplementationVersion(BaseModel):
     description: str
     dependencies: List[str]
 
-    def as_python_package_dependencies(
-        self, force_isolation: bool
-    ) -> List[PythonPackageDependency]:
+    def as_python_package_dependencies(self, forced_isolation_value: bool | None = None) -> List[PythonPackageDependency]:
         """
         Parse the dependencies: List[str] -> List[PythonPackageDependency]
 
@@ -56,25 +54,29 @@ class PaperImplementationVersion(BaseModel):
         pypackage_deps: List[PythonPackageDependency] = []
 
         # NOTE: Each dependency MUST start with either 'isolate:' or 'noisolate:'
-        for dependency_ in self.dependencies:
+        # Go thru a denormalization process
+        for _dependency_ in self.dependencies:
+            """
+            Example `_dependency_`:
+                noisolate:"conda-forge::numpy>=1.23.1,<1.24.0"
+            """
+
             default_isolation: bool = DEFAULT_ISOLATION_VALUE
             package_start_idx: int = 0
 
             # trim all whitespace
-            dependency: str = remove_all_whitespace(dependency_)
-            dependency = dependency.replace('"', "")  # remove any quotation marks
+            _dependency: str = remove_all_whitespace(_dependency_)
+            _dependency = _dependency.replace('"', "")  # remove any quotation marks
 
-            """
-            Example `dependency`:
-                noisolate:"conda-forge::numpy>=1.23.1,<1.24.0"
-            """
-
-            if dependency.startswith("isolate:"):
+            if _dependency.startswith("isolate:"):
                 default_isolation = True
                 package_start_idx = len("isolate:")
-            elif dependency.startswith("noisolate:"):
+            elif _dependency.startswith("noisolate:"):
                 default_isolation = False
                 package_start_idx = len("noisolate:")
+
+            # Denormalization complete
+            dependency: str = _dependency[package_start_idx:]
 
             version: PackageVersion = None
             version_start_idx: int = 0
@@ -89,19 +91,19 @@ class PaperImplementationVersion(BaseModel):
 
             package_type: Literal["pypi", "non-pypi"] = "non-pypi"
             channel: str = ""
-            if "::" in dependency[package_start_idx:version_start_idx]:
+            if "::" in dependency[:version_start_idx]:
                 package_type = "non-pypi"
 
                 # NOTE: It is important that things go in this order
                 channel_divider_idx: int = dependency.index("::")
-                channel = dependency[package_start_idx:channel_divider_idx]
+                channel = dependency[:channel_divider_idx]
 
                 package_start_idx = channel_divider_idx + 2
             else:
                 package_type = "pypi"
 
-            package_name: str = dependency[package_start_idx:version_start_idx]
-            isolated: bool = force_isolation or default_isolation
+            package_name: str = dependency[:version_start_idx]
+            isolated: bool = forced_isolation_value if forced_isolation_value is not None else default_isolation
 
             pypackage_deps.append(
                 PythonPackageDependency(
@@ -163,7 +165,7 @@ def fetch_dependencies(paper_installations: List[PaperInstallation]) -> List[Ran
 
         # Fetch dependencies
         package_dependencies: List[PythonPackageDependency] = (
-            version.as_python_package_dependencies(force_isolation=isolate_packages)
+            version.as_python_package_dependencies(forced_isolation_value=isolate_packages)
         )
 
         ran_paper_installations.append(

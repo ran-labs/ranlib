@@ -27,7 +27,7 @@ from ranlib.state.pathutils import (
 from ranlib.compilation import compiler
 
 
-"""This file is about the ran.toml file and lockfile"""
+"""This file is about the ran.toml file (manifest) and lockfile"""
 
 
 class PaperImplID(BaseModel):
@@ -155,7 +155,7 @@ class RanTOML(BaseModel):
         return paper_installations
     
     # TODO: remove serialization and just use regular TOML lists
-    def serialize_paper_installations(paper_installations: List[PaperInstallation]) -> List[str]:
+    def write_paper_installations(self, paper_installations: List[PaperInstallation]) -> List[str]:
         """
         Example Before:
         [PaperInstallation(), ...]
@@ -165,26 +165,32 @@ class RanTOML(BaseModel):
         """
 
         serialized_papers: List[str] = []
+        isolate_by_default: bool = self.settings.isolate_dependencies
 
         for paper in paper_installations:
             paper_impl_id: str = ""
 
-            if paper.isolate:
-                paper_impl_id += "isolate:"
-            else:
+            if isolate_by_default and not paper.isolate:
                 paper_impl_id += "noisolate:"
+            elif not isolate_by_default and paper.isolate:
+                paper_impl_id += "isolate:"
 
             paper_impl_id += str(paper.paper_impl_id)
 
             serialized_papers.append(paper_impl_id)
 
         return serialized_papers
+    
+    def set_paper_installations(self, paper_installations: List[PaperInstallation]):
+        # Serialize
+        serialized_papers: List[str] = self.write_paper_installations(paper_installations)
+
+        # Set 'em
+        self.dependencies.papers = serialized_papers
 
     def add_paper_installations(self, paper_installations: List[PaperInstallation]):
         # Serialize
-        new_papers_serialized: List[str] = RanTOML.serialize_paper_installations(
-            paper_installations
-        )
+        new_papers_serialized: List[str] = self.write_paper_installations(paper_installations)
 
         # Add 'em
         self.dependencies.papers += new_papers_serialized
@@ -202,10 +208,8 @@ class RanTOML(BaseModel):
             if installed_paper.paper_impl_id not in to_remove_paper_impl_ids
         ]
 
-        # Reserialize and set
-        self.dependencies.papers = RanTOML.serialize_paper_installations(
-            _installed_papers_
-        )
+        # Reserialize and update
+        self.dependencies.papers = self.write_paper_installations(_installed_papers_)
 
 
 def generate_ran_toml():
@@ -217,9 +221,7 @@ def generate_ran_toml():
     if lockfile_exists():
         # Generate off the lockfile
         ran_lock: RanLock = read_lock()
-        ran_toml_obj.dependencies.papers = RanTOML.serialize_paper_installations(
-            ran_lock.get_as_paper_installations()
-        )
+        ran_toml_obj.set_paper_installations(ran_lock.get_as_paper_installations())
 
     ran_dot_toml: str = tomli_w.dumps(ran_toml_obj.dict(), multiline_strings=False)
 
@@ -363,7 +365,7 @@ class RanLock(BaseModel):
             PaperInstallation(
                 paper_impl_id=ran_paper_installation.paper_impl_id,
                 isolate=ran_paper_installation.package_dependencies[0].isolated,
-            )  # isolation happens as a group
+            )  # isolation happens as a group. If 1 dep is isolated, the whole paper and all of its dependencies will be counted as such
             for ran_paper_installation in self.ran_paper_installations
         ]
 
@@ -497,24 +499,16 @@ def produce_delta_lock(
     else:
         prev_ran_lock: RanLock = read_lock()
 
-    prev_ran_paper_installations: List[RanPaperInstallation] = (
-        prev_ran_lock.ran_paper_installations
-    )
+    prev_ran_paper_installations: List[RanPaperInstallation] = prev_ran_lock.ran_paper_installations
 
     # First thing's first: to the fetching HERE before anything else
     # Here's what it's gotta do:
     # 0.) process tags like 'latest' into their actual values
     # 1.) Fetch the dependencies based on that and wrap in a nice RanPaperInstallation
-    ran_paper_installations: List[RanPaperInstallation] = fetch_dependencies(
-        paper_installations
-    )
+    ran_paper_installations: List[RanPaperInstallation] = fetch_dependencies(paper_installations)
 
-    ran_paper_installations_set: Set[RanPaperInstallation] = frozenset(
-        ran_paper_installations
-    )
-    prev_ran_paper_installations_set: Set[RanPaperInstallation] = frozenset(
-        prev_ran_paper_installations
-    )
+    ran_paper_installations_set: Set[RanPaperInstallation] = frozenset(ran_paper_installations)
+    prev_ran_paper_installations_set: Set[RanPaperInstallation] = frozenset(prev_ran_paper_installations)
 
     # Create deltas for RanPaperInstallation's
     to_add_ran_paper_installations: List[RanPaperInstallation] = list(
