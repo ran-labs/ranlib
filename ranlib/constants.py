@@ -14,7 +14,7 @@ PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME: str = "_lib"
 
 # Project Constants
 DEFAULT_ISOLATION_VALUE: bool = False
-RAN_DEFAULT_AUTHOR_NAME: str = "randefault" # TODO: change to $randefault
+RAN_DEFAULT_AUTHOR_NAME: str = "$randefault"
 
 RAN_API_SERVER_URL: str = "https://lib.ran.so"
 

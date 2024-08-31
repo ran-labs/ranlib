@@ -21,7 +21,7 @@ import re
 # Example registry.yaml [DEPRECATED]
 """
 attention_is_all_you_need:
-    randefault:
+    $randefault:
         versions:
             - tag: v1
               repo_url: https://github.com/...
