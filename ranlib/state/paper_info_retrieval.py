@@ -8,19 +8,17 @@ from ranlib.state.ranstate import PaperInstallation, PaperImplID
 from ranlib.state.ranstate import RanPaperInstallation, PythonPackageDependency, PackageVersion
 
 from ranlib.constants import (
-    LIB_ROOT,
-    RAN_REGISTRY_GIT_HTTPS_URL,
-    RAN_DEFAULT_AUTHOR_NAME,
+    RAN_API_SERVER_URL,
     DEFAULT_ISOLATION_VALUE,
 )
 
-from git import Repo
-import yaml
+import httpx
+import json
 
 import re
 
 
-# Example registry.yaml
+# Example registry.yaml [DEPRECATED]
 """
 attention_is_all_you_need:
     randefault:
@@ -118,84 +116,46 @@ class PaperImplementationVersion(BaseModel):
         return pypackage_deps
 
 
-def load_registry(update_registry: bool = True) -> Dict:
-    if update_registry:
-        print("Retrieving Latest Registry...")
-        shutil.rmtree(f"{LIB_ROOT}/ran-registry", ignore_errors=True)
+def fetch_paper_implementation_version(paper_impl_id: PaperImplID) -> PaperImplementationVersion:
+    # Make a POST request to RAN_API_SERVER_URL
+    response = httpx.post(
+        url=f"{RAN_API_SERVER_URL}/v1/read_registry",
+        headers={"Content-Type": "application/json"},
+        data=json.dumps(paper_impl_id.dict())
+    )
 
-        # Clone
-        Repo.clone_from(
-            RAN_REGISTRY_GIT_HTTPS_URL, f"{LIB_ROOT}/ran-registry"
-        )  # clones into LIB_ROOT/ran-registry/*
-
-    with open(f"{LIB_ROOT}/ran-registry/registry.yaml") as registry_file:
-        registry: Dict = yaml.safe_load(registry_file)
-
-    return registry
-
-
-def _find_matching_version_idx(versions: List[Dict], nametag: str) -> int:
-    for idx, version in enumerate(versions):
-        if version["tag"] == nametag:
-            return idx
-
-    return -1
-
-
-def fetch_paper_implementation_version(
-    paper_impl_id: PaperImplID, registry: Dict
-) -> PaperImplementationVersion:
-    versions: List[Dict] = registry[paper_impl_id.paper_id][paper_impl_id.author][
-        "versions"
-    ]
-
-    # Get correct version index based on
-    idx: int = 0
-    if paper_impl_id.tag == "latest":
-        idx = -1
-    elif paper_impl_id.tag == "earliest":
-        idx = 0
-    else:
-        # This implies the tag is exact
-        # Find idx by nametag
-        idx = _find_matching_version_idx(versions, paper_impl_id.tag)
-
-    version: PaperImplementationVersion = PaperImplementationVersion(**versions[idx])
+    if not response.is_success:
+        # Failure
+        raise Exception("Paper Implementation Not Found")
+    
+    # Success
+    json_response: Dict = response.json()
+    version: PaperImplementationVersion = PaperImplementationVersion(**json_response)
 
     return version
 
 
-def fetch_repo_url(paper_impl_id: PaperImplID, update_registry: bool = False) -> str:
-    registry: Dict = load_registry(update_registry)
-
-    version: PaperImplementationVersion = fetch_paper_implementation_version(
-        paper_impl_id, registry
-    )
+def fetch_repo_url(paper_impl_id: PaperImplID) -> str:
+    version: PaperImplementationVersion = fetch_paper_implementation_version(paper_impl_id)
 
     return version.repo_url
 
 
-def fetch_dependencies(
-    paper_installations: List[PaperInstallation], update_registry: bool = True
-) -> List[RanPaperInstallation]:
+def fetch_dependencies(paper_installations: List[PaperInstallation]) -> List[RanPaperInstallation]:
     """
     Fetch from remote to get the required python package names and versions, then return the as List[RanPaperInstallation]
 
     Actually, for now we could just have a public git repo to be pulled from that would contain all the papers as yaml or json
     """
-    # 0.) Git clone latest, which consists of removing the existing one then git cloning
-    # 1.) Read locally and process tags like 'latest' into their actual values (their actual verbose values for maximum reproducibility)
-    registry: Dict = load_registry(update_registry=update_registry)
-
+    # Read locally and process tags like 'latest' into their actual values (their actual verbose values for maximum reproducibility)
+    
     # Fetch dependencies
     ran_paper_installations: List[RanPaperInstallation] = []
     for paper_installation in paper_installations:
         paper_impl_id: PaperImplID = paper_installation.paper_impl_id
         isolate_packages: bool = paper_installation.isolate
 
-        version: PaperImplementationVersion = fetch_paper_implementation_version(
-            paper_impl_id, registry
-        )
+        version: PaperImplementationVersion = fetch_paper_implementation_version(paper_impl_id)
 
         # Process tags like 'latest' and 'earliest' into their respective tags
         # (Use EXACT tag, no aliases)

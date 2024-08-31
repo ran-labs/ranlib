@@ -20,12 +20,10 @@ def push_entry_to_registry(entry: RegistryPaperImplEntry):
     # Push to the RAN Registry
     print("Publishing...")
 
-    headers = {"Content-Type": "application/json"}
-
     response = httpx.post(
         url=f"{RAN_API_SERVER_URL}/publish_to_registry",
+        headers={"Content-Type": "application/json"},
         data=json.dumps(entry.dict()),
-        headers=headers,
     )
 
     if response.status_code != 200:
@@ -34,7 +32,7 @@ def push_entry_to_registry(entry: RegistryPaperImplEntry):
     else:
         # TODO: with the api server, make it so that it returns the paper_impl_id and then make a message like:
         # "Published! Use this paper with: ran use ameerarsala/attention_is_all_you_need"
-        json_response = json.loads(response)
+        json_response = response.json()
         username = json_response.get("username")
         paper_id = json_response.get("paper_id")
         print(f"Published! Use this paper with: ran use {username}/{paper_id}")
