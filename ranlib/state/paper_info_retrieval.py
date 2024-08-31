@@ -10,6 +10,7 @@ from ranlib.state.ranstate import RanPaperInstallation, PythonPackageDependency,
 from ranlib.constants import (
     RAN_API_SERVER_URL,
     DEFAULT_ISOLATION_VALUE,
+    RAN_DEFAULT_AUTHOR_NAME
 )
 
 from ranlib.utils import remove_all_whitespace
@@ -170,7 +171,8 @@ def fetch_dependencies(paper_installations: List[PaperInstallation]) -> List[Ran
 
         ran_paper_installations.append(
             RanPaperInstallation(
-                paper_impl_id=paper_impl_id, package_dependencies=package_dependencies
+                paper_impl_id=paper_impl_id,
+                package_dependencies=package_dependencies
             )
         )
 

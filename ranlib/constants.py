@@ -5,7 +5,7 @@ from ranlib.generated.dependencies import DEPENDENCIES_NAMES
 LIB_ROOT: str = str(Path(__file__).parent.parent)
 
 # Naming conventions
-DOTRAN_FOLDER_NAME: str = "ran"  # Used to be .ran/
+DOTRAN_FOLDER_NAME: str = "ran"  # Used to be .ran
 # RAN_MODULES_FOLDER_NAME: str = (
 #     "."  # This is for the relative paths  # Used to be "ran_modules"
 # )
