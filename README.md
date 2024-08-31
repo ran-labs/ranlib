@@ -25,15 +25,23 @@ Just drop-in and start using it
 
 This project uses [pixi](https://pixi.sh)
 
-```
+```bash
 pixi install
+```
+
+## Development
+
+Get started with development environment by running this command:
+
+```bash
+pixi shell --change-ps1=false -e dev
 ```
 
 ### Building from source
 
 First of all, you must have `hatch` installed and probably also want to install pipx
 
-```
+```bash
 pipx install hatch
 ```
 
@@ -47,6 +55,6 @@ hatch build .
 
 There already exist some pre-built versions with this repo (for now) that can be installed if you have not built them. (We should probably move this to releases). Whether you re-built or not, you can install ran with this command:
 
-```
+```bash
 pip install ./ranlib-0.1.0-py3-none-any.whl
 ```
