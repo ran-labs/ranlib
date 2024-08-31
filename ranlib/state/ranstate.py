@@ -153,8 +153,7 @@ class RanTOML(BaseModel):
             paper_installations.append(paper_installation)
 
         return paper_installations
-    
-    # TODO: remove serialization and just use regular TOML lists
+
     def write_paper_installations(self, paper_installations: List[PaperInstallation]) -> List[str]:
         """
         Example Before:
