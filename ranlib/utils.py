@@ -1,4 +1,5 @@
 import os
+import re
 from pathlib import Path
 from typing import List
 
@@ -22,3 +23,7 @@ def find_all_python_files(directory: str) -> List[str]:
             if file.endswith(".py"):
                 python_files.append(os.path.join(root, file))
     return python_files
+
+
+def remove_all_whitespace(s: str) -> str:
+    return re.sub(r"\s+", "", s)

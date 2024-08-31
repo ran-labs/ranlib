@@ -12,10 +12,10 @@ from ranlib.constants import (
     DEFAULT_ISOLATION_VALUE,
 )
 
+from ranlib.utils import remove_all_whitespace
+
 import httpx
 import json
-
-import re
 
 
 # Example registry.yaml [DEPRECATED]
@@ -61,7 +61,7 @@ class PaperImplementationVersion(BaseModel):
             package_start_idx: int = 0
 
             # trim all whitespace
-            dependency: str = re.sub(r"\s+", "", dependency_)
+            dependency: str = remove_all_whitespace(dependency_)
             dependency = dependency.replace('"', "")  # remove any quotation marks
 
             """

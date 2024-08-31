@@ -7,9 +7,6 @@ import json
 
 import uuid
 
-# RegEx
-import re
-
 from git import Repo
 
 from ranlib.constants import (
@@ -30,7 +27,7 @@ from ranlib.state.pathutils import (
 from ranlib.compilation import compiler
 
 
-"""This file is about the ran.toml file and lockfile (.ran/ran-lock.json)"""
+"""This file is about the ran.toml file and lockfile"""
 
 
 class PaperImplID(BaseModel):
@@ -41,7 +38,7 @@ class PaperImplID(BaseModel):
     def from_str(paper_impl_id: str):
         """Create a PaperImplID object from its string version."""
 
-        slash_idx: int = paper_impl_id.find("/")  # for author
+        slash_idx: int = paper_impl_id.find("/")   # for author
         colon_idx: int = paper_impl_id.rfind(":")  # for tag
 
         author_specified: bool = slash_idx != -1
@@ -103,10 +100,7 @@ class RanPlatformParams(BaseModel):
 # Dependencies
 class RanPaperDependencies(BaseModel):
     # paper_impl_ids
-    papers: str = Field(
-        default="""
-"""
-    )  # fuck this formatter
+    papers: List[str] = Field(default=[])
 
 
 # settings
@@ -124,43 +118,25 @@ class RanTOML(BaseModel):
 
     settings: RanSettings = Field(default=RanSettings())
     
-    # TODO: remove serialization and just use regular TOML lists
-    # Yeah, I'm gonna be a bitch about this unless the users complain
-    def deserialize_paper_installations(self) -> List[PaperInstallation]:
+    def read_paper_installations(self) -> List[PaperInstallation]:
         """
+        Example Before:
+        ['attention_is_all_you_need', 'seanmeher/mamba', 'mae', 'rwkv:latest']
+        
+        Example After:
+        [PaperInstallation(), ...]
+        
         Isolation Notation: 'isolate:' or 'noisolate:'
-
         Example - isolate:ameerarsala/rwkv:latest
         """
 
-        # Example Before:
-
-        """
-        - attention_is_all_you_need
-        - seanmeher/mamba
-        - mae
-        - rwkv:latest
-        """
-
-        # Example After:
-        """
-        ['attention_is_all_you_need', 'seanmeher/mamba', 'mae', 'rwkv:latest']
-        """
-
-        # Remove ALL whitespace
-        paper_impl_ids_no_whitespace: str = re.sub(r"\s+", "", self.dependencies.papers)
-
-        # Remove the first hyphen if there is one
-        if paper_impl_ids_no_whitespace[0] == "-":
-            paper_impl_ids_no_whitespace = paper_impl_ids_no_whitespace[1:]
-
-        # Separate by hyphens
-        paper_impl_ids_list: List[str] = paper_impl_ids_no_whitespace.split("-")
+        paper_impl_ids_list: List[str] = self.dependencies.papers
 
         # Read isolation notation
         paper_installations: List[PaperInstallation] = []
         for paper_impl_id in paper_impl_ids_list:
             paper_impl_id_: str = str(paper_impl_id)  # copy it
+            paper_impl_id_ = paper_impl_id_.replace(" ", "")  # remove any remaining whitespace
 
             isolation: bool = self.settings.isolate_dependencies  # Default value
             if paper_impl_id.startswith("isolate:"):
@@ -179,23 +155,16 @@ class RanTOML(BaseModel):
         return paper_installations
     
     # TODO: remove serialization and just use regular TOML lists
-    def serialize_paper_installations(
-        paper_installations: List[PaperInstallation],
-    ) -> str:
-        # Example Before:
+    def serialize_paper_installations(paper_installations: List[PaperInstallation]) -> List[str]:
         """
+        Example Before:
+        [PaperInstallation(), ...]
+        
+        Example After:
         ['attention_is_all_you_need', 'seanmeher/mamba', 'mae', 'rwkv:latest']
         """
 
-        # Example After:
-        """
-        - attention_is_all_you_need
-        - seanmeher/mamba
-        - mae
-        - rwkv:latest
-        """
-
-        serialized_papers: str = ""
+        serialized_papers: List[str] = []
 
         for paper in paper_installations:
             paper_impl_id: str = ""
@@ -207,32 +176,26 @@ class RanTOML(BaseModel):
 
             paper_impl_id += str(paper.paper_impl_id)
 
-            serialized_papers += f"\n- {paper_impl_id}"
-
-        # Newline at the end for readability
-        serialized_papers += "\n"
+            serialized_papers.append(paper_impl_id)
 
         return serialized_papers
 
     def add_paper_installations(self, paper_installations: List[PaperInstallation]):
         # Serialize
-        new_papers_serialized: str = RanTOML.serialize_paper_installations(
+        new_papers_serialized: List[str] = RanTOML.serialize_paper_installations(
             paper_installations
         )
 
         # Add 'em
-        self.dependencies.papers = "".join(
-            [self.dependencies.papers, new_papers_serialized, "\n"]
-        )
+        self.dependencies.papers += new_papers_serialized
 
     # Do this by paper_impl_id
     def remove_paper_installations(self, to_remove_paper_impl_ids: List[PaperImplID]):
-        # Deserialize to get existing
-        installed_papers: List[PaperInstallation] = (
-            self.deserialize_paper_installations()
-        )
+        # Read to get existing
+        installed_papers: List[PaperInstallation] = self.read_paper_installations()
 
         # Installed Papers' (prime)
+        # Filter for the ones that are not in to_remove_paper_impl_ids
         _installed_papers_: List[PaperInstallation] = [
             installed_paper
             for installed_paper in installed_papers
@@ -258,7 +221,7 @@ def generate_ran_toml():
             ran_lock.get_as_paper_installations()
         )
 
-    ran_dot_toml: str = tomli_w.dumps(ran_toml_obj.dict(), multiline_strings=True)
+    ran_dot_toml: str = tomli_w.dumps(ran_toml_obj.dict(), multiline_strings=False)
 
     # Write it to the ran.toml file
     file_path: str = get_ran_toml_path()
@@ -279,7 +242,7 @@ def read_ran_toml() -> RanTOML:
 
 def write_to_ran_toml(ran_toml: RanTOML):
     """Write to ran.toml"""
-    ran_dot_toml: str = tomli_w.dumps(ran_toml.dict(), multiline_strings=True)
+    ran_dot_toml: str = tomli_w.dumps(ran_toml.dict(), multiline_strings=False)
 
     file_path: str = get_ran_toml_path()
     with open(file_path, "w") as file:
@@ -594,9 +557,7 @@ def produce_delta_lock_from_ran_toml(
     ran_toml: RanTOML, prev_lock: RanLock = None
 ) -> DeltaRanLock:
     """Produce a DeltaRanLock from ran.toml (pre-resolve packages as well)"""
-    paper_installations: List[PaperInstallation] = (
-        ran_toml.deserialize_paper_installations()
-    )
+    paper_installations: List[PaperInstallation] = ran_toml.read_paper_installations()
 
     return produce_delta_lock(paper_installations, prev_lock=prev_lock)
 

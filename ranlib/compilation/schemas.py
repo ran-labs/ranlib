@@ -1,7 +1,7 @@
 from typing import List, Dict, Set, Union, Tuple
 from pydantic import BaseModel, Field
 
-import re
+from ranlib.utils import remove_all_whitespace
 
 
 class RANFunction(BaseModel):
@@ -33,7 +33,7 @@ class RANFunction(BaseModel):
         SEP_IN: str = ","
         SEP_OUT: str = ", "
 
-        params_no_whitespace: str = re.sub(r"\s+", "", self.params_str)
+        params_no_whitespace: str = remove_all_whitespace(self.params_str)
 
         params: List[str] = params_no_whitespace.split(SEP_IN)
         parsed_params: List[str] = []
