@@ -21,7 +21,13 @@ dependencies = [
 ran = "ranlib.main:app"
 
 [project.optional-dependencies]
-devdeps = [ "jupytext>=1.16.4,<2", "pytest>=8.3.2,<9", "pre-commit>=3.8.0,<4", "black>=24.8.0,<25", "hatch>=1.12.0,<2"]
+devdeps = [
+  "jupytext>=1.16.4,<2",
+  "pytest>=8.3.2,<9",
+  "pre-commit>=3.8.0,<4",
+  "black>=24.8.0,<25",
+  "hatch>=1.12.0,<2",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -30,6 +36,9 @@ build-backend = "hatchling.build"
 [tool.pixi.project]
 channels = ["conda-forge"]
 platforms = ["linux-64", "osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+ranlib = { path = ".", editable = true }
 
 [tool.pixi.tasks]
 ran = "python3 ranlib/main.py"
