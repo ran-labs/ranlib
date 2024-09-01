@@ -1,0 +1,3 @@
+[submodule "ranlib-global"]
+	path = ranlib-global
+	url = git@github.com:anemo-ai/ranlib-global.git
