@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-from ranlib.constants import LIB_ROOT, DOTRAN_FOLDER_NAME
+from ranlib.constants import PROJECT_ROOT, DOTRAN_FOLDER_NAME
 
 
 # NOTE: NO PATHS CAN END WITH A SLASH (/)
@@ -27,7 +27,7 @@ def find_root_path() -> str:
     if len(ROOT_PATH) > 0 and current_path.startswith(ROOT_PATH):
         return ROOT_PATH
 
-    dot_ranprojects_filepath: str = f"{LIB_ROOT}/.ranprojects"
+    dot_ranprojects_filepath: str = f"{PROJECT_ROOT}/.ranprojects"
 
     if not os.path.exists(dot_ranprojects_filepath):
         return None
@@ -55,7 +55,7 @@ def find_root_path() -> str:
 def add_root_path(path: str):
     """Add a root path to the top of the .ranprojects file"""
 
-    dot_ranprojects_filepath: str = f"{LIB_ROOT}/.ranprojects"
+    dot_ranprojects_filepath: str = f"{PROJECT_ROOT}/.ranprojects"
 
     try:
         # Read the current content to check if the file ends with a newline

@@ -2,7 +2,7 @@ from pathlib import Path
 from ranlib.generated.dependencies import DEPENDENCIES_NAMES
 
 # Paths
-LIB_ROOT: str = str(Path(__file__).parent.parent)
+PROJECT_ROOT: str = str(Path(__file__).parent.parent)
 
 # Naming conventions
 DOTRAN_FOLDER_NAME: str = "ran"  # Used to be .ran

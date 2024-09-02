@@ -8,7 +8,7 @@ import textwrap
 
 # Paths
 # I didn't want to import from constants. That could cause potential issues on a recursive base case (which is now) due to the way Python's circular imports work
-_LIB_ROOT: str = str(Path(__file__).parent)
+_PROJECT_ROOT: str = str(Path(__file__).parent)
 
 # Note: this function ONLY works in dev and is hence excluded from the actual library
 def _read_dependencies() -> List[str]:
@@ -16,7 +16,7 @@ def _read_dependencies() -> List[str]:
     Read the dependencies of ranlib
     """
     
-    with open(f"{_LIB_ROOT}/pyproject.toml", 'rb') as pyproject_dot_toml_file:
+    with open(f"{_PROJECT_ROOT}/pyproject.toml", 'rb') as pyproject_dot_toml_file:
         pyproject_dot_toml: Dict = tomli.load(pyproject_dot_toml_file)
 
     dependencies: List[str] = pyproject_dot_toml["project"]["dependencies"]
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     DEPENDENCIES_NAMES: List[str] = _read_dependencies()
 
     # Write them to that python file (./ranlib/generated/dependencies.py)
-    with open(f"{_LIB_ROOT}/ranlib/generated/dependencies.py", 'w') as dependencies_dot_py_file:
+    with open(f"{_PROJECT_ROOT}/ranlib/generated/dependencies.py", 'w') as dependencies_dot_py_file:
         dependencies_dot_py_file.write(
             textwrap.dedent(f"""
             ## GENERATED CODE ##
