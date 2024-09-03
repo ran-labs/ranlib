@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field
 import tomli
 
 # Registry object
-from ranlib.state.paper_info_retrieval import PaperImplementationVersion
+from ranlib.state.dependencies.paper_info_retrieval import PaperImplementationVersion
 
 from ranlib.state.ranstate import (
     PaperImplID,
@@ -35,7 +35,7 @@ from ranlib.state.ranstate import (
 from ranlib.state.ranstate import read_ran_toml, read_lock
 
 from ranlib.state.pathutils import find_root_path
-from ranlib.state import package_installation as pypkgs
+from ranlib.state.dependencies import package_installation as pypkgs
 
 from ranlib.cli.utils import init_pixi_project
 

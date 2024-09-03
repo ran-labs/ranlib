@@ -15,8 +15,8 @@ from ranlib.constants import (
 )  # , RAN_MODULES_FOLDER_NAME
 
 from ranlib.state.pathutils import (
-    find_root_path,
-    readme_exists,
+    #find_root_path,
+    #readme_exists,
     ran_toml_exists,
     lockfile_exists,
     get_ran_toml_path,
@@ -424,8 +424,8 @@ class DeltaRanLock(BaseModel):
         """Above says it all. However, as compilation steps are done after receiving the stuff, they will be recorded and changed with this method"""
         # This assumes post-preresolution of what should be added and removed
         # And if something gets recompiled (perhaps due to a different package version?), the compilation steps WILL be replaced (desired behavior)
-        from ranlib.state.paper_info_retrieval import fetch_repo_url
-        import ranlib.state.package_installation as pkgs
+        from ranlib.state.dependencies.paper_info_retrieval import fetch_repo_url
+        import ranlib.state.dependencies.package_installation as pkgs
 
         compilation_steps: Dict[str, List[str]] = {}
 
@@ -490,8 +490,8 @@ def produce_delta_lock(
     """
 
     # I HATE PYTHON
-    from ranlib.state.paper_info_retrieval import fetch_dependencies
-    from ranlib.state import preresolution
+    from ranlib.state.dependencies.paper_info_retrieval import fetch_dependencies
+    from ranlib.state.dependencies import preresolution
 
     prev_ran_lock: RanLock = None
     if prev_lock is not None:
