@@ -42,7 +42,7 @@ ranlib = { path = ".", editable = true }
 
 [tool.pixi.tasks]
 ran = "python3 ranlib/main.py"
-build = "python3 ./prebuild.py && hatch build ."
+build = "python3 ./prebuild.py && hatch build ./release"
 
 [tool.pixi.environments]
 dev = { features = ["devdeps"] }
