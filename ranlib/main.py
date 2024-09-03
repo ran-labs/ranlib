@@ -11,7 +11,7 @@ import subprocess
 from ranlib.state.ranstate import PaperImplID, RanTOML, RanLock, read_ran_toml
 from ranlib.cli import initialization as init
 from ranlib.cli import modify_papers
-from ranlib.cli.utils import manifest_project_root, check_pixi_installation
+from ranlib.cli.helpers import manifest_project_root, check_pixi_installation
 from ranlib.cli.integrations import Integration, setup_integration
 
 from ranlib.publish.push_entry import push_to_registry

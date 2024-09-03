@@ -37,7 +37,7 @@ from ranlib.state.ranstate import read_ran_toml, read_lock
 from ranlib.state.pathutils import find_root_path
 from ranlib.state.dependencies import package_installation as pypkgs
 
-from ranlib.cli.utils import init_pixi_project
+from ranlib.cli.helpers import init_pixi_project
 
 
 class RegistryPaperImplEntry(BaseModel):
