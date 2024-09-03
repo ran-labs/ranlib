@@ -1,4 +1,5 @@
 import os
+from typing import List, Callable
 
 import functools
 
@@ -7,24 +8,53 @@ from ranlib.state.pathutils import find_root_path, set_root_path, add_root_path
 import subprocess
 
 
-def manifest_project_root(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        """Manifest the User Project Root before every single command."""
-        root_path: str = find_root_path()
+def pre(fns: List[Callable]):
+    """
+    Stuff that executes before the function. For improved code readability and composability
+    However, they cannot have arguments, so if you want to use args, you'll have to settle with lambdas
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # Execute all functions before a command first
+            for fn in fns:
+                fn()
 
-        if root_path is None:
-            root_path = os.getcwd()
-            add_root_path(root_path)
+            # Execute the actual function
+            result = func(*args, **kwargs)
 
-        set_root_path(root_path)
+            return result
+        
+        return wrapper
 
-        # Execute the actual function
-        result = func(*args, **kwargs)
+    return decorator
 
-        return result
 
-    return wrapper
+def manifest_project_root():
+    """Manifest the User Project Root before every single command."""
+
+    root_path: str = find_root_path()
+
+    if root_path is None:
+        root_path = os.getcwd()
+        add_root_path(root_path)
+
+    set_root_path(root_path)
+
+
+# DEPRECATED: use pre instead
+# def manifest_project_root(func):
+#     @functools.wraps(func)
+#     def wrapper(*args, **kwargs):
+#         """Manifest the User Project Root before every single command."""
+#         manifest_user_project_root()
+#         
+#         # Execute the actual function
+#         result = func(*args, **kwargs)
+#
+#         return result
+#
+#     return wrapper
 
 
 def check_pixi_installation():

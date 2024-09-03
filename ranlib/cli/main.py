@@ -1,5 +1,3 @@
-import os
-
 from typing import List, Dict, Union, Set
 from typing_extensions import Annotated
 
@@ -8,6 +6,7 @@ import subprocess
 
 # State
 from ranlib.state.ranstate import PaperImplID, RanTOML, RanLock, read_ran_toml
+from ranlib.constants import DEFAULT_ISOLATION_VALUE
 
 # Actions
 from ranlib.actions import initialization as init
@@ -17,9 +16,7 @@ from ranlib.actions.publish import push_entry
 from ranlib.actions.integrations import Integration
 
 # Helpers
-from ranlib.cli.helpers import manifest_project_root, check_pixi_installation
-
-from ranlib.constants import DEFAULT_ISOLATION_VALUE
+from ranlib.cli.helpers import pre, manifest_project_root, check_pixi_installation
 
 # Subcommands
 from ranlib.cli.subcmds import dev
@@ -30,7 +27,7 @@ app = typer.Typer(rich_markup_mode="rich")
 
 # ran setup
 @app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
-@manifest_project_root
+@pre([manifest_project_root, check_pixi_installation])
 def setup(
     papers: List[str] = [],
     isolated: bool = DEFAULT_ISOLATION_VALUE,
@@ -45,8 +42,6 @@ def setup(
           - else if ran.toml, init from there
           - else, do a full initialization
     """
-    check_pixi_installation()
-
     if override:
         init.full_init_from_scratch()
     else:
@@ -66,7 +61,7 @@ def setup(
 
 
 @app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
-@manifest_project_root
+@pre([manifest_project_root])
 def integrate(integration: Integration = "auto"):
     """Setup integrations such as git, github, etc."""
 
@@ -77,12 +72,11 @@ def integrate(integration: Integration = "auto"):
 
 # ran install
 @app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
-@manifest_project_root
+@pre([manifest_project_root, check_pixi_installation])
 def install(from_rantoml: bool = False):
     """Installs the papers from the lockfile, unless the user specifies to be from ran.toml. If lockfile not found, try ran.toml"""
     # This will ALWAYS fresh install
-    check_pixi_installation()
-
+    
     if from_rantoml:
         init.init_from_ran_toml()
         raise typer.Exit()  # used to be 'return'
@@ -92,7 +86,7 @@ def install(from_rantoml: bool = False):
 
 # ran update
 @app.command()
-@manifest_project_root
+@pre([manifest_project_root])
 def update():
     """
     Installs from the ran.toml file. In case the user wants to use this. This will NOT fresh install everything unless there is no lockfile
@@ -104,7 +98,7 @@ def update():
 
 # ran loadstate
 @app.command()
-@manifest_project_root
+@pre([manifest_project_root])
 def loadstate(epilog=":rocket: [orange]Skyrocket[/orange] your Research"):
     """Load from the lockfile that is in ran/ran-lock.json"""
     # init_from_lockfile will always be from zero since otherwise nothing would happpen (x - x = 0, but x - 0 = x)
@@ -113,11 +107,9 @@ def loadstate(epilog=":rocket: [orange]Skyrocket[/orange] your Research"):
 
 # ran use
 @app.command()
-@manifest_project_root
+@pre([manifest_project_root, check_pixi_installation])
 def use(paper_impl_ids: List[str], isolated: bool = False):
     """Installs a paper library/module (or multiple), updates the lockfile, then updates ran.toml"""
-    check_pixi_installation()
-
     if not init.appears_to_be_initialized():
         print("RAN does not appear to be initialized. Initializing first...")
         init.smart_init()
@@ -133,15 +125,14 @@ def use(paper_impl_ids: List[str], isolated: bool = False):
 
 # ran remove
 @app.command()
-@manifest_project_root
+@pre([manifest_project_root, check_pixi_installation])
 def remove(paper_impl_ids: List[str]):
     """Removes a paper installation (or multiple), updates the lockfile, then updates ran.toml"""
     # Remove modules from ran/ran_modules
     # Remove its entry in ran.toml
     # For any isolated packages associated with the module(s), remove 'em
     # Generate/Update lockfile
-    check_pixi_installation()
-
+    
     # Convert papers to PaperImplID
     paper_implementation_ids: List[PaperImplID] = [
         PaperImplID.from_str(paper_impl_id) for paper_impl_id in paper_impl_ids
@@ -154,20 +145,19 @@ def remove(paper_impl_ids: List[str]):
 # ran push
 # As of right now, git push should auto-push to ran if need-be
 @app.command()
-@manifest_project_root
+@pre([manifest_project_root, check_pixi_installation])
 def publish():
     """
     Push to the specified remote.
     What IS required though is that a compilation tree/dump is produced and written to a file, so that a user can easily recompile on their own machine
     When this project is setup with git / github / gitlab integrations, this will run on pushing to those
     """
-    check_pixi_installation()
-
     push_entry.push_to_registry()
 
 
 # ran shell
 @app.command()
+@pre([check_pixi_installation])
 def shell():
     """
     Enters the correct pixi shell (to fix bugs). Really, all this does is run `pixi shell --change-ps1=false`
