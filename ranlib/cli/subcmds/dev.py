@@ -6,7 +6,7 @@ import os
 import typer
 
 # Helpers
-from ranlib.cli.helpers import pre, manifest_project_root, check_pixi_installation
+from ranlib.cli.helpers import pre, manifest_project_root, manifest_pixi_project
 
 
 ################ IGNORE THE BELOW FOR NOW; DO NOT RELEASE IN PROD ################

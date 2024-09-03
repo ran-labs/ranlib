@@ -16,7 +16,7 @@ from ranlib.actions.publish import push_entry
 from ranlib.actions.integrations import Integration
 
 # Helpers
-from ranlib.cli.helpers import pre, manifest_project_root, check_pixi_installation
+from ranlib.cli.helpers import pre, manifest_project_root, manifest_pixi_project
 
 # Subcommands
 from ranlib.cli.subcmds import dev, auth
@@ -27,7 +27,7 @@ app = typer.Typer(rich_markup_mode="rich")
 
 # ran setup
 @app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
-@pre([manifest_project_root, check_pixi_installation])
+@pre([manifest_project_root, manifest_pixi_project])
 def setup(
     papers: List[str] = [],
     isolated: bool = DEFAULT_ISOLATION_VALUE,
@@ -72,7 +72,7 @@ def integrate(integration: Integration = "auto"):
 
 # ran install
 @app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
-@pre([manifest_project_root, check_pixi_installation])
+@pre([manifest_project_root, manifest_pixi_project])
 def install(from_rantoml: bool = False):
     """Installs the papers from the lockfile, unless the user specifies to be from ran.toml. If lockfile not found, try ran.toml"""
     # This will ALWAYS fresh install
@@ -86,7 +86,7 @@ def install(from_rantoml: bool = False):
 
 # ran update
 @app.command()
-@pre([manifest_project_root, check_pixi_installation])
+@pre([manifest_project_root, manifest_pixi_project])
 def update():
     """
     Installs from the ran.toml file. In case the user wants to use this. This will NOT fresh install everything unless there is no lockfile
@@ -98,7 +98,7 @@ def update():
 
 # ran loadstate
 @app.command()
-@pre([manifest_project_root, check_pixi_installation])
+@pre([manifest_project_root, manifest_pixi_project])
 def loadstate(epilog=":rocket: [orange]Skyrocket[/orange] your Research"):
     """Load from the lockfile that is in ran/ran-lock.json"""
     # init_from_lockfile will always be from zero since otherwise nothing would happpen (x - x = 0, but x - 0 = x)
@@ -107,7 +107,7 @@ def loadstate(epilog=":rocket: [orange]Skyrocket[/orange] your Research"):
 
 # ran use
 @app.command()
-@pre([manifest_project_root, check_pixi_installation])
+@pre([manifest_project_root, manifest_pixi_project])
 def use(paper_impl_ids: List[str], isolated: bool = False):
     """Installs a paper library/module (or multiple), updates the lockfile, then updates ran.toml"""
     if not init.appears_to_be_initialized():
@@ -125,7 +125,7 @@ def use(paper_impl_ids: List[str], isolated: bool = False):
 
 # ran remove
 @app.command()
-@pre([manifest_project_root, check_pixi_installation])
+@pre([manifest_project_root, manifest_pixi_project])
 def remove(paper_impl_ids: List[str]):
     """Removes a paper installation (or multiple), updates the lockfile, then updates ran.toml"""
     # Remove modules from ran/ran_modules
@@ -145,7 +145,7 @@ def remove(paper_impl_ids: List[str]):
 # ran push
 # As of right now, git push should auto-push to ran if need-be
 @app.command()
-@pre([manifest_project_root, check_pixi_installation])
+@pre([manifest_project_root, manifest_pixi_project])
 def publish():
     """
     Push to the specified remote.
@@ -157,7 +157,7 @@ def publish():
 
 # ran shell
 @app.command()
-@pre([check_pixi_installation])
+@pre([manifest_pixi_project])
 def shell():
     """
     Enters the correct pixi shell (to fix bugs). Really, all this does is run `pixi shell --change-ps1=false`

@@ -2,10 +2,11 @@ import os
 from typing import List, Callable
 
 import functools
+import subprocess
 
 from ranlib.state.pathutils import find_root_path, set_root_path, add_root_path
+from ranlib._external.install_checks import check_pixi_installation
 
-import subprocess
 
 
 def pre(fns: List[Callable]):
@@ -42,32 +43,9 @@ def manifest_project_root():
     set_root_path(root_path)
 
 
-def check_pixi_installation():
-    """Check if pixi is installed and install it if not."""
-    try:
-        subprocess.run("pixi --version", shell=True, check=True)
-    except subprocess.CalledProcessError:
-        print("Pixi is not installed. Installing pixi...")
-
-        # Install pixi
-        subprocess.run(
-            "curl -fsSL https://pixi.sh/install.sh | bash", shell=True, check=True
-        )
-
-        # Also installs the autocompletion for the respective shell
-        # Maybe remove this if it becomes a problem
-        # subprocess.run('eval "$(pixi completion --shell bash)"', shell=True, check=True)
-        # subprocess.run('eval "$(pixi completion --shell zsh)"', shell=True, check=True)
-        # subprocess.run(
-        #     'eval "$(pixi completion --shell fish | source)"',
-        #     shell=True,
-        #     check=True,
-        # )
-        # subprocess.run(
-        #     'eval "$(pixi completion --shell elvish | slurp)"',
-        #     shell=True,
-        #     check=True,
-        # )
+def manifest_pixi_project():
+    # First, check if pixi is installed or not. If not, then install it
+    check_pixi_installation()
 
     # If pixi project not initialized (no pixi.toml), then do this
     root_path: str = find_root_path()
