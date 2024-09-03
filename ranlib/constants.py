@@ -17,3 +17,5 @@ DEFAULT_ISOLATION_VALUE: bool = False
 RAN_DEFAULT_AUTHOR_NAME: str = "$randefault"
 
 RAN_API_SERVER_URL: str = "https://lib.ran.so"
+
+RAN_AUTH_TOKEN_FILEPATH_JSON: str = "~/ran/.ranprofile.json"

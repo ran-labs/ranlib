@@ -19,7 +19,7 @@ from ranlib.actions.integrations import Integration
 from ranlib.cli.helpers import pre, manifest_project_root, check_pixi_installation
 
 # Subcommands
-from ranlib.cli.subcmds import dev
+from ranlib.cli.subcmds import dev, auth
 
 
 app = typer.Typer(rich_markup_mode="rich")
@@ -166,7 +166,11 @@ def shell():
     subprocess.run("pixi shell --change-ps1=false", shell=True, check=True)
 
 
+# TODO: `ran cleanup` for cleaning up pixi installs (like in case the user accidentally runs some ran cmd and it makes a pixi project)
+
+
 ################ SUBCOMMANDS ################
+app.add_typer(auth.app, name="auth")
 app.add_typer(dev.app, name="dev")
 
 
