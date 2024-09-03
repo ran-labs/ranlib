@@ -7,7 +7,8 @@ import json
 
 from ranlib.state.ranstate import generate_default_tag_hash
 from ranlib.state.ranfile import RANFILE
-from ranlib.publish.gather_entry import (
+
+from ranlib.actions.publish.gather_entry import (
     RegistryPaperImplEntry,
     gather_dependencies,
     gather_registry_entry,

@@ -14,7 +14,7 @@ from ranlib.actions import modify_papers, integrations
 from ranlib.actions.integrations import Integration
 from ranlib.cli.helpers import manifest_project_root, check_pixi_installation
 
-from ranlib.publish.push_entry import push_to_registry
+from ranlib.actions.publish.push_entry import push_to_registry
 
 from ranlib.constants import DEFAULT_ISOLATION_VALUE
 
