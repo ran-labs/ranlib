@@ -12,13 +12,17 @@ from ranlib.state.ranstate import PaperImplID, RanTOML, RanLock, read_ran_toml
 # Actions
 from ranlib.actions import initialization as init
 from ranlib.actions import modify_papers, integrations
+from ranlib.actions.publish import push_entry
+
 from ranlib.actions.integrations import Integration
-from ranlib.actions.publish.push_entry import push_to_registry
 
 # Helpers
 from ranlib.cli.helpers import manifest_project_root, check_pixi_installation
 
 from ranlib.constants import DEFAULT_ISOLATION_VALUE
+
+# Subcommands
+from ranlib.cli.subcmds import dev
 
 
 app = typer.Typer(rich_markup_mode="rich")
@@ -159,7 +163,7 @@ def publish():
     """
     check_pixi_installation()
 
-    push_to_registry()
+    push_entry.push_to_registry()
 
 
 # ran shell
@@ -172,32 +176,10 @@ def shell():
     subprocess.run("pixi shell --change-ps1=false", shell=True, check=True)
 
 
-################ IGNORE THE BELOW FOR NOW; DO NOT RELEASE IN PROD ################
+################ SUBCOMMANDS ################
+app.add_typer(dev.app, name="dev")
 
 
-@app.command()
-def test():
-    """Just stuff to test with as typer is being learned"""
-    typer.echo("I just echoed!")
-
-    something: str = typer.prompt("Say something")
-    print(f"You just said: {something}")
-
-
-@app.command()
-@manifest_project_root
-def reset():
-    """ONLY FOR DEBUGGING PURPOSES. DO NOT RELEASE IN PROD"""
-    from ranlib.state.pathutils import get_dotran_dir_path, get_ran_toml_path
-    import shutil
-
-    shutil.rmtree(get_dotran_dir_path())
-    print("Removed ran/")
-
-    os.remove(get_ran_toml_path())
-    print("Removed ran.toml")
-
-
-# Start Typer CLI
+################ START TYPER CLI ################
 if __name__ == "__main__":
     app()
