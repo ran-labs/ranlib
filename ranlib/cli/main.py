@@ -1,24 +1,24 @@
 import os
 
-# import sys
-
 from typing import List, Dict, Union, Set
 from typing_extensions import Annotated
 
 import typer
 import subprocess
 
+# State
 from ranlib.state.ranstate import PaperImplID, RanTOML, RanLock, read_ran_toml
+
+# Actions
 from ranlib.actions import initialization as init
 from ranlib.actions import modify_papers, integrations
 from ranlib.actions.integrations import Integration
-from ranlib.cli.helpers import manifest_project_root, check_pixi_installation
-
 from ranlib.actions.publish.push_entry import push_to_registry
 
-from ranlib.constants import DEFAULT_ISOLATION_VALUE
+# Helpers
+from ranlib.cli.helpers import manifest_project_root, check_pixi_installation
 
-# import rich
+from ranlib.constants import DEFAULT_ISOLATION_VALUE
 
 
 app = typer.Typer(rich_markup_mode="rich")
@@ -196,6 +196,12 @@ def reset():
 
     os.remove(get_ran_toml_path())
     print("Removed ran.toml")
+
+
+@app.command()
+def somethinggg():
+    """Testing some stuff"""
+    print("hiii")
 
 
 # Start Typer CLI
