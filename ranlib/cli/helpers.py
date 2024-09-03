@@ -42,21 +42,6 @@ def manifest_project_root():
     set_root_path(root_path)
 
 
-# DEPRECATED: use pre instead
-# def manifest_project_root(func):
-#     @functools.wraps(func)
-#     def wrapper(*args, **kwargs):
-#         """Manifest the User Project Root before every single command."""
-#         manifest_user_project_root()
-#         
-#         # Execute the actual function
-#         result = func(*args, **kwargs)
-#
-#         return result
-#
-#     return wrapper
-
-
 def check_pixi_installation():
     """Check if pixi is installed and install it if not."""
     try:

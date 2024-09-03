@@ -86,7 +86,7 @@ def install(from_rantoml: bool = False):
 
 # ran update
 @app.command()
-@pre([manifest_project_root])
+@pre([manifest_project_root, check_pixi_installation])
 def update():
     """
     Installs from the ran.toml file. In case the user wants to use this. This will NOT fresh install everything unless there is no lockfile
@@ -98,7 +98,7 @@ def update():
 
 # ran loadstate
 @app.command()
-@pre([manifest_project_root])
+@pre([manifest_project_root, check_pixi_installation])
 def loadstate(epilog=":rocket: [orange]Skyrocket[/orange] your Research"):
     """Load from the lockfile that is in ran/ran-lock.json"""
     # init_from_lockfile will always be from zero since otherwise nothing would happpen (x - x = 0, but x - 0 = x)
