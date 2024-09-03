@@ -36,9 +36,9 @@ if __name__ == "__main__":
     # Read Project Dependencies
     DEPENDENCIES_NAMES: List[str] = _read_dependencies()
 
-    # Write them to that python file (./ranlib/generated/dependencies.py)
-    with open(f"{_PROJECT_ROOT}/ranlib/generated/dependencies.py", 'w') as dependencies_dot_py_file:
-        dependencies_dot_py_file.write(
+    # Write them to that python file (./ranlib/_generated/lib_dependencies.py)
+    with open(f"{_PROJECT_ROOT}/ranlib/_generated/lib_dependencies.py", 'w') as lib_dependencies_dot_py_file:
+        lib_dependencies_dot_py_file.write(
             textwrap.dedent(f"""
             ## GENERATED CODE ##
             ## DO NOT MODIFY DIRECTLY ##
