@@ -1,4 +1,4 @@
-from typing import List, Dict, Union, Optional
+from typing import Union, Optional
 from pydantic import BaseModel
 
 import json
@@ -22,7 +22,7 @@ def is_user_already_logged_in(verbose: bool = False, debug_mode: bool = False) -
     """
     try:
         with open(RAN_AUTH_TOKEN_FILEPATH_JSON, 'r') as auth_file:
-            data: Dict = json.load(auth_file)
+            data: dict = json.load(auth_file)
 
         auth_creds: AuthToken = AuthToken(**data)
         

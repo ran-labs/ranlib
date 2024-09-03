@@ -27,6 +27,7 @@ devdeps = [
   "pre-commit>=3.8.0,<4",
   "black>=24.8.0,<25",
   "hatch>=1.12.0,<2",
+  "pybashify>=0.0.1,<0.0.2",
 ]
 
 [build-system]
