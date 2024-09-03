@@ -25,5 +25,28 @@ def find_all_python_files(directory: str) -> List[str]:
     return python_files
 
 
+def append_to_gitignore(item: str, gitignore_path: str = ".gitignore"):
+    """
+    Appends a given item to the .gitignore file.
+
+    Parameters:
+    - item (str): The item to add to the .gitignore file.
+    - gitignore_path (str): The path to the .gitignore file. Defaults to '.gitignore'.
+
+    Returns:
+    - None
+    """
+    path = Path(gitignore_path)
+
+    # Ensure the .gitignore file exists
+    if not path.exists():
+        print(f"The file {gitignore_path} does not exist. Creating a new one.")
+        path.touch()
+
+    # Read the current contents of the .gitignore file
+    with path.open("a") as file:
+        file.write(f"\n{item}\n")
+
+
 def remove_all_whitespace(s: str) -> str:
     return re.sub(r"\s+", "", s)

@@ -198,12 +198,6 @@ def reset():
     print("Removed ran.toml")
 
 
-@app.command()
-def somethinggg():
-    """Testing some stuff"""
-    print("hiii")
-
-
 # Start Typer CLI
 if __name__ == "__main__":
     app()

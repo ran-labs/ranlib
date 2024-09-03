@@ -37,6 +37,8 @@ Get started with development environment by running this command:
 pixi shell --change-ps1=false -e dev
 ```
 
+During development, you can actually test the `ran` CLI command via just running `ran`!
+
 ### Building from source
 
 You must be in the development environment as shown in the command above
