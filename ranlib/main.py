@@ -9,10 +9,10 @@ import typer
 import subprocess
 
 from ranlib.state.ranstate import PaperImplID, RanTOML, RanLock, read_ran_toml
-from ranlib.cli import initialization as init
-from ranlib.cli import modify_papers
+from ranlib.actions import initialization as init
+from ranlib.actions import modify_papers, integrations
+from ranlib.actions.integrations import Integration
 from ranlib.cli.helpers import manifest_project_root, check_pixi_installation
-from ranlib.cli.integrations import Integration, setup_integration
 
 from ranlib.publish.push_entry import push_to_registry
 
@@ -50,7 +50,7 @@ def setup(
 
     # Setup the integration
     if integration != "none":
-        setup_integration(integration)
+        integrations.setup_integration(integration)
 
     # Make the isolated value change the default isolation value on the ran.toml
     ran_toml: RanTOML = read_ran_toml()
@@ -68,7 +68,7 @@ def integrate(integration: Integration = "auto"):
 
     # Setup the integration
     if integration != "none":
-        setup_integration(integration)
+        integrations.setup_integration(integration)
 
 
 # ran install
