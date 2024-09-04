@@ -1,4 +1,4 @@
-from typing import List, Dict, Set, Union, Tuple
+from typing import Union
 from pydantic import BaseModel, Field
 
 from ranlib.utils import remove_all_whitespace
@@ -35,8 +35,8 @@ class RANFunction(BaseModel):
 
         params_no_whitespace: str = remove_all_whitespace(self.params_str)
 
-        params: List[str] = params_no_whitespace.split(SEP_IN)
-        parsed_params: List[str] = []
+        params: list[str] = params_no_whitespace.split(SEP_IN)
+        parsed_params: list[str] = []
 
         for param in params:
             colon_idx: int = param.find(":")

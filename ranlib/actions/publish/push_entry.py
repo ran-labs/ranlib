@@ -1,6 +1,6 @@
 """Push an entry to the registry"""
 
-from typing import List, Dict, Set, Optional, Union, Literal
+from typing import Union
 
 import httpx
 import json
@@ -22,7 +22,7 @@ def push_entry_to_registry(entry: RegistryPaperImplEntry):
     # Push to the RAN Registry
     print("Publishing...")
 
-    registry_entry: Dict = entry.dict()
+    registry_entry: dict = entry.dict()
     
     tag: str = entry.paper_impl_version.tag
     if tag == "latest":
@@ -52,7 +52,7 @@ def push_entry_to_registry(entry: RegistryPaperImplEntry):
 
 def push_to_registry():
     # Gather the dependencies
-    dependencies: List[str] = gather_dependencies()
+    dependencies: list[str] = gather_dependencies()
     
     # TODO: maybe deprecate the RANFILE or make it a ranrc at the very most
     # Write the dependencies to the RANFILE

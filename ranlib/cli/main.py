@@ -1,4 +1,4 @@
-from typing import List, Dict, Union, Set
+from typing import Union
 from typing_extensions import Annotated
 
 import typer
@@ -29,7 +29,7 @@ app = typer.Typer(rich_markup_mode="rich")
 @app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
 @pre([manifest_project_root, manifest_pixi_project])
 def setup(
-    papers: List[str] = [],
+    papers: list[str] = [],
     isolated: bool = DEFAULT_ISOLATION_VALUE,
     integration: Integration = "auto",
     override: bool = False,
@@ -108,14 +108,14 @@ def loadstate(epilog=":rocket: [orange]Skyrocket[/orange] your Research"):
 # ran use
 @app.command()
 @pre([manifest_project_root, manifest_pixi_project])
-def use(paper_impl_ids: List[str], isolated: bool = False):
+def use(paper_impl_ids: list[str], isolated: bool = False):
     """Installs a paper library/module (or multiple), updates the lockfile, then updates ran.toml"""
     if not init.appears_to_be_initialized():
         print("RAN does not appear to be initialized. Initializing first...")
         init.smart_init()
 
     # Convert papers to PaperImplID
-    paper_implementation_ids: List[PaperImplID] = [
+    paper_implementation_ids: list[PaperImplID] = [
         PaperImplID.from_str(paper_impl_id) for paper_impl_id in paper_impl_ids
     ]
 
@@ -126,7 +126,7 @@ def use(paper_impl_ids: List[str], isolated: bool = False):
 # ran remove
 @app.command()
 @pre([manifest_project_root, manifest_pixi_project])
-def remove(paper_impl_ids: List[str]):
+def remove(paper_impl_ids: list[str]):
     """Removes a paper installation (or multiple), updates the lockfile, then updates ran.toml"""
     # Remove modules from ran/ran_modules
     # Remove its entry in ran.toml
@@ -134,7 +134,7 @@ def remove(paper_impl_ids: List[str]):
     # Generate/Update lockfile
     
     # Convert papers to PaperImplID
-    paper_implementation_ids: List[PaperImplID] = [
+    paper_implementation_ids: list[PaperImplID] = [
         PaperImplID.from_str(paper_impl_id) for paper_impl_id in paper_impl_ids
     ]
 

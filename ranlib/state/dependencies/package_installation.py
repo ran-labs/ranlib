@@ -1,5 +1,4 @@
-from typing import List, Dict, Set, Union, Tuple
-from pydantic import BaseModel, Field
+from typing import Union
 
 import subprocess
 
@@ -11,7 +10,7 @@ from ranlib.constants import DEPENDENCIES_NAMES
 
 
 def _stringify_packages(
-    packages: List[PythonPackageDependency],
+    packages: list[PythonPackageDependency],
     include_versions: bool = True,
     separator: str = " ",
 ) -> str:
@@ -34,9 +33,7 @@ def _stringify_packages(
     return pkgs_str
 
 
-def _ignore_ranlib_dependencies(
-    packages: List[PythonPackageDependency],
-) -> List[PythonPackageDependency]:
+def _ignore_ranlib_dependencies(packages: list[PythonPackageDependency]) -> list[PythonPackageDependency]:
     return [
         package
         for package in packages
@@ -44,8 +41,8 @@ def _ignore_ranlib_dependencies(
     ]
 
 
-def install(packages: List[PythonPackageDependency]):
-    pkgs: List[PythonPackageDependency] = _ignore_ranlib_dependencies(packages)
+def install(packages: list[PythonPackageDependency]):
+    pkgs: list[PythonPackageDependency] = _ignore_ranlib_dependencies(packages)
     num_packages: int = len(pkgs)
     if num_packages == 0:
         print("No packages to install.")
@@ -55,7 +52,7 @@ def install(packages: List[PythonPackageDependency]):
     print("Installing Packages...")
 
     # Install the non-pypi packages
-    conda_packages: List[PythonPackageDependency] = [
+    conda_packages: list[PythonPackageDependency] = [
         package for package in pkgs if package.package_type == "non-pypi"
     ]
     if len(conda_packages) > 0:
@@ -76,7 +73,7 @@ def install(packages: List[PythonPackageDependency]):
             )
 
     # Install the pypi packages
-    pypi_packages: List[PythonPackageDependency] = [
+    pypi_packages: list[PythonPackageDependency] = [
         package for package in pkgs if package.package_type == "pypi"
     ]
     if len(pypi_packages) > 0:
@@ -99,8 +96,8 @@ def install(packages: List[PythonPackageDependency]):
     print(f"Installed {num_packages} packages.")
 
 
-def remove(packages: List[PythonPackageDependency]):
-    pkgs: List[PythonPackageDependency] = _ignore_ranlib_dependencies(packages)
+def remove(packages: list[PythonPackageDependency]):
+    pkgs: list[PythonPackageDependency] = _ignore_ranlib_dependencies(packages)
     num_packages: int = len(pkgs)
     if num_packages == 0:
         print("No packages to remove")
@@ -110,7 +107,7 @@ def remove(packages: List[PythonPackageDependency]):
     print("Removing packages...")
 
     # Remove the non-pypi packages
-    conda_packages: List[PythonPackageDependency] = [
+    conda_packages: list[PythonPackageDependency] = [
         package for package in pkgs if package.package_type == "non-pypi"
     ]
     if len(conda_packages) > 0:
@@ -121,7 +118,7 @@ def remove(packages: List[PythonPackageDependency]):
         )
 
     # Remove the pypi packages
-    pypi_packages: List[PythonPackageDependency] = [
+    pypi_packages: list[PythonPackageDependency] = [
         package for package in pkgs if package.package_type == "pypi"
     ]
     if len(pypi_packages) > 0:

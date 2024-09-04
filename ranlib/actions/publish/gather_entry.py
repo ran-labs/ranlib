@@ -2,7 +2,7 @@
 Gather an entry be pushed to the registry
 Here's how to use:
     # Gather the dependencies
-    dependencies: List[str] = gather_dependencies()
+    dependencies: list[str] = gather_dependencies()
     
     # Write the dependencies to the RANFILE
     ranfile: RANFILE = RANFILE(python_dependencies=dependencies)
@@ -17,7 +17,7 @@ Here's how to use:
 
 import os
 
-from typing import List, Dict, Union
+from typing import Union
 from pydantic import BaseModel, Field
 
 import tomli
@@ -55,7 +55,7 @@ class RegistryPaperImplEntry(BaseModel):
 
 
 # To be pushed
-def gather_registry_entry(dependencies: List[str]) -> RegistryPaperImplEntry:
+def gather_registry_entry(dependencies: list[str]) -> RegistryPaperImplEntry:
     ran_toml: RanTOML = read_ran_toml()
 
     paper_id: str = ran_toml.RAN.paper_id_name
@@ -81,7 +81,7 @@ def gather_registry_entry(dependencies: List[str]) -> RegistryPaperImplEntry:
 
 
 # str() a List of PythonPackageDependency because it will format correctly
-def gather_dependencies() -> List[str]:
+def gather_dependencies() -> list[str]:
     """
     Auto-figure out the dependencies to be put in the RANFile; prioritize in order of:
         - pixi.toml
@@ -92,7 +92,7 @@ def gather_dependencies() -> List[str]:
         - requirements.txt (pip, uv, etc. even pipenv can utilize this)
     """
     # Figure out the dependencies
-    dependencies: List[PythonPackageDependency] = []
+    dependencies: list[PythonPackageDependency] = []
 
     root_path: str = find_root_path()
 
@@ -115,16 +115,16 @@ def gather_dependencies() -> List[str]:
     dependencies = list(frozenset(dependencies))
 
     # Turn it into strs
-    dependencies_strs: List[str] = [str(dependency) for dependency in dependencies]
+    dependencies_strs: list[str] = [str(dependency) for dependency in dependencies]
 
     return dependencies_strs
 
 
-def _read_pixi_dot_toml(root_path: str) -> List[PythonPackageDependency]:
-    dependencies: List[PythonPackageDependency] = []
+def _read_pixi_dot_toml(root_path: str) -> list[PythonPackageDependency]:
+    dependencies: list[PythonPackageDependency] = []
 
     with open(f"{root_path}/pixi.toml", "rb") as file:
-        pixi_toml: Dict = tomli.load(file)
+        pixi_toml: dict = tomli.load(file)
 
     # Non-pypi Packages
     default_channel: str = pixi_toml["project"]["channels"][0]
@@ -165,20 +165,20 @@ def _read_pixi_dot_toml(root_path: str) -> List[PythonPackageDependency]:
             )
 
 
-def _read_pyproject_dot_toml(root_path: str) -> List[PythonPackageDependency]:
+def _read_pyproject_dot_toml(root_path: str) -> list[PythonPackageDependency]:
     """
     Parse all forms:
         - [COMING SOON] (pixi)
         - (poetry)
         - Not gonna support pdm due to conflicts with pixi
     """
-    dependencies: List[PythonPackageDependency] = []
+    dependencies: list[PythonPackageDependency] = []
 
     # Read pyproject.toml
     with open(f"{root_path}/pixi.toml", "rb") as file:
-        pyproject_toml: Dict = tomli.load(file)
+        pyproject_toml: dict = tomli.load(file)
 
-    tool: Dict = pyproject_toml.get("tool")
+    tool: dict = pyproject_toml.get("tool")
 
     # TODO:
     # Try pixi's pyproject.toml for pypi packages
@@ -190,7 +190,7 @@ def _read_pyproject_dot_toml(root_path: str) -> List[PythonPackageDependency]:
     # Try pixi's pyproject.toml for non-pypi packages
 
     # Try poetry's pyproject.toml
-    poetry: Dict = tool.get("poetry")
+    poetry: dict = tool.get("poetry")
     if poetry is not None and poetry.get("dependencies") is not None:
         for pkg_name, ver in poetry["dependencies"].items():
             version: str = ver.replace("^", ">=")
@@ -206,7 +206,7 @@ def _read_pyproject_dot_toml(root_path: str) -> List[PythonPackageDependency]:
             )
 
 
-def _read_requirements_dot_txt(root_path: str) -> List[PythonPackageDependency]:
+def _read_requirements_dot_txt(root_path: str) -> list[PythonPackageDependency]:
     # Possibly look into pipenv source to see how they did it?
     # TODO:
     return []

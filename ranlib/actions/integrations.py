@@ -1,4 +1,4 @@
-from typing import List, Set, Union
+from typing import Union
 from enum import Enum
 
 from git import Repo
@@ -47,8 +47,8 @@ def setup_integration(integration: Integration):
         integration = auto_detect_integration()
 
     # Setup github or gitlab integration for ran (register to RAN registry)
-    GIT_INTEGRATONS: Set[str] = {"git", "huggingface"}
-    GITHUB_INTEGRATIONS: Set[str] = {"github", "dagshub"}
+    GIT_INTEGRATONS: set[str] = {"git", "huggingface"}
+    GITHUB_INTEGRATIONS: set[str] = {"github", "dagshub"}
 
     if (
         integration in GIT_INTEGRATONS

@@ -1,10 +1,10 @@
 import os
-from typing import List, Dict, Set, Optional
+from typing import Optional
 
 from ranlib.constants import DOTRAN_FOLDER_NAME
 
 
-def find_all_python_files(directory: str) -> List[str]:
+def find_all_python_files(directory: str) -> list[str]:
     """
     Recursively finds all Python files in the given directory and its subdirectories.
 
@@ -20,7 +20,7 @@ def find_all_python_files(directory: str) -> List[str]:
 
 
 def replace_imports(directory: str) -> None:
-    allFiles: List[str] = find_all_python_files(directory)
+    allFiles: list[str] = find_all_python_files(directory)
     repository_files = set()
     for fileName in allFiles:
         file_to_add = fileName.split("/")[-1]
@@ -52,7 +52,7 @@ def replace_imports(directory: str) -> None:
                     # TODO: Why do we want to do this?
                     # TODO: What is the purpose of this code?
                     file_path_test: str = directory + "/" + words[1] + ".py"
-                    file_path_test_list: List[str] = file_path_test.split("/")
+                    file_path_test_list: list[str] = file_path_test.split("/")
                     ran_path_index: int = file_path_test_list.index(DOTRAN_FOLDER_NAME)
                     ran_path = "/".join(file_path_test_list[ran_path_index:])
                     new_file: str = "/".join(words[1].split(".")) + ".py"

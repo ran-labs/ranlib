@@ -1,4 +1,4 @@
-from typing import List, Dict, Set, Union, Tuple
+from typing import Union
 from pydantic import BaseModel, Field
 
 from ranlib.state.ranstate import RanPaperInstallation, PythonPackageDependency
@@ -6,18 +6,16 @@ from ranlib.state.ranstate import RanPaperInstallation, PythonPackageDependency
 from packaging.version import parse
 
 
-def preresolve_dependencies(
-    dependencies: List[RanPaperInstallation],
-) -> List[PythonPackageDependency]:
-    all_dependencies: List[PythonPackageDependency] = []
+def preresolve_dependencies(dependencies: list[RanPaperInstallation]) -> list[PythonPackageDependency]:
+    all_dependencies: list[PythonPackageDependency] = []
     for dependency in dependencies:
         all_dependencies += dependency.package_dependencies
 
     # Pre-resolution
 
     # Remove duplicates
-    pypackage_deps: List[PythonPackageDependency] = list(set(all_dependencies))
-    preresolved_dependencies: List[PythonPackageDependency] = []
+    pypackage_deps: list[PythonPackageDependency] = list(set(all_dependencies))
+    preresolved_dependencies: list[PythonPackageDependency] = []
 
     def package_name_added(name: str) -> int:
         for i, package in enumerate(preresolved_dependencies):
@@ -60,19 +58,19 @@ def preresolve_dependencies(
 
 
 def resolve_to_deltas(
-    pkg_deps_new: List[PythonPackageDependency],
-    pkg_deps_old: List[PythonPackageDependency],
-) -> Tuple[List[PythonPackageDependency], List[PythonPackageDependency]]:
+    pkg_deps_new: list[PythonPackageDependency],
+    pkg_deps_old: list[PythonPackageDependency],
+) -> tuple[list[PythonPackageDependency], list[PythonPackageDependency]]:
     """
     Returns a tuple of (to_add, to_remove)
     """
-    pkg_deps_new_set: Set[PythonPackageDependency] = frozenset(pkg_deps_new)
-    pkg_deps_old_set: Set[PythonPackageDependency] = frozenset(pkg_deps_old)
+    pkg_deps_new_set: frozenset[PythonPackageDependency] = frozenset(pkg_deps_new)
+    pkg_deps_old_set: frozenset[PythonPackageDependency] = frozenset(pkg_deps_old)
 
-    to_add_packages: List[PythonPackageDependency] = list(
+    to_add_packages: list[PythonPackageDependency] = list(
         pkg_deps_new_set - pkg_deps_old_set
     )
-    to_remove_packages: List[PythonPackageDependency] = list(
+    to_remove_packages: list[PythonPackageDependency] = list(
         pkg_deps_old_set - pkg_deps_new_set
     )
 

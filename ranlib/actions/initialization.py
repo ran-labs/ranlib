@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import Union
 
 from ranlib.state import ranstate, dotran
 from ranlib.state.pathutils import ran_toml_exists, lockfile_exists

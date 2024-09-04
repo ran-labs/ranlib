@@ -1,6 +1,4 @@
 import os
-from typing import List
-
 from ranlib.constants import PROJECT_ROOT, DOTRAN_FOLDER_NAME
 
 
@@ -35,7 +33,7 @@ def find_root_path() -> str:
     # Get the list of lines
     try:
         with open(dot_ranprojects_filepath, "r") as file:
-            root_paths: List[str] = file.readlines()
+            root_paths: list[str] = file.readlines()
 
         # Also return None if the length of the file is 0
         if len(root_paths) == 0:

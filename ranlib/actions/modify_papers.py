@@ -1,11 +1,11 @@
-from typing import List, Dict, Union, Set
+from typing import Union
 
 from ranlib.state import ranstate
 from ranlib.state.ranstate import RanTOML, RanLock, PaperImplID, PaperInstallation
 
 
 # ran use
-def add_papers(paper_impl_ids: List[PaperImplID], isolated: bool):
+def add_papers(paper_impl_ids: list[PaperImplID], isolated: bool):
     """Installs a paper library/module (or multiple)"""
     # Read ran.toml as RanTOML
     ran_toml: RanTOML = ranstate.read_ran_toml()
@@ -23,7 +23,7 @@ def add_papers(paper_impl_ids: List[PaperImplID], isolated: bool):
 
 
 # ran remove
-def remove_papers(paper_impl_ids: List[PaperImplID]):
+def remove_papers(paper_impl_ids: list[PaperImplID]):
     """Removes a paper installation (or multiple)"""
     # Read ran.toml as RanTOML
     ran_toml: RanTOML = ranstate.read_ran_toml()

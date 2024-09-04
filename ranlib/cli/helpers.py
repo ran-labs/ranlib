@@ -1,5 +1,5 @@
 import os
-from typing import List, Callable
+from typing import Callable
 
 import functools
 import subprocess
@@ -9,7 +9,7 @@ from ranlib._external.install_checks import check_pixi_installation
 
 
 
-def pre(fns: List[Callable]):
+def pre(fns: list[Callable]):
     """
     Stuff that executes before the function. For improved code readability and composability
     However, they cannot have arguments, so if you want to use args, you'll have to settle with lambdas

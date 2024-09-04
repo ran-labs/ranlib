@@ -1,4 +1,3 @@
-from typing import List, Dict
 from pydantic import BaseModel, Field
 
 from ranlib.state.pathutils import get_dotran_dir_path
@@ -11,7 +10,7 @@ RANLIB_VERSION_PREFIX: str = "RANLib Version "
 
 class RANFILE(BaseModel):
     version: str = __version__
-    python_dependencies: List[str] = Field(default=[])
+    python_dependencies: list[str] = Field(default=[])
 
     def write_to_ranfile(self):
         dotran_dir_path: str = get_dotran_dir_path()
@@ -30,7 +29,7 @@ class RANFILE(BaseModel):
         """Parse the string into a RANFILE"""
         ranfile: RANFILE = RANFILE()
 
-        lines: List[str] = ranfile_str.splitlines()
+        lines: list[str] = ranfile_str.splitlines()
 
         if include_version:
             version_str: str = lines[0]

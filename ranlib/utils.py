@@ -1,7 +1,6 @@
 import os
 import re
 from pathlib import Path
-from typing import List
 
 
 def delete_all_files_glob(directory: str, pattern: str):
@@ -10,14 +9,14 @@ def delete_all_files_glob(directory: str, pattern: str):
         file.unlink()
 
 
-def find_all_python_files(directory: str) -> List[str]:
+def find_all_python_files(directory: str) -> list[str]:
     """
     Recursively finds all Python files in the given directory and its subdirectories.
 
     :param directory: Path to the directory to start searching from.
     :return: List of paths to all Python files found.
     """
-    python_files: List[str] = []
+    python_files: list[str] = []
     for root, dirs, files in os.walk(directory):
         for file in files:
             if file.endswith(".py"):

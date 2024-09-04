@@ -1,7 +1,4 @@
-#import os
-#import shutil
-
-from typing import List, Dict, Set, Union, Literal
+from typing import Union, Literal
 from pydantic import BaseModel, Field
 
 from ranlib.state.ranstate import PaperInstallation, PaperImplID
@@ -43,16 +40,16 @@ class PaperImplementationVersion(BaseModel):
     tag: str
     repo_url: str
     description: str
-    dependencies: List[str]
+    dependencies: list[str]
 
-    def as_python_package_dependencies(self, forced_isolation_value: bool | None = None) -> List[PythonPackageDependency]:
+    def as_python_package_dependencies(self, forced_isolation_value: bool | None = None) -> list[PythonPackageDependency]:
         """
         Parse the dependencies: List[str] -> List[PythonPackageDependency]
 
         isolation will only be enforced if force_isolation is True
         """
 
-        pypackage_deps: List[PythonPackageDependency] = []
+        pypackage_deps: list[PythonPackageDependency] = []
 
         # NOTE: Each dependency MUST start with either 'isolate:' or 'noisolate:'
         # Go thru a denormalization process
@@ -132,7 +129,7 @@ def fetch_paper_implementation_version(paper_impl_id: PaperImplID) -> PaperImple
         raise Exception("Paper Implementation Not Found")
     
     # Success
-    json_response: Dict = response.json()
+    json_response: dict = response.json()
     version: PaperImplementationVersion = PaperImplementationVersion(**json_response)
 
     return version
@@ -144,7 +141,7 @@ def fetch_repo_url(paper_impl_id: PaperImplID) -> str:
     return version.repo_url
 
 
-def fetch_dependencies(paper_installations: List[PaperInstallation]) -> List[RanPaperInstallation]:
+def fetch_dependencies(paper_installations: list[PaperInstallation]) -> list[RanPaperInstallation]:
     """
     Fetch from remote to get the required python package names and versions, then return the as List[RanPaperInstallation]
 
@@ -153,7 +150,7 @@ def fetch_dependencies(paper_installations: List[PaperInstallation]) -> List[Ran
     # Read locally and process tags like 'latest' into their actual values (their actual verbose values for maximum reproducibility)
     
     # Fetch dependencies
-    ran_paper_installations: List[RanPaperInstallation] = []
+    ran_paper_installations: list[RanPaperInstallation] = []
     for paper_installation in paper_installations:
         paper_impl_id: PaperImplID = paper_installation.paper_impl_id
         isolate_packages: bool = paper_installation.isolate
@@ -165,7 +162,7 @@ def fetch_dependencies(paper_installations: List[PaperInstallation]) -> List[Ran
         paper_impl_id.tag = version.tag
 
         # Fetch dependencies
-        package_dependencies: List[PythonPackageDependency] = (
+        package_dependencies: list[PythonPackageDependency] = (
             version.as_python_package_dependencies(forced_isolation_value=isolate_packages)
         )
 

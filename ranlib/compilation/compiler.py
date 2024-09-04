@@ -2,8 +2,8 @@ import os
 import sys
 import shutil
 
-from typing import List, Dict, Set, Union, Tuple
-from pydantic import BaseModel, Field
+#from typing import Union
+#from pydantic import BaseModel, Field
 
 from pydantic import (
     parse_obj_as,  # for Pydantic V1
@@ -32,10 +32,10 @@ from ranlib.constants import (
 
 # The keys are the actual paper_id such as "attention_is_all_you_need"
 # This is from .ran/ran-modules/_lib/.comptools/exposed_functions.json
-exposed_functions_cache: Dict[str, List[RANFunction]] = {}
+exposed_functions_cache: dict[str, list[RANFunction]] = {}
 
 
-def read_exposed_functions_from_cache() -> Dict[str, List[RANFunction]]:
+def read_exposed_functions_from_cache() -> dict[str, list[RANFunction]]:
     if exposed_functions_cache:
         # if not empty, return it
         return exposed_functions_cache
@@ -48,9 +48,9 @@ def read_exposed_functions_from_cache() -> Dict[str, List[RANFunction]]:
 
 
 def convert_buffer_to_serializable(
-    buffer: Dict[str, List[RANFunction]]
-) -> Dict[str, List[Dict]]:
-    buffer_serializable: Dict[str, List[Dict]] = {}
+    buffer: dict[str, list[RANFunction]]
+) -> dict[str, list[dict]]:
+    buffer_serializable: dict[str, list[dict]] = {}
 
     for key, val_list in buffer.items():
         buffer_serializable[key] = [val.dict() for val in val_list]
@@ -59,16 +59,16 @@ def convert_buffer_to_serializable(
 
 
 def combine_buffers(
-    buffer1: Dict[str, List], buffer2: Dict[str, List]
-) -> Dict[str, List]:
+    buffer1: dict[str, list], buffer2: dict[str, list]
+) -> dict[str, list]:
     # Copy buffer1
-    combined_buffer: Dict[str, List[RANFunction]] = {k: v for (k, v) in buffer1.items()}
+    combined_buffer: dict[str, list[RANFunction]] = {k: v for (k, v) in buffer1.items()}
 
     for key, value in buffer2.items():
         # key: str
         # value: List[RANFunction]
 
-        combined_list: List[RANFunction] = combined_buffer.get(key)
+        combined_list: list[RANFunction] = combined_buffer.get(key)
         if combined_list is None:
             # Set the key if it doesn't exist
             combined_buffer[key] = value
@@ -82,7 +82,7 @@ def combine_buffers(
     return combined_buffer
 
 
-def read_saved_exposed_functions(json_filepath: str) -> Dict[str, List[RANFunction]]:
+def read_saved_exposed_functions(json_filepath: str) -> dict[str, list[RANFunction]]:
     if not os.path.exists(json_filepath):
         # Make a new one
         new_exposed_functions = dict()
@@ -95,28 +95,28 @@ def read_saved_exposed_functions(json_filepath: str) -> Dict[str, List[RANFuncti
         # Dict[str, List[Dict]]
         data = json.load(file)
 
-    ta = TypeAdapter(Dict[str, List[RANFunction]])
-    saved_exposed_functions: Dict[str, List[RANFunction]] = ta.validate_python(data)
+    ta = TypeAdapter(dict[str, list[RANFunction]])
+    saved_exposed_functions: dict[str, list[RANFunction]] = ta.validate_python(data)
 
     return saved_exposed_functions
 
 
-def write_exposed_functions(exposed_buffer: Dict[str, List[RANFunction]]):
+def write_exposed_functions(exposed_buffer: dict[str, list[RANFunction]]):
     filepath: str = (
         f"{get_dotran_dir_path()}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
     )
 
-    existing_buffer: Dict[str, List[RANFunction]] = read_saved_exposed_functions(
+    existing_buffer: dict[str, list[RANFunction]] = read_saved_exposed_functions(
         filepath
     )
 
     # Combine the buffers
-    combined_buffer: Dict[str, List[RANFunction]] = combine_buffers(
+    combined_buffer: dict[str, list[RANFunction]] = combine_buffers(
         existing_buffer, exposed_buffer
     )
 
     # Write it to the json file
-    exposed_functions_dot_json: Dict[str, List[Dict]] = convert_buffer_to_serializable(
+    exposed_functions_dot_json: dict[str, list[dict]] = convert_buffer_to_serializable(
         combined_buffer
     )
     with open(filepath, "w") as file:
@@ -162,7 +162,7 @@ def delete_redundant_stuff(repo_dir: str):
     # TODO: anything in the .ranignore
 
 
-def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
+def precompile(to_add_paper_ids: list[str], to_remove_paper_ids: list[str]):
     """Setup the paper_ids to add + Cleanup the ones to remove"""
 
     dotran_dir_path: str = get_dotran_dir_path()
@@ -195,7 +195,7 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
 
     existing_filepath: str = f"{_lib_dir_path}/.comptools/exposed_functions.json"
 
-    existing_buffer: Dict[str, List[RANFunction]] = read_saved_exposed_functions(
+    existing_buffer: dict[str, list[RANFunction]] = read_saved_exposed_functions(
         existing_filepath
     )
 
@@ -221,7 +221,7 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
     # Write the updated buffer
     if existing_buffer_is_not_empty:
         print("Writing buffer...")
-        existing_buffer_serializable: Dict[str, List[Dict]] = (
+        existing_buffer_serializable: dict[str, list[dict]] = (
             convert_buffer_to_serializable(existing_buffer)
         )
         with open(existing_filepath, "w") as file:
@@ -234,7 +234,7 @@ def precompile(to_add_paper_ids: List[str], to_remove_paper_ids: List[str]):
 
 def compile(
     paper_id: str, compilation_parent_dir: str, compilation_target_subdir: str
-) -> List[str]:
+) -> list[str]:
     """
     Returns compilation steps
 
@@ -275,13 +275,13 @@ def compile(
     # Includes the import statements (don't need to do dynamic imports rn) as well as the linked functions
     # At this point, exposed_function_buffer[paper_id] is filled up
 
-    exposed_functions_dict: Dict[str, List[RANFunction]] = (
+    exposed_functions_dict: dict[str, list[RANFunction]] = (
         read_exposed_functions_from_cache()
     )
-    exposed_functions: List[RANFunction] = exposed_functions_dict[paper_id]
+    exposed_functions: list[RANFunction] = exposed_functions_dict[paper_id]
 
-    import_statements_list: List[str] = []
-    function_code_list: List[str] = []
+    import_statements_list: list[str] = []
+    function_code_list: list[str] = []
 
     def check_name_conflicts(exposed_function: RANFunction) -> bool:
         for exposed_function_2 in exposed_functions:
