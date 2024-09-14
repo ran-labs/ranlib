@@ -1,4 +1,6 @@
-from typing import Union, Literal
+"""This file is about the ran.toml file (manifest) and lockfile"""
+
+from typing import Union, Literal, Self
 from pydantic import BaseModel, Field
 
 import tomli
@@ -27,15 +29,13 @@ from ranlib.state.pathutils import (
 from ranlib.compilation import compiler
 
 
-"""This file is about the ran.toml file (manifest) and lockfile"""
-
-
 class PaperImplID(BaseModel):
     author: str
     paper_id: str
     tag: str
-
-    def from_str(paper_impl_id: str):
+    
+    @classmethod
+    def from_str(cls, paper_impl_id: str) -> Self:
         """Create a PaperImplID object from its string version."""
 
         slash_idx: int = paper_impl_id.find("/")   # for author
@@ -54,7 +54,7 @@ class PaperImplID(BaseModel):
 
         paper_id: str = paper_impl_id[id_start:id_end]
 
-        return PaperImplID(author=author, paper_id=paper_id, tag=tag)
+        return cls(author=author, paper_id=paper_id, tag=tag)
 
     def __str__(self) -> str:
         return f"{self.author}/{self.paper_id}:{self.tag}"
@@ -257,8 +257,9 @@ def write_to_ran_toml(ran_toml: RanTOML):
 class PackageVersion(BaseModel):
     lower_bound: str
     upper_bound: str
-
-    def from_str(version_str: str):
+    
+    @classmethod
+    def from_str(cls, version_str: str) -> Self:
         """Create a PackageVersion object from its string version."""
         if version_str.startswith("="):
             if version_str.startswith("=="):
@@ -273,7 +274,7 @@ class PackageVersion(BaseModel):
         else:
             raise ValueError("Invalid version string")
 
-        return PackageVersion(lower_bound=lower_bound, upper_bound=upper_bound)
+        return cls(lower_bound=lower_bound, upper_bound=upper_bound)
 
     def __hash__(self) -> int:
         return hash((self.lower_bound, self.upper_bound))

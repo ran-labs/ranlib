@@ -39,5 +39,6 @@ def check_pipx_installation():
 # ranx
 # TODO:
 def check_ranx_installation():
+    """Check if RANx is installed (pipx is the preferred method of doing so)"""
     pass
 

@@ -165,6 +165,7 @@ def _read_pixi_dot_toml(root_path: str) -> list[PythonPackageDependency]:
             )
 
 
+# TODO: pyproject.toml (for pixi and poetry)
 def _read_pyproject_dot_toml(root_path: str) -> list[PythonPackageDependency]:
     """
     Parse all forms:
@@ -206,7 +207,7 @@ def _read_pyproject_dot_toml(root_path: str) -> list[PythonPackageDependency]:
             )
 
 
+# TODO: requirements.txt
 def _read_requirements_dot_txt(root_path: str) -> list[PythonPackageDependency]:
     # Possibly look into pipenv source to see how they did it?
-    # TODO:
     return []
