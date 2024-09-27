@@ -41,8 +41,8 @@ platforms = ["linux-64", "osx-arm64", "win-64"]
 [tool.pixi.pypi-dependencies]
 ranlib = { path = ".", editable = true }
 
-[tool.pixi.tasks]
-ran = "python3 ranlib/cli/main.py"
+# [tool.pixi.tasks]
+# ran = "python3 ranlib/cli/main.py"
 
 [tool.pixi.feature.devdeps.tasks]
 build = "python3 ./prebuild.py && hatch build ./dist"
