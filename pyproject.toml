@@ -21,13 +21,12 @@ dependencies = [
 ran = "ranlib.cli.main:app"
 
 [project.optional-dependencies]
-devdeps = [
+fdev = [
   "jupytext>=1.16.4,<2",
   "pytest>=8.3.2,<9",
-  "pre-commit>=3.8.0,<4",
-  "black>=24.8.0,<25",
   "hatch>=1.12.0,<2",
   "pybashify>=0.0.1,<0.0.2",
+  "ruff>=0.6.8,<0.7",
 ]
 
 [build-system]
@@ -44,9 +43,9 @@ ranlib = { path = ".", editable = true }
 # [tool.pixi.tasks]
 # ran = "python3 ranlib/cli/main.py"
 
-[tool.pixi.feature.devdeps.tasks]
+[tool.pixi.feature.fdev.tasks]
 build = "python3 ./prebuild.py && hatch build ./dist"
 
 [tool.pixi.environments]
-dev = { features = ["devdeps"] }
+dev = { features = ["fdev"] }
 prod = { features = [] }

@@ -2,8 +2,8 @@ from typing import Union, Optional
 from pydantic import BaseModel
 
 import json
-import subprocess
-import httpx
+# import subprocess
+# import httpx
 
 from rich import print
 
@@ -44,7 +44,7 @@ def execute_login_flow():
     
     # TODO:
     # 1.) Use ranx CLI to start the ranx server on a specified host/port
-    # 2.) After, send these credentials in a post request to the auth server. It will then open up a callback port and send the link (including the callback port) back
+    # 2.) After, send these credentials in a post request to the auth server. It will then open up a callback port and send the link (including the callback port) back. It will also update the dedicated cache with the info
     # 3.) With this link, print it to the terminal so the user can click and log in
     # 4.) In the meantime (while waiting for the user to log in), make a GET request to the ranx server that will just listen. This will stall the program just enough
     # 5.) Once the user is logged in, the auth server will make a request back to the ranx server, telling it that it's done. That will store the token and unblock the state so this function can finish

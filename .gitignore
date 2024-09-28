@@ -3,6 +3,8 @@ ran-registry
 ranlib/ran
 ranlib/ran.toml
 
+# Ignore pipelight
+.pipelight/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
