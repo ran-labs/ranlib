@@ -10,9 +10,7 @@ def check_pixi_installation():
         print("Pixi is not installed. Installing pixi...")
 
         # Install pixi
-        subprocess.run(
-            "curl -fsSL https://pixi.sh/install.sh | bash", shell=True, check=True
-        )
+        subprocess.run("curl -fsSL https://pixi.sh/install.sh | bash", shell=True, check=True)
 
         # Also installs the autocompletion for the respective shell
         # Maybe remove this if it becomes a problem
@@ -41,4 +39,3 @@ def check_pipx_installation():
 def check_ranx_installation():
     """Check if RANx is installed (pipx is the preferred method of doing so)"""
     pass
-

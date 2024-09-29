@@ -3,11 +3,11 @@ Gather an entry be pushed to the registry
 Here's how to use:
     # Gather the dependencies
     dependencies: list[str] = gather_dependencies()
-    
+
     # Write the dependencies to the RANFILE
     ranfile: RANFILE = RANFILE(python_dependencies=dependencies)
     ranfile.write_to_ranfile()
-    
+
     # Get the registry entry
     registry_entry: RegistryPaperImplEntry = gather_registry_entry(dependencies)
 
@@ -16,28 +16,26 @@ Here's how to use:
 """
 
 import os
-
 from typing import Union
-from pydantic import BaseModel, Field
 
 import tomli
+from pydantic import BaseModel, Field
+
+from ranlib.cli.helpers import init_pixi_project
+from ranlib.state.dependencies import package_installation as pypkgs
 
 # Registry object
 from ranlib.state.dependencies.paper_info_retrieval import PaperImplementationVersion
-
-from ranlib.state.ranstate import (
-    PaperImplID,
-    RanTOML,
-    RanLock,
-    PythonPackageDependency,
-    PackageVersion,
-)
-from ranlib.state.ranstate import read_ran_toml, read_lock
-
 from ranlib.state.pathutils import find_root_path
-from ranlib.state.dependencies import package_installation as pypkgs
-
-from ranlib.cli.helpers import init_pixi_project
+from ranlib.state.ranstate import (
+    PackageVersion,
+    PaperImplID,
+    PythonPackageDependency,
+    RanLock,
+    RanTOML,
+    read_lock,
+    read_ran_toml,
+)
 
 
 class RegistryPaperImplEntry(BaseModel):

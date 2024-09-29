@@ -1,10 +1,10 @@
-from typing import Union, Optional
+import json
+from typing import Optional, Union
+
 from pydantic import BaseModel
 
-import json
 # import subprocess
 # import httpx
-
 from rich import print
 
 from ranlib.constants import RAN_AUTH_TOKEN_FILEPATH_JSON
@@ -25,7 +25,7 @@ def is_user_already_logged_in(verbose: bool = False, debug_mode: bool = False) -
             data: dict = json.load(auth_file)
 
         auth_creds: AuthToken = AuthToken(**data)
-        
+
         MIN_TOKEN_LEN: int = 5
         return len(auth_creds.value) >= MIN_TOKEN_LEN
     except Exception as e:
@@ -41,7 +41,7 @@ def is_user_already_logged_in(verbose: bool = False, debug_mode: bool = False) -
 def execute_login_flow():
     """The full login flow"""
     # This assumes ranx is installed
-    
+
     # TODO:
     # 1.) Use ranx CLI to start the ranx server on a specified host/port
     # 2.) After, send these credentials in a post request to the auth server. It will then open up a callback port and send the link (including the callback port) back. It will also update the dedicated cache with the info

@@ -1,4 +1,5 @@
 from typing import Union
+
 from pydantic import BaseModel, Field
 
 from ranlib.utils import remove_all_whitespace

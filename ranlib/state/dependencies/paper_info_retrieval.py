@@ -1,20 +1,18 @@
-from typing import Union, Literal
-from pydantic import BaseModel, Field
-
-from ranlib.state.ranstate import PaperInstallation, PaperImplID
-from ranlib.state.ranstate import RanPaperInstallation, PythonPackageDependency, PackageVersion
-
-from ranlib.constants import (
-    RAN_API_SERVER_URL,
-    DEFAULT_ISOLATION_VALUE,
-    RAN_DEFAULT_AUTHOR_NAME
-)
-
-from ranlib.utils import remove_all_whitespace
+import json
+from typing import Literal, Union
 
 import httpx
-import json
+from pydantic import BaseModel, Field
 
+from ranlib.constants import DEFAULT_ISOLATION_VALUE, RAN_API_SERVER_URL, RAN_DEFAULT_AUTHOR_NAME
+from ranlib.state.ranstate import (
+    PackageVersion,
+    PaperImplID,
+    PaperInstallation,
+    PythonPackageDependency,
+    RanPaperInstallation,
+)
+from ranlib.utils import remove_all_whitespace
 
 # Example registry.yaml [DEPRECATED]
 """
@@ -42,7 +40,9 @@ class PaperImplementationVersion(BaseModel):
     description: str
     dependencies: list[str]
 
-    def as_python_package_dependencies(self, forced_isolation_value: bool | None = None) -> list[PythonPackageDependency]:
+    def as_python_package_dependencies(
+        self, forced_isolation_value: bool | None = None
+    ) -> list[PythonPackageDependency]:
         """
         Parse the dependencies: List[str] -> List[PythonPackageDependency]
 
@@ -101,7 +101,9 @@ class PaperImplementationVersion(BaseModel):
                 package_type = "pypi"
 
             package_name: str = dependency[:version_start_idx]
-            isolated: bool = forced_isolation_value if forced_isolation_value is not None else default_isolation
+            isolated: bool = (
+                forced_isolation_value if forced_isolation_value is not None else default_isolation
+            )
 
             pypackage_deps.append(
                 PythonPackageDependency(
@@ -121,13 +123,13 @@ def fetch_paper_implementation_version(paper_impl_id: PaperImplID) -> PaperImple
     response = httpx.post(
         url=f"{RAN_API_SERVER_URL}/v1/read_registry",
         headers={"Content-Type": "application/json"},
-        data=json.dumps(paper_impl_id.dict())
+        data=json.dumps(paper_impl_id.dict()),
     )
 
     if not response.is_success:
         # Failure
         raise Exception("Paper Implementation Not Found")
-    
+
     # Success
     json_response: dict = response.json()
     version: PaperImplementationVersion = PaperImplementationVersion(**json_response)
@@ -148,7 +150,7 @@ def fetch_dependencies(paper_installations: list[PaperInstallation]) -> list[Ran
     Actually, for now we could just have a public git repo to be pulled from that would contain all the papers as yaml or json
     """
     # Read locally and process tags like 'latest' into their actual values (their actual verbose values for maximum reproducibility)
-    
+
     # Fetch dependencies
     ran_paper_installations: list[RanPaperInstallation] = []
     for paper_installation in paper_installations:
@@ -168,8 +170,7 @@ def fetch_dependencies(paper_installations: list[PaperInstallation]) -> list[Ran
 
         ran_paper_installations.append(
             RanPaperInstallation(
-                paper_impl_id=paper_impl_id,
-                package_dependencies=package_dependencies
+                paper_impl_id=paper_impl_id, package_dependencies=package_dependencies
             )
         )
 

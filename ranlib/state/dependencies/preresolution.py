@@ -1,12 +1,14 @@
 from typing import Union
-from pydantic import BaseModel, Field
-
-from ranlib.state.ranstate import RanPaperInstallation, PythonPackageDependency
 
 from packaging.version import parse
+from pydantic import BaseModel, Field
+
+from ranlib.state.ranstate import PythonPackageDependency, RanPaperInstallation
 
 
-def preresolve_dependencies(dependencies: list[RanPaperInstallation]) -> list[PythonPackageDependency]:
+def preresolve_dependencies(
+    dependencies: list[RanPaperInstallation],
+) -> list[PythonPackageDependency]:
     all_dependencies: list[PythonPackageDependency] = []
     for dependency in dependencies:
         all_dependencies += dependency.package_dependencies
@@ -67,11 +69,7 @@ def resolve_to_deltas(
     pkg_deps_new_set: frozenset[PythonPackageDependency] = frozenset(pkg_deps_new)
     pkg_deps_old_set: frozenset[PythonPackageDependency] = frozenset(pkg_deps_old)
 
-    to_add_packages: list[PythonPackageDependency] = list(
-        pkg_deps_new_set - pkg_deps_old_set
-    )
-    to_remove_packages: list[PythonPackageDependency] = list(
-        pkg_deps_old_set - pkg_deps_new_set
-    )
+    to_add_packages: list[PythonPackageDependency] = list(pkg_deps_new_set - pkg_deps_old_set)
+    to_remove_packages: list[PythonPackageDependency] = list(pkg_deps_old_set - pkg_deps_new_set)
 
     return (to_add_packages, to_remove_packages)

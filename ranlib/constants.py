@@ -1,6 +1,6 @@
 from pathlib import Path
-from ranlib._generated.lib_dependencies import DEPENDENCIES_NAMES
 
+from ranlib._generated.lib_dependencies import DEPENDENCIES_NAMES
 
 # Paths
 PROJECT_ROOT: str = str(Path(__file__).parent.parent)

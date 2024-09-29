@@ -1,10 +1,8 @@
+import subprocess
 from typing import Union
 
-import subprocess
-
-from ranlib.state.ranstate import PythonPackageDependency, read_ran_toml, RanTOML
 from ranlib.constants import DEPENDENCIES_NAMES
-
+from ranlib.state.ranstate import PythonPackageDependency, RanTOML, read_ran_toml
 
 # TODO: Enforce isolation
 
@@ -33,12 +31,10 @@ def _stringify_packages(
     return pkgs_str
 
 
-def _ignore_ranlib_dependencies(packages: list[PythonPackageDependency]) -> list[PythonPackageDependency]:
-    return [
-        package
-        for package in packages
-        if package.package_name not in DEPENDENCIES_NAMES
-    ]
+def _ignore_ranlib_dependencies(
+    packages: list[PythonPackageDependency],
+) -> list[PythonPackageDependency]:
+    return [package for package in packages if package.package_name not in DEPENDENCIES_NAMES]
 
 
 def install(packages: list[PythonPackageDependency]):
@@ -62,10 +58,8 @@ def install(packages: list[PythonPackageDependency]):
                 shell=True,
                 check=True,
             )
-        except Exception as err:
-            print(
-                "Couldn't use exact conda package versions. Trying approximate ones..."
-            )
+        except:
+            print("Couldn't use exact conda package versions. Trying approximate ones...")
             subprocess.run(
                 f"pixi add {_stringify_packages(conda_packages, include_versions=False)}",
                 shell=True,
@@ -83,10 +77,8 @@ def install(packages: list[PythonPackageDependency]):
                 shell=True,
                 check=True,
             )
-        except Exception as err:
-            print(
-                "Couldn't use exact pypi package versions. Trying approximate ones..."
-            )
+        except:
+            print("Couldn't use exact pypi package versions. Trying approximate ones...")
             subprocess.run(
                 f"pixi add {_stringify_packages(pypi_packages, include_versions=False)} --pypi",
                 shell=True,

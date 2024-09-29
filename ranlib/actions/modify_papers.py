@@ -1,7 +1,7 @@
 from typing import Union
 
 from ranlib.state import ranstate
-from ranlib.state.ranstate import RanTOML, RanLock, PaperImplID, PaperInstallation
+from ranlib.state.ranstate import PaperImplID, PaperInstallation, RanLock, RanTOML
 
 
 # ran use

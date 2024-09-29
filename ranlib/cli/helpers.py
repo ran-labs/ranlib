@@ -1,12 +1,10 @@
+import functools
 import os
+import subprocess
 from typing import Callable
 
-import functools
-import subprocess
-
-from ranlib.state.pathutils import find_root_path, set_root_path, add_root_path
 from ranlib._external.install_checks import check_pixi_installation
-
+from ranlib.state.pathutils import add_root_path, find_root_path, set_root_path
 
 
 def pre(fns: list[Callable]):
@@ -14,6 +12,7 @@ def pre(fns: list[Callable]):
     Stuff that executes before the function. For improved code readability and composability
     However, they cannot have arguments, so if you want to use args, you'll have to settle with lambdas
     """
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -25,7 +24,7 @@ def pre(fns: list[Callable]):
             result = func(*args, **kwargs)
 
             return result
-        
+
         return wrapper
 
     return decorator
@@ -61,9 +60,7 @@ def init_pixi_project():
         print("Pixi is not installed. Installing pixi...")
 
         # Install pixi
-        subprocess.run(
-            "curl -fsSL https://pixi.sh/install.sh | bash", shell=True, check=True
-        )
+        subprocess.run("curl -fsSL https://pixi.sh/install.sh | bash", shell=True, check=True)
 
         _init_pixi_project_raw()
 

@@ -1,9 +1,7 @@
 from pydantic import BaseModel, Field
 
-from ranlib.state.pathutils import get_dotran_dir_path
-
 from ranlib.__init__ import __version__
-
+from ranlib.state.pathutils import get_dotran_dir_path
 
 RANLIB_VERSION_PREFIX: str = "RANLib Version "
 
@@ -18,9 +16,7 @@ class RANFILE(BaseModel):
         ranfile_str: str = f"{RANLIB_VERSION_PREFIX}{self.version}"
 
         if len(self.python_dependencies) > 0:
-            ranfile_str += "\nPython Package Dependencies:\n" + "\n".join(
-                self.python_dependencies
-            )
+            ranfile_str += "\nPython Package Dependencies:\n" + "\n".join(self.python_dependencies)
 
         with open(f"{dotran_dir_path}/RANFILE", "w") as ranfile:
             ranfile.write(ranfile_str)
@@ -53,7 +49,5 @@ def read_ranfile(dotran_dir_path: str = None, include_version: bool = True) -> R
     with open(f"{dotran_dir_path}/RANFILE", "r") as file:
         ranfile_str = file.read()
 
-    ranfile: RANFILE = RANFILE.parse_ranfile(
-        ranfile_str, include_version=include_version
-    )
+    ranfile: RANFILE = RANFILE.parse_ranfile(ranfile_str, include_version=include_version)
     return ranfile

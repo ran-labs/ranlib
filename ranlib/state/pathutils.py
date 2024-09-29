@@ -1,6 +1,6 @@
 import os
-from ranlib.constants import PROJECT_ROOT, DOTRAN_FOLDER_NAME
 
+from ranlib.constants import DOTRAN_FOLDER_NAME, PROJECT_ROOT
 
 # NOTE: NO PATHS CAN END WITH A SLASH (/)
 ROOT_PATH: str = ""
@@ -63,9 +63,7 @@ def add_root_path(path: str):
 
             # Determine if a newline is needed before appending the new line
             if contents and len(contents) > 0:
-                file.write(
-                    "\n"
-                )  # Add a newline if the current content does not end with one
+                file.write("\n")  # Add a newline if the current content does not end with one
             # Write the new line without leading or trailing newlines
             file.write(path)
     except Exception as e:

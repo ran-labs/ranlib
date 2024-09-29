@@ -1,5 +1,5 @@
-from typing import Union
 from enum import Enum
+from typing import Union
 
 from git import Repo
 
@@ -32,6 +32,8 @@ def auto_detect_integration() -> Integration:
 
         # TODO: add publish on git push
 
+        # To avoid the ruff error
+        del repo
         return Integration.GIT
     except Exception:
         # Not in a git repo

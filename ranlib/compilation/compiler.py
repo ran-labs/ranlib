@@ -1,34 +1,28 @@
-import os
-import sys
-import shutil
-
-#from typing import Union
-#from pydantic import BaseModel, Field
-
-from pydantic import (
-    parse_obj_as,  # for Pydantic V1
-    TypeAdapter,  # for Pydantic V2 (which we are using)
-)
-
-import json
-import subprocess
-
 import importlib.util
+import json
+import os
+import shutil
+import subprocess
+import sys
 
 # TODO: use this to write more maintainable code
 import textwrap
 
-from ranlib.utils import find_all_python_files
-from ranlib.state.pathutils import get_dotran_dir_path, find_root_path
+# from typing import Union
+# from pydantic import BaseModel, Field
+from pydantic import (
+    TypeAdapter,  # for Pydantic V2 (which we are using)
+    parse_obj_as,  # for Pydantic V1
+)
 
-from ranlib.compilation.schemas import RANFunction
 from ranlib.compilation.abs2relimports import replace_imports
-
+from ranlib.compilation.schemas import RANFunction
 from ranlib.constants import (
     DOTRAN_FOLDER_NAME,
     PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME,
-)  # , RAN_MODULES_FOLDER_NAME
-
+)
+from ranlib.state.pathutils import find_root_path, get_dotran_dir_path
+from ranlib.utils import find_all_python_files
 
 # The keys are the actual paper_id such as "attention_is_all_you_need"
 # This is from .ran/ran-modules/_lib/.comptools/exposed_functions.json
@@ -40,16 +34,12 @@ def read_exposed_functions_from_cache() -> dict[str, list[RANFunction]]:
         # if not empty, return it
         return exposed_functions_cache
 
-    filepath: str = (
-        f"{get_dotran_dir_path()}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
-    )
+    filepath: str = f"{get_dotran_dir_path()}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
 
     return read_saved_exposed_functions(filepath)
 
 
-def convert_buffer_to_serializable(
-    buffer: dict[str, list[RANFunction]]
-) -> dict[str, list[dict]]:
+def convert_buffer_to_serializable(buffer: dict[str, list[RANFunction]]) -> dict[str, list[dict]]:
     buffer_serializable: dict[str, list[dict]] = {}
 
     for key, val_list in buffer.items():
@@ -58,11 +48,11 @@ def convert_buffer_to_serializable(
     return buffer_serializable
 
 
-def combine_buffers(
-    buffer1: dict[str, list], buffer2: dict[str, list]
-) -> dict[str, list]:
+def combine_buffers(buffer1: dict[str, list], buffer2: dict[str, list]) -> dict[str, list]:
     # Copy buffer1
-    combined_buffer: dict[str, list[RANFunction]] = {k: v for (k, v) in buffer1.items()}
+    combined_buffer: dict[str, list[RANFunction]] = dict(
+        buffer1.items()
+    )  # {k: v for (k, v) in buffer1.items()}
 
     for key, value in buffer2.items():
         # key: str
@@ -75,9 +65,7 @@ def combine_buffers(
         else:
             # Add all list items if the key already exists
             # No duplicates tho
-            combined_buffer[key] = list(
-                frozenset(combined_list).union(frozenset(value))
-            )
+            combined_buffer[key] = list(frozenset(combined_list).union(frozenset(value)))
 
     return combined_buffer
 
@@ -85,7 +73,7 @@ def combine_buffers(
 def read_saved_exposed_functions(json_filepath: str) -> dict[str, list[RANFunction]]:
     if not os.path.exists(json_filepath):
         # Make a new one
-        new_exposed_functions = dict()
+        new_exposed_functions: dict = {}
         with open(json_filepath, "w") as file:
             json.dump(new_exposed_functions, file)
 
@@ -102,13 +90,9 @@ def read_saved_exposed_functions(json_filepath: str) -> dict[str, list[RANFuncti
 
 
 def write_exposed_functions(exposed_buffer: dict[str, list[RANFunction]]):
-    filepath: str = (
-        f"{get_dotran_dir_path()}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
-    )
+    filepath: str = f"{get_dotran_dir_path()}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/.comptools/exposed_functions.json"
 
-    existing_buffer: dict[str, list[RANFunction]] = read_saved_exposed_functions(
-        filepath
-    )
+    existing_buffer: dict[str, list[RANFunction]] = read_saved_exposed_functions(filepath)
 
     # Combine the buffers
     combined_buffer: dict[str, list[RANFunction]] = combine_buffers(
@@ -126,7 +110,9 @@ def write_exposed_functions(exposed_buffer: dict[str, list[RANFunction]]):
 def import_all_pymodules_from_directory(directory: str):
     for file_name in find_all_python_files(directory):
         module_name: str = file_name[
-            file_name.index(f"{DOTRAN_FOLDER_NAME}/") : -3  # ignore the .py
+            file_name.index(
+                f"{DOTRAN_FOLDER_NAME}/"
+            ) : -3  # ignore the .py
         ].replace("/", ".")
 
         # print(module_name)
@@ -195,16 +181,12 @@ def precompile(to_add_paper_ids: list[str], to_remove_paper_ids: list[str]):
 
     existing_filepath: str = f"{_lib_dir_path}/.comptools/exposed_functions.json"
 
-    existing_buffer: dict[str, list[RANFunction]] = read_saved_exposed_functions(
-        existing_filepath
-    )
+    existing_buffer: dict[str, list[RANFunction]] = read_saved_exposed_functions(existing_filepath)
 
     existing_buffer_is_not_empty: bool = bool(existing_buffer)
 
     for paper_id in to_remove_paper_ids:
-        folderpath: str = (
-            f"{dotran_dir_path}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
-        )
+        folderpath: str = f"{dotran_dir_path}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
         modulepath: str = f"{dotran_dir_path}/{paper_id}.py"
 
         # Remove the folder and module
@@ -221,8 +203,8 @@ def precompile(to_add_paper_ids: list[str], to_remove_paper_ids: list[str]):
     # Write the updated buffer
     if existing_buffer_is_not_empty:
         print("Writing buffer...")
-        existing_buffer_serializable: dict[str, list[dict]] = (
-            convert_buffer_to_serializable(existing_buffer)
+        existing_buffer_serializable: dict[str, list[dict]] = convert_buffer_to_serializable(
+            existing_buffer
         )
         with open(existing_filepath, "w") as file:
             json.dump(existing_buffer_serializable, file)
@@ -253,9 +235,7 @@ def compile(
 
     # Also, rename the directory name to _lib/paper_id/*
     # Maybe move this off of subprocess later (security issue)
-    repo_dir: str = (
-        f"{compilation_parent_dir}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
-    )
+    repo_dir: str = f"{compilation_parent_dir}/{PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME}/{paper_id}"
     # print(f'MOVING "{old_repo_dir}" TO "{repo_dir}"')
     subprocess.run(
         f'mv "{old_repo_dir}" "{repo_dir}"',
@@ -275,9 +255,7 @@ def compile(
     # Includes the import statements (don't need to do dynamic imports rn) as well as the linked functions
     # At this point, exposed_function_buffer[paper_id] is filled up
 
-    exposed_functions_dict: dict[str, list[RANFunction]] = (
-        read_exposed_functions_from_cache()
-    )
+    exposed_functions_dict: dict[str, list[RANFunction]] = read_exposed_functions_from_cache()
     exposed_functions: list[RANFunction] = exposed_functions_dict[paper_id]
 
     import_statements_list: list[str] = []
@@ -308,19 +286,17 @@ def compile(
             imported_func_name = exposed_function.function_name
 
         func_name: str = "" + imported_func_name
-        imported_func_name += "_"  # add an _ so the imported function name doesnt conflict with the actual thing
-
-        import_statement = exposed_function.as_import_statement(
-            alias=imported_func_name
+        imported_func_name += (
+            "_"  # add an _ so the imported function name doesnt conflict with the actual thing
         )
+
+        import_statement = exposed_function.as_import_statement(alias=imported_func_name)
 
         # Add to import statements
         import_statements_list.append(import_statement)
 
         # Generate function body (calls the original imported function)
-        generated_function_code: str = (
-            f"def {func_name}({exposed_function.params_str}):\n\t# Put any desired pre-call handling here\n\t\n\tresult = {imported_func_name}({exposed_function.parse_params_names_only()})\n\t\n\t# Put any desired post-call handling here\n\t\n\treturn result"
-        )
+        generated_function_code: str = f"def {func_name}({exposed_function.params_str}):\n\t# Put any desired pre-call handling here\n\t\n\tresult = {imported_func_name}({exposed_function.parse_params_names_only()})\n\t\n\t# Put any desired post-call handling here\n\t\n\treturn result"
 
         # Add to function_code_list
         function_code_list.append(generated_function_code)

@@ -1,52 +1,48 @@
 """This file is about the ran.toml file (manifest) and lockfile"""
 
-from typing import Union, Literal, Self
-from pydantic import BaseModel, Field
+import json
+import uuid
+from typing import Literal, Self, Union
 
 import tomli
 import tomli_w
-import json
-
-import uuid
-
 from git import Repo
+from pydantic import BaseModel, Field
 
+from ranlib.compilation import compiler
 from ranlib.constants import (
     DEFAULT_ISOLATION_VALUE,
     RAN_DEFAULT_AUTHOR_NAME,
-)  # , RAN_MODULES_FOLDER_NAME
-
-from ranlib.state.pathutils import (
-    #find_root_path,
-    #readme_exists,
-    ran_toml_exists,
-    lockfile_exists,
-    get_ran_toml_path,
-    get_lockfile_path,
-    get_dotran_dir_path,
 )
 
-from ranlib.compilation import compiler
+# , RAN_MODULES_FOLDER_NAME
+from ranlib.state.pathutils import (
+    get_dotran_dir_path,
+    get_lockfile_path,
+    get_ran_toml_path,
+    lockfile_exists,
+    # find_root_path,
+    # readme_exists,
+    ran_toml_exists,
+)
 
 
 class PaperImplID(BaseModel):
     author: str
     paper_id: str
     tag: str
-    
+
     @classmethod
     def from_str(cls, paper_impl_id: str) -> Self:
         """Create a PaperImplID object from its string version."""
 
-        slash_idx: int = paper_impl_id.find("/")   # for author
+        slash_idx: int = paper_impl_id.find("/")  # for author
         colon_idx: int = paper_impl_id.rfind(":")  # for tag
 
         author_specified: bool = slash_idx != -1
         tag_specified: bool = colon_idx != -1
 
-        author: str = (
-            paper_impl_id[0:slash_idx] if author_specified else RAN_DEFAULT_AUTHOR_NAME
-        )
+        author: str = paper_impl_id[0:slash_idx] if author_specified else RAN_DEFAULT_AUTHOR_NAME
         tag: str = paper_impl_id[colon_idx + 1 :] if tag_specified else "latest"
 
         id_start: int = slash_idx + 1 if author_specified else 0
@@ -84,6 +80,7 @@ class PaperInstallation(BaseModel):
 def generate_default_tag_hash() -> str:
     return str(uuid.uuid4())[:13].replace("-", "")
 
+
 # For pushers [optional]
 # RAN username
 # paper name/id
@@ -118,15 +115,15 @@ class RanTOML(BaseModel):
     dependencies: RanPaperDependencies = Field(default=RanPaperDependencies())
 
     settings: RanSettings = Field(default=RanSettings())
-    
+
     def read_paper_installations(self) -> list[PaperInstallation]:
         """
         Example Before:
         ['attention_is_all_you_need', 'seanmeher/mamba', 'mae', 'rwkv:latest']
-        
+
         Example After:
         [PaperInstallation(), ...]
-        
+
         Isolation Notation: 'isolate:' or 'noisolate:'
         Example - isolate:ameerarsala/rwkv:latest
         """
@@ -159,7 +156,7 @@ class RanTOML(BaseModel):
         """
         Example Before:
         [PaperInstallation(), ...]
-        
+
         Example After:
         ['attention_is_all_you_need', 'seanmeher/mamba', 'mae', 'rwkv:latest']
         """
@@ -180,7 +177,7 @@ class RanTOML(BaseModel):
             serialized_papers.append(paper_impl_id)
 
         return serialized_papers
-    
+
     def set_paper_installations(self, paper_installations: list[PaperInstallation]):
         # Serialize
         serialized_papers: list[str] = self.write_paper_installations(paper_installations)
@@ -257,7 +254,7 @@ def write_to_ran_toml(ran_toml: RanTOML):
 class PackageVersion(BaseModel):
     lower_bound: str
     upper_bound: str
-    
+
     @classmethod
     def from_str(cls, version_str: str) -> Self:
         """Create a PackageVersion object from its string version."""
@@ -425,8 +422,8 @@ class DeltaRanLock(BaseModel):
         """Above says it all. However, as compilation steps are done after receiving the stuff, they will be recorded and changed with this method"""
         # This assumes post-preresolution of what should be added and removed
         # And if something gets recompiled (perhaps due to a different package version?), the compilation steps WILL be replaced (desired behavior)
-        from ranlib.state.dependencies.paper_info_retrieval import fetch_repo_url
         import ranlib.state.dependencies.package_installation as pkgs
+        from ranlib.state.dependencies.paper_info_retrieval import fetch_repo_url
 
         compilation_steps: dict[str, list[str]] = {}
 
@@ -489,10 +486,10 @@ def produce_delta_lock(
 
     paper_installations are not necessarily just the ADDED installations but the state of new installations as a whole which INCLUDES those to add
     """
-    
+
     # I HATE PYTHON
-    from ranlib.state.dependencies.paper_info_retrieval import fetch_dependencies
     from ranlib.state.dependencies import preresolution
+    from ranlib.state.dependencies.paper_info_retrieval import fetch_dependencies
 
     prev_ran_lock: RanLock = None
     if prev_lock is not None:
@@ -500,7 +497,9 @@ def produce_delta_lock(
     else:
         prev_ran_lock: RanLock = read_lock()
 
-    prev_ran_paper_installations: list[RanPaperInstallation] = prev_ran_lock.ran_paper_installations
+    prev_ran_paper_installations: list[RanPaperInstallation] = (
+        prev_ran_lock.ran_paper_installations
+    )
 
     # First thing's first: to the fetching HERE before anything else
     # Here's what it's gotta do:
@@ -508,8 +507,12 @@ def produce_delta_lock(
     # 1.) Fetch the dependencies based on that and wrap in a nice RanPaperInstallation
     ran_paper_installations: list[RanPaperInstallation] = fetch_dependencies(paper_installations)
 
-    ran_paper_installations_set: frozenset[RanPaperInstallation] = frozenset(ran_paper_installations)
-    prev_ran_paper_installations_set: frozenset[RanPaperInstallation] = frozenset(prev_ran_paper_installations)
+    ran_paper_installations_set: frozenset[RanPaperInstallation] = frozenset(
+        ran_paper_installations
+    )
+    prev_ran_paper_installations_set: frozenset[RanPaperInstallation] = frozenset(
+        prev_ran_paper_installations
+    )
 
     # Create deltas for RanPaperInstallation's
     to_add_ran_paper_installations: list[RanPaperInstallation] = list(
@@ -522,8 +525,8 @@ def produce_delta_lock(
     # Pre-resolution
 
     # Domestic preresolution
-    preresolved_pkg_deps: list[PythonPackageDependency] = (
-        preresolution.preresolve_dependencies(ran_paper_installations)
+    preresolved_pkg_deps: list[PythonPackageDependency] = preresolution.preresolve_dependencies(
+        ran_paper_installations
     )
     prev_preresolved_pkg_deps: list[PythonPackageDependency] = (
         prev_ran_lock.preresolved_python_dependencies
@@ -548,18 +551,14 @@ def produce_delta_lock(
     )
 
 
-def produce_delta_lock_from_ran_toml(
-    ran_toml: RanTOML, prev_lock: RanLock = None
-) -> DeltaRanLock:
+def produce_delta_lock_from_ran_toml(ran_toml: RanTOML, prev_lock: RanLock = None) -> DeltaRanLock:
     """Produce a DeltaRanLock from ran.toml (pre-resolve packages as well)"""
     paper_installations: list[PaperInstallation] = ran_toml.read_paper_installations()
 
     return produce_delta_lock(paper_installations, prev_lock=prev_lock)
 
 
-def produce_delta_lock_from_ran_lock(
-    ran_lock: RanLock, prev_lock: RanLock = None
-) -> DeltaRanLock:
+def produce_delta_lock_from_ran_lock(ran_lock: RanLock, prev_lock: RanLock = None) -> DeltaRanLock:
     """Produce a DeltaRanLock from a RanLock (pre-resolve packages as well)"""
     paper_installations: list[PaperInstallation] = ran_lock.get_as_paper_installations()
 
@@ -576,17 +575,13 @@ def apply_delta_lock(delta_lock: DeltaRanLock):
     write_to_lockfile(lock)
 
 
-def apply_ran_toml(
-    ran_toml: RanTOML, from_zero: bool = False, write_to_randottoml: bool = True
-):
+def apply_ran_toml(ran_toml: RanTOML, from_zero: bool = False, write_to_randottoml: bool = True):
     prev_lock: RanLock = None
     if from_zero:
         prev_lock = RanLock.empty()
 
     # 1.) Make a DeltaRanLock
-    delta_ran_lock: DeltaRanLock = produce_delta_lock_from_ran_toml(
-        ran_toml, prev_lock=prev_lock
-    )
+    delta_ran_lock: DeltaRanLock = produce_delta_lock_from_ran_toml(ran_toml, prev_lock=prev_lock)
 
     # 2.) Apply the DeltaRanLock
     apply_delta_lock(delta_ran_lock)
@@ -603,9 +598,7 @@ def apply_lock(lock: RanLock, from_zero: bool = False):
     # no need for an else statement here since produce_delta_lock will automatically get the prior lock if it's not specified as anything but None
 
     # 1.) Make a DeltaRanLock
-    delta_ran_lock: DeltaRanLock = produce_delta_lock_from_ran_lock(
-        lock, prev_lock=prev_lock
-    )
+    delta_ran_lock: DeltaRanLock = produce_delta_lock_from_ran_lock(lock, prev_lock=prev_lock)
 
     # 2.) Apply the DeltaRanLock
     apply_delta_lock(delta_ran_lock)

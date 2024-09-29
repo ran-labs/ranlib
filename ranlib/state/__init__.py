@@ -1,1 +1,1 @@
-from ranlib.state.ranstate import RanTOML, RanLock, PaperImplID, PaperInstallation
+from ranlib.state.ranstate import PaperImplID, PaperInstallation, RanLock, RanTOML

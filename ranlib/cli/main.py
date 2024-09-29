@@ -1,26 +1,24 @@
+import subprocess
 from typing import Union
-from typing_extensions import Annotated
 
 import typer
-import subprocess
-
-# State
-from ranlib.state.ranstate import PaperImplID, RanTOML, RanLock, read_ran_toml
-from ranlib.constants import DEFAULT_ISOLATION_VALUE
+from typing_extensions import Annotated
 
 # Actions
 from ranlib.actions import initialization as init
-from ranlib.actions import modify_papers, integrations
+from ranlib.actions import integrations, modify_papers
+from ranlib.actions.integrations import Integration
 from ranlib.actions.publish import push_entry
 
-from ranlib.actions.integrations import Integration
-
 # Helpers
-from ranlib.cli.helpers import pre, manifest_project_root, manifest_pixi_project
+from ranlib.cli.helpers import manifest_pixi_project, manifest_project_root, pre
 
 # Subcommands
-from ranlib.cli.subcmds import dev, auth
+from ranlib.cli.subcmds import auth, dev
+from ranlib.constants import DEFAULT_ISOLATION_VALUE
 
+# State
+from ranlib.state.ranstate import PaperImplID, RanLock, RanTOML, read_ran_toml
 
 app = typer.Typer(rich_markup_mode="rich")
 
@@ -76,7 +74,7 @@ def integrate(integration: Integration = "auto"):
 def install(from_rantoml: bool = False):
     """Installs the papers from the lockfile, unless the user specifies to be from ran.toml. If lockfile not found, try ran.toml"""
     # This will ALWAYS fresh install
-    
+
     if from_rantoml:
         init.init_from_ran_toml()
         raise typer.Exit()  # used to be 'return'
@@ -132,7 +130,7 @@ def remove(paper_impl_ids: list[str]):
     # Remove its entry in ran.toml
     # For any isolated packages associated with the module(s), remove 'em
     # Generate/Update lockfile
-    
+
     # Convert papers to PaperImplID
     paper_implementation_ids: list[PaperImplID] = [
         PaperImplID.from_str(paper_impl_id) for paper_impl_id in paper_impl_ids

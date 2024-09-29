@@ -1,9 +1,8 @@
 from typing import Union
 
-from ranlib.state import ranstate, dotran
-from ranlib.state.pathutils import ran_toml_exists, lockfile_exists
-from ranlib.state.ranstate import RanTOML, RanLock
-
+from ranlib.state import dotran, ranstate
+from ranlib.state.pathutils import lockfile_exists, ran_toml_exists
+from ranlib.state.ranstate import RanLock, RanTOML
 
 # NOTE:Initialization consists of:
 # Setting up the project (ran.toml and lockfile will exist)
@@ -76,9 +75,7 @@ def init_from_ran_toml(force_fresh_install: bool = True):
     ran_toml: RanTOML = ranstate.read_ran_toml()
 
     # 2.) Apply RanTOML (we don't want to rewrite it since we are applying the same thing)
-    ranstate.apply_ran_toml(
-        ran_toml, from_zero=force_fresh_install, write_to_randottoml=False
-    )
+    ranstate.apply_ran_toml(ran_toml, from_zero=force_fresh_install, write_to_randottoml=False)
 
 
 def full_init_from_scratch():

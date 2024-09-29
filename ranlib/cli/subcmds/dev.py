@@ -3,11 +3,11 @@ This file is for dev commands ONLY for testing in dev
 """
 
 import os
+
 import typer
 
 # Helpers
-from ranlib.cli.helpers import pre, manifest_project_root, manifest_pixi_project
-
+from ranlib.cli.helpers import manifest_pixi_project, manifest_project_root, pre
 
 ################ IGNORE THE BELOW FOR NOW; DO NOT RELEASE IN PROD ################
 app = typer.Typer()
@@ -27,13 +27,12 @@ def test():
 @pre([manifest_project_root])
 def reset():
     """ONLY FOR DEBUGGING PURPOSES. DO NOT RELEASE IN PROD"""
-    from ranlib.state.pathutils import get_dotran_dir_path, get_ran_toml_path
     import shutil
+
+    from ranlib.state.pathutils import get_dotran_dir_path, get_ran_toml_path
 
     shutil.rmtree(get_dotran_dir_path())
     print("Removed ran/")
 
     os.remove(get_ran_toml_path())
     print("Removed ran.toml")
-
-

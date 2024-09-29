@@ -12,7 +12,7 @@ def find_all_python_files(directory: str) -> list[str]:
     :return: List of paths to all Python files found.
     """
     python_files = []
-    for root, dirs, files in os.walk(directory):
+    for root, _dirs, files in os.walk(directory):
         for file in files:
             if file.endswith(".py"):
                 python_files.append(os.path.join(root, file))
@@ -33,10 +33,10 @@ def replace_imports(directory: str) -> None:
         f = open(fileName, "r")
         newf = open(fileName + ".temp", "w")
         lines = f.readlines()
-        for l in lines:
+        for line in lines:
             # TODO: The strip is problematic because spaces are removed from the line
             # Ex: outputs jso.py instead of json.py however, works for repo files as expected
-            words = l.strip().split(" ")
+            words = line.strip().split(" ")
             # if len(words) > 2:
             #     print("test",words[1] in repository_files,words[1])
             if (
@@ -55,7 +55,7 @@ def replace_imports(directory: str) -> None:
                     file_path_test_list: list[str] = file_path_test.split("/")
                     ran_path_index: int = file_path_test_list.index(DOTRAN_FOLDER_NAME)
                     ran_path = "/".join(file_path_test_list[ran_path_index:])
-                    new_file: str = "/".join(words[1].split(".")) + ".py"
+                    # new_file: str = "/".join(words[1].split(".")) + ".py"  # assigned but never used
                     testf = open(ran_path, "r")
                     testf.close()
                     currentPath = words[1].split(".")
@@ -73,18 +73,20 @@ def replace_imports(directory: str) -> None:
                         # for i in range(1):
                         #     newPath += "."
                         # newPath += ".".join(currentPath[index:])
-                        for i in range(index + 1):
-                            newPath += "."
+
+                        newPath += (index + 1) * "."
+                        # for _ in range(index + 1):
+                        #     newPath += "."
                         newPath += ".".join(currentPath[index:])
                     newLine = "from " + newPath + " import " + words[3]
                     print(directory)
                     print(newLine)
                     newf.write(newLine)
-                except Exception as e:
+                except:
                     # print("Exception (File Unable to be read):",e)
                     # print(l.strip())
-                    newf.write(l.strip())
-                    print("File Does Not Exist Writing File:", l.strip())
+                    newf.write(line.strip())
+                    print("File Does Not Exist Writing File:", line.strip())
             elif words[0] == "import" and not words[1].startswith("."):
                 try:
                     newString = "/".join(words[1].split(".")) + ".py"
@@ -106,15 +108,15 @@ def replace_imports(directory: str) -> None:
                         newPath += ".".join(currentPath[index:])
                     newLine = "import " + newPath
                     newf.write(newLine)
-                except Exception as e:
+                except:
                     # print("Exception:",e)
-                    newf.write(l)
+                    newf.write(line)
             else:
-                newf.write(l)
+                newf.write(line)
         newf.close()
         f.close()
         f = open(fileName, "w")
         newf = open(fileName + ".temp", "r")
-        for l in newf.readlines():
-            f.write(l)
+        for newf_line in newf.readlines():
+            f.write(newf_line)
         os.remove(fileName + ".temp")

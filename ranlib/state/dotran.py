@@ -1,10 +1,9 @@
 import os
 
-# import sys
-
-from ranlib.state.pathutils import get_dotran_dir_path
 from ranlib.constants import DOTRAN_FOLDER_NAME
 
+# import sys
+from ranlib.state.pathutils import get_dotran_dir_path
 from ranlib.state.ranfile import RANFILE
 
 
@@ -23,9 +22,7 @@ def generate_dotran_dir():
         # This way, we can do from ran import <paper_id>
         # sys.path.append(dotran_dir_path)
     except OSError as error:
-        print(
-            f"Directory '{DOTRAN_FOLDER_NAME}/' cannot be created successfully. Error: {error}"
-        )
+        print(f"Directory '{DOTRAN_FOLDER_NAME}/' cannot be created successfully. Error: {error}")
 
     # Generate a RANFILE (ran/RANFILE) [lightweight lil file]
     RANFILE().write_to_ranfile()

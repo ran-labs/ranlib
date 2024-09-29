@@ -3,7 +3,6 @@ import inspect
 
 from ranlib.compilation.compiler import write_exposed_functions  # , exposed_function_buffer
 from ranlib.compilation.schemas import RANFunction
-
 from ranlib.constants import PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME
 
 
@@ -12,9 +11,7 @@ def infer_paper_id(source_filepath: str) -> str:
 
     root: str = PAPER_IMPLEMENTATIONS_BODY_FOLDER_NAME + "/"
 
-    paper_id_and_beyond: str = source_filepath[
-        source_filepath.index(root) + len(root) :
-    ]
+    paper_id_and_beyond: str = source_filepath[source_filepath.index(root) + len(root) :]
 
     paper_id: str = paper_id_and_beyond[: paper_id_and_beyond.index("/")]
 

@@ -1,21 +1,18 @@
 """Push an entry to the registry"""
 
+import json
 from typing import Union
 
 import httpx
-import json
-
-from ranlib.state.ranstate import generate_default_tag_hash
-from ranlib.state.ranfile import RANFILE
 
 from ranlib.actions.publish.gather_entry import (
     RegistryPaperImplEntry,
     gather_dependencies,
     gather_registry_entry,
 )
-
-
 from ranlib.constants import RAN_API_SERVER_URL
+from ranlib.state.ranfile import RANFILE
+from ranlib.state.ranstate import generate_default_tag_hash
 
 
 def push_entry_to_registry(entry: RegistryPaperImplEntry):
@@ -23,15 +20,17 @@ def push_entry_to_registry(entry: RegistryPaperImplEntry):
     print("Publishing...")
 
     registry_entry: dict = entry.dict()
-    
+
     tag: str = entry.paper_impl_version.tag
     if tag == "latest":
         # If user puts 'latest' for version, just generate a random tag
         registry_entry["paper_impl_version"]["tag"] = generate_default_tag_hash()
     elif tag == "earliest":
         # Reject if the user puts 'earliest' for version
-        raise Exception("Invalid tag name. You are not allowed to put 'earliest' as your tag name.")
-        
+        raise Exception(
+            "Invalid tag name. You are not allowed to put 'earliest' as your tag name."
+        )
+
     response = httpx.post(
         url=f"{RAN_API_SERVER_URL}/publish_to_registry",
         headers={"Content-Type": "application/json"},
@@ -53,7 +52,7 @@ def push_entry_to_registry(entry: RegistryPaperImplEntry):
 def push_to_registry():
     # Gather the dependencies
     dependencies: list[str] = gather_dependencies()
-    
+
     # TODO: maybe deprecate the RANFILE or make it a ranrc at the very most
     # Write the dependencies to the RANFILE
     ranfile: RANFILE = RANFILE(python_dependencies=dependencies)

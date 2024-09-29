@@ -13,7 +13,7 @@ pipelines = [
     ]
     triggers = [{
       branches = ["main", "dev"]
-      actions  = ["pre-commit"]
+      actions  = ["pre-commit", "manual"]
     }]
   }
 ]
