@@ -29,7 +29,6 @@ def ensure_pixi_installation():
 
 
 # ranx
-# TODO:
 def ensure_ranx_installation():
     """Check if RANx is installed (pipx is the preferred method of doing so)"""
     try:

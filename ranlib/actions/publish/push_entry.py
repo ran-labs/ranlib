@@ -58,7 +58,7 @@ def push_to_registry():
     ranfile: RANFILE = RANFILE(python_dependencies=dependencies)
     ranfile.write_to_ranfile()
 
-    # # Get the registry entry
+    # Get the registry entry
     registry_entry: RegistryPaperImplEntry = gather_registry_entry(dependencies)
 
     # Then push this to the remote registry

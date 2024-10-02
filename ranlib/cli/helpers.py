@@ -5,6 +5,7 @@ from typing import Callable
 
 from ranlib._external.install_checks import ensure_pixi_installation
 from ranlib.state.pathutils import add_root_path, find_root_path, set_root_path
+from ranlib.state.pathutils import pixi_project_exists, environment_yml_exists
 
 
 def pre(fns: list[Callable]):
@@ -46,26 +47,22 @@ def manifest_pixi_project():
     # First, check if pixi is installed or not. If not, then install it
     ensure_pixi_installation()
 
-    # If pixi project not initialized (no pixi.toml), then do this
-    root_path: str = find_root_path()
-    if not os.path.exists(f"{root_path}/pixi.toml"):
+    # If pixi project not initialized, then do this
+    if not pixi_project_exists():
         _init_pixi_project_raw()
 
 
-# This is usually not due to CLI, so I didn't add the autocompletion hooks
-def init_pixi_project():
-    ensure_pixi_installation()
-    _init_pixi_project_raw()
-
-
+# Do not call anywhere but from this file
 def _init_pixi_project_raw():
     # Initialize a pixi project
-    init_cmd: str = "pixi init"
-    root_path: str = find_root_path()
-    if os.path.exists(f"{root_path}/environment.yml"):
+    root_path: str = find_root_path()  # if this is None, then that means that manifest_project_root wasn't called before
+    init_cmd: str = f"pixi init {root_path}"
+    
+    environment_yml: str | bool = environment_yml_exists(return_which=True)
+    if environment_yml:
         print(
             "Conda project detected. Converting to Pixi...(don't worry it's better and easier to use with more functionality)"
         )
-        init_cmd += f" --import {root_path}/environment.yml"
+        init_cmd += f" --import {root_path}/{environment_yml}"
 
     subprocess.run(init_cmd, shell=True, check=True)

@@ -85,7 +85,7 @@ def full_init_from_scratch():
     - ran/
     - ran/ran-lock.json
     """
-    # Generate the .ran/ directory with the .ran/ran_modules/
+    # Generate the ran/ directory with the ran/*ran_modules/
     dotran.generate_dotran_dir()
 
     # Generate the .ran/ran-lock.json

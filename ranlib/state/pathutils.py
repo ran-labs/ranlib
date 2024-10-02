@@ -1,6 +1,7 @@
 import os
-
+from typing import Literal
 from ranlib.constants import DOTRAN_FOLDER_NAME, PROJECT_ROOT
+
 
 # NOTE: NO PATHS CAN END WITH A SLASH (/)
 ROOT_PATH: str = ""
@@ -18,7 +19,7 @@ def LOCKFILE_PATH() -> str:
     return f"{ROOT_PATH}/{DOTRAN_FOLDER_NAME}/ran-lock.json"
 
 
-def find_root_path() -> str:
+def find_root_path() -> str | None:
     """Must be able to perfectly find the root path every single time"""
     current_path: str = os.getcwd()
 
@@ -84,10 +85,6 @@ def lockfile_exists() -> bool:
     return os.path.exists(LOCKFILE_PATH())
 
 
-def readme_exists() -> bool:
-    return os.path.exists(f"{find_root_path()}/README.md")
-
-
 def dotran_dir_exists() -> bool:
     return os.path.exists(DOTRAN_DIR_PATH())
 
@@ -117,3 +114,30 @@ def get_dotran_dir_path() -> str:
         ROOT_PATH = find_root_path()
 
     return DOTRAN_DIR_PATH()
+
+
+# Class B existences (ones that you just want to read if exists, not read the whole thing or write to it)
+# As a result, you must use find_root_path() instead of ROOT_PATH since there won't be a function setting that for us
+
+def readme_exists() -> bool:
+    return os.path.exists(f"{find_root_path()}/README.md")
+
+
+def pixi_project_exists() -> bool:
+    rootpath: str = find_root_path()
+
+    return os.path.exists(f"{rootpath}/.pixi") or os.path.exists(f"{rootpath}/pixi.lock")
+
+
+def environment_yml_exists(return_which: bool = False) -> bool | Literal["environment.yml", "environment.yaml"]:
+    rootpath: str = find_root_path()
+
+    if not return_which:
+        return os.path.exists(f"{rootpath}/environment.yml") or os.path.exists(f"{rootpath}/environment.yaml")
+    else:
+        if os.path.exists(f"{rootpath}/environment.yml"):
+            return "environment.yml"
+        elif os.path.exists(f"{rootpath}/environment.yaml"):
+            return "environment.yaml"
+        else:
+            return False

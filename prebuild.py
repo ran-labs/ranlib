@@ -46,8 +46,10 @@ if __name__ == "__main__":
             DEPENDENCIES_NAMES: list[str] = {str(DEPENDENCIES_NAMES)}
             """).strip()
         )
-
-    subprocess.run("bashify installation/install_template.sh --out installation/_out/install.sh", 
-                   shell=True,
-                   check=True
+    
+    # Rewrite the installation every time it builds
+    subprocess.run(
+        "bashify installation/install_template.sh --out installation/_out/install.sh",
+        shell=True,
+        check=True
     )

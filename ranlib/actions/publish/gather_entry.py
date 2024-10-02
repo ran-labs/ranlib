@@ -21,12 +21,12 @@ from typing import Union
 import tomli
 from pydantic import BaseModel, Field
 
-from ranlib.cli.helpers import init_pixi_project
+from ranlib.cli.helpers import manifest_pixi_project
 from ranlib.state.dependencies import package_installation as pypkgs
 
 # Registry object
 from ranlib.state.dependencies.paper_info_retrieval import PaperImplementationVersion
-from ranlib.state.pathutils import find_root_path
+from ranlib.state.pathutils import find_root_path, environment_yml_exists
 from ranlib.state.ranstate import (
     PackageVersion,
     PaperImplID,
@@ -94,9 +94,10 @@ def gather_dependencies() -> list[str]:
 
     root_path: str = find_root_path()
 
-    if os.path.exists(f"{root_path}/environment.yml"):
-        # Create a pixi project; make it someone else's problem!!!
-        init_pixi_project()
+    if environment_yml_exists():
+        # Manifest a pixi project; make it someone else's problem!!!
+        # If one already exists, it won't initialize one
+        manifest_pixi_project()
 
     # In all cases, add all to `dependencies`
     if os.path.exists(f"{root_path}/pixi.toml"):

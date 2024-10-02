@@ -24,7 +24,7 @@ app = typer.Typer(rich_markup_mode="rich")
 
 
 # ran setup
-@app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
+@app.command(name="init", epilog=":rocket: [orange]Skyrocket[/orange] your Research")
 @pre([manifest_project_root, manifest_pixi_project])
 def setup(
     papers: list[str] = [],
@@ -34,11 +34,11 @@ def setup(
 ):
     """
     Setup the project:
-        - `ran setup --override` says fuck it and does a full initialization, overriding anything else that existed before
-        - Otherwise, run a smart init (reflect each of these options in the logs)
+        - Run a smart init (reflect each of these options in the logs)
           - if lockfile, init from there
           - else if ran.toml, init from there
           - else, do a full initialization
+        - However, `ran init --override` says screw it and does a full initialization, overriding anything else (ran.toml or ran-lock.json) that existed before
     """
     if override:
         init.full_init_from_scratch()
@@ -72,7 +72,7 @@ def integrate(integration: Integration = "auto"):
 @app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
 @pre([manifest_project_root, manifest_pixi_project])
 def install(from_rantoml: bool = False):
-    """Installs the papers from the lockfile, unless the user specifies to be from ran.toml. If lockfile not found, try ran.toml"""
+    """Installs the papers from the ran-lock.json (lockfile), unless the user specifies to be from ran.toml. If lockfile not found, try ran.toml"""
     # This will ALWAYS fresh install
 
     if from_rantoml:
@@ -87,7 +87,7 @@ def install(from_rantoml: bool = False):
 @pre([manifest_project_root, manifest_pixi_project])
 def update():
     """
-    Installs from the ran.toml file. In case the user wants to use this. This will NOT fresh install everything unless there is no lockfile
+    Installs from the ran.toml file. In case the user wants to use this. This will NOT fresh install everything unless there is no ran-lock.json (lockfile)
 
     This will sync the lockfile with the ran.toml file (the manifest)
     """
@@ -125,7 +125,9 @@ def use(paper_impl_ids: list[str], isolated: bool = False):
 @app.command()
 @pre([manifest_project_root, manifest_pixi_project])
 def remove(paper_impl_ids: list[str]):
-    """Removes a paper installation (or multiple), updates the lockfile, then updates ran.toml"""
+    """Removes a paper installation (or multiple), then updates ran.toml"""
+    # Removes a paper installation (or multiple), updates the lockfile, then updates ran.toml
+    
     # Remove modules from ran/ran_modules
     # Remove its entry in ran.toml
     # For any isolated packages associated with the module(s), remove 'em

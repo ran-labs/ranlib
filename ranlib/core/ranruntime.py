@@ -20,6 +20,10 @@ def infer_paper_id(source_filepath: str) -> str:
 
 # @ran.expose
 def expose(func):
+    """
+    There is ZERO overhead when calling a function decorated with @ran.expose
+    """
+    
     # On WRAPPING, add to the exposed_function_buffer
 
     # Get the source filepath to infer the paper_id
