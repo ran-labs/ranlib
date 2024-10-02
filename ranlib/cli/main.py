@@ -142,7 +142,7 @@ def remove(paper_impl_ids: list[str]):
     modify_papers.remove_papers(paper_implementation_ids)
 
 
-# ran push
+# ran publish
 # As of right now, git push should auto-push to ran if need-be
 @app.command()
 @pre([manifest_project_root, manifest_pixi_project])

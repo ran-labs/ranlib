@@ -5,17 +5,15 @@ from ranlib.actions import authentication
 
 # Helpers
 from ranlib.cli.helpers import manifest_project_root, pre
+from ranlib._external.install_checks import ensure_ranx_installation
 
 app = typer.Typer()
 
 
 @app.command()
-@pre([manifest_project_root])
+@pre([manifest_project_root, ensure_ranx_installation])
 def login(verbose: bool = False):
     """Log into RAN. Useful for publishing. Or if you want to access private stuff"""
-
-    # TODO:
-    # 0. Ensure ranx is installed (and pipx by extension). Put this in the pre
 
     # Check if user is already logged in. If so, ask if they want to log in again
     if authentication.is_user_already_logged_in(verbose=verbose, debug_mode=False):
