@@ -1,0 +1,59 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+    # branches:
+    #   - main
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: "Build & Publish package"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Pixi Python Project
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: v0.28.2
+          cache: true
+          environments: dev  # separate by spaces; only using the dev environment to build
+
+      - name: Install twine from conda-forge (globally as to not interfere)
+        run: pixi global install twine
+
+      - name: Build package
+        run: pixi run -e dev build
+
+      # Create GitHub release
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release create "$tag" ./dist/* \
+              --repo="$GITHUB_REPOSITORY" \
+              --generate-notes
+
+      - name: Publish to PyPI
+        run: twine upload dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+
+      - name: Install rattler-build, grayskull, and conda-recipe-manager
+        run: pixi global install "conda-forge::rattler-build==0.22.0" "conda-forge::grayskull==2.7.3" "conda-forge::conda-recipe-manager==0.2.1"
+
+      # Now for uploading the conda packages
+      - name: Build conda package & upload
+        run: scripts/conda-build-and-upload.sh
+        env:
+          PREFIX_DEV_TOKEN: ${{ secrets.PREFIX_DEV_TOKEN }}
+          #ANACONDA_TOKEN: ${{secrets.ANACONDA_TOKEN}}
+

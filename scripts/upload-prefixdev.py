@@ -43,7 +43,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         # print(f"Package: {sys.argv[1]}")
         # print(f"Token: {sys.argv[2]}")
-        
+
         package = Path(sys.argv[1])  # get path
         token: str = sys.argv[2]
         upload(package, token)
