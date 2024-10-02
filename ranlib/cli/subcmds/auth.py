@@ -1,11 +1,12 @@
 import typer
 
+from ranlib._external.install_checks import ensure_ranx_installation
+
 # Actions
 from ranlib.actions import authentication
 
 # Helpers
 from ranlib.cli.helpers import manifest_project_root, pre
-from ranlib._external.install_checks import ensure_ranx_installation
 
 app = typer.Typer()
 
