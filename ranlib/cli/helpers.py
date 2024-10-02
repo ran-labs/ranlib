@@ -3,7 +3,7 @@ import os
 import subprocess
 from typing import Callable
 
-from ranlib._external.install_checks import check_pixi_installation
+from ranlib._external.install_checks import ensure_pixi_installation
 from ranlib.state.pathutils import add_root_path, find_root_path, set_root_path
 
 
@@ -44,7 +44,7 @@ def manifest_project_root():
 
 def manifest_pixi_project():
     # First, check if pixi is installed or not. If not, then install it
-    check_pixi_installation()
+    ensure_pixi_installation()
 
     # If pixi project not initialized (no pixi.toml), then do this
     root_path: str = find_root_path()

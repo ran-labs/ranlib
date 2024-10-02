@@ -2121,7 +2121,7 @@ packages:
   name: ranlib
   version: 0.0.1
   path: .
-  sha256: 9a1df064cacdde61e959cbf8945b63b0cfb50c8af7ee67807b7e8fb2e5afec91
+  sha256: 155d5a7a9bef6444493e39a7dbb7d1b6777aa64a405449b4726793c109c39dda
   requires_dist:
   - typer>=0.12.3,<0.13
   - pydantic>=2.8.2,<2.9
@@ -2134,6 +2134,7 @@ packages:
   - pytest>=8.3.2,<9 ; extra == 'fdev'
   - hatch>=1.12.0,<2 ; extra == 'fdev'
   - pybashify>=0.0.1,<0.0.2 ; extra == 'fdev'
+  - ruff>=0.6.8,<0.7 ; extra == 'fdev'
   requires_python: '>=3.9'
   editable: true
 - kind: conda

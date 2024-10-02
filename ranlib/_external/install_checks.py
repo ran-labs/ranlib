@@ -2,7 +2,7 @@ import subprocess
 
 
 # Pixi
-def check_pixi_installation():
+def ensure_pixi_installation():
     """Check if pixi is installed and install it if not."""
     try:
         subprocess.run("pixi --version", shell=True, check=True)
@@ -28,14 +28,12 @@ def check_pixi_installation():
         # )
 
 
-# pipx
-# TODO:
-def check_pipx_installation():
-    pass
-
-
 # ranx
 # TODO:
-def check_ranx_installation():
+def ensure_ranx_installation():
     """Check if RANx is installed (pipx is the preferred method of doing so)"""
-    pass
+    try:
+        subprocess.run("ranx ping", shell=True, check=True)
+    except subprocess.CalledProcessError:
+        print("RANx is not installed. Installing ranx...")
+        subprocess.run("pixi global install ranlibx")
