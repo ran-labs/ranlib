@@ -54,15 +54,8 @@ def manifest_pixi_project():
 
 # This is usually not due to CLI, so I didn't add the autocompletion hooks
 def init_pixi_project():
-    try:
-        subprocess.run("pixi --version", shell=True, check=True)
-    except subprocess.CalledProcessError:
-        print("Pixi is not installed. Installing pixi...")
-
-        # Install pixi
-        subprocess.run("curl -fsSL https://pixi.sh/install.sh | bash", shell=True, check=True)
-
-        _init_pixi_project_raw()
+    ensure_pixi_installation()
+    _init_pixi_project_raw()
 
 
 def _init_pixi_project_raw():
