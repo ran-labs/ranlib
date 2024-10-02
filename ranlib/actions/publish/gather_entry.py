@@ -26,7 +26,7 @@ from ranlib.state.dependencies import package_installation as pypkgs
 
 # Registry object
 from ranlib.state.dependencies.paper_info_retrieval import PaperImplementationVersion
-from ranlib.state.pathutils import find_root_path, environment_yml_exists
+from ranlib.state.pathutils import environment_yml_exists, find_root_path
 from ranlib.state.ranstate import (
     PackageVersion,
     PaperImplID,

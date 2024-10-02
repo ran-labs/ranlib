@@ -10,7 +10,7 @@ def pixi_project_exists() -> bool:
 
 def environment_yml_exists():
     if os.path.exists("./environment.yml"):
-            return "environment.yml"
+        return "environment.yml"
     elif os.path.exists("./environment.yaml"):
         return "environment.yaml"
     else:
@@ -21,7 +21,7 @@ def semisafe_init_local_pixi_project():
     # Check whether there is one already. if so, return
     if pixi_project_exists():
         return
-    
+
     # Initialize a pixi project
     init_cmd: str = "pixi init ."
     environment_yml: str = environment_yml_exists()

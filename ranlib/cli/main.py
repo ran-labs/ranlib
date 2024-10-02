@@ -127,7 +127,7 @@ def use(paper_impl_ids: list[str], isolated: bool = False):
 def remove(paper_impl_ids: list[str]):
     """Removes a paper installation (or multiple), then updates ran.toml"""
     # Removes a paper installation (or multiple), updates the lockfile, then updates ran.toml
-    
+
     # Remove modules from ran/ran_modules
     # Remove its entry in ran.toml
     # For any isolated packages associated with the module(s), remove 'em

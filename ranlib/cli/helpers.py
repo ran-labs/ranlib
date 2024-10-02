@@ -4,8 +4,13 @@ import subprocess
 from typing import Callable
 
 from ranlib._external.install_checks import ensure_pixi_installation
-from ranlib.state.pathutils import add_root_path, find_root_path, set_root_path
-from ranlib.state.pathutils import pixi_project_exists, environment_yml_exists
+from ranlib.state.pathutils import (
+    add_root_path,
+    environment_yml_exists,
+    find_root_path,
+    pixi_project_exists,
+    set_root_path,
+)
 
 
 def pre(fns: list[Callable]):
@@ -55,9 +60,11 @@ def manifest_pixi_project():
 # Do not call anywhere but from this file
 def _init_pixi_project_raw():
     # Initialize a pixi project
-    root_path: str = find_root_path()  # if this is None, then that means that manifest_project_root wasn't called before
+    root_path: str = (
+        find_root_path()
+    )  # if this is None, then that means that manifest_project_root wasn't called before
     init_cmd: str = f"pixi init {root_path}"
-    
+
     environment_yml: str | bool = environment_yml_exists(return_which=True)
     if environment_yml:
         print(
