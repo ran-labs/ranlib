@@ -40,6 +40,11 @@ pixi shell --change-ps1=false -e dev
 
 During development, you can actually test the `ran` CLI command via just running `ran`!
 
+### Creating Releases
+
+1. After committing your code changes, change the version of `pyproject.toml` accordingly.
+2. RUN `scripts/update-version.sh` (it will make an update version commit and push on your behalf--don't worry)
+
 ### Building from source
 
 You must be in the development environment as shown in the command above
