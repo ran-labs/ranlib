@@ -16,7 +16,7 @@ grayskull pypi "$pypi_build" --output ./temp
 recipe="temp/recipe.yaml"
 
 # Convert meta.yaml to a recipe.yaml
-conda-recipe-manager convert temp/ranlibx/meta.yaml > $recipe
+conda-recipe-manager convert temp/ranlib/meta.yaml > $recipe
 
 # Now, modify the recipe.yaml
 python3 scripts/helpers/recipe-preprocessor.py "$recipe"
