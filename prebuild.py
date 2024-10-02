@@ -3,6 +3,7 @@ from pathlib import Path
 import tomli
 import re
 import textwrap
+import subprocess
 
 
 # Paths
@@ -46,3 +47,7 @@ if __name__ == "__main__":
             """).strip()
         )
 
+    subprocess.run("bashify installation/install_template.sh --out installation/_out/install.sh", 
+                   shell=True,
+                   check=True
+    )

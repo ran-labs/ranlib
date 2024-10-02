@@ -6,6 +6,8 @@ authors = [
   { name = "AmeerArsala", email = "ameer.arsala03@gmail.com" },
   { name = "ShanMehr", email = "ishanmeher25@gmail.com" },
 ]
+readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">= 3.9"
 dependencies = [
   "typer >=0.12.3, <0.13",
@@ -16,6 +18,15 @@ dependencies = [
   "rich >=13.7.1, <13.8",
   "httpx>=0.27.2,<0.28",
 ]
+
+[project.urls]
+Repository = "https://github.com/anemo-ai/ranlib"
+Changelog = "https://github.com/anemo-ai/ranlib/blob/main/CHANGELOG.md"
+Homepage = "https://ran.so"
+Documentation = "https://ran.so/docs"
+Source = "https://github.com/anemo-ai/ranlib"
+Tracker = "https://github.com/anemo-ai/ranlib/issues"
+Twitter = "https://twitter.com/AnemoDotAI"
 
 [project.scripts]
 ran = "ranlib.cli.main:app"
@@ -44,6 +55,7 @@ ranlib = { path = ".", editable = true }
 # ran = "python3 ranlib/cli/main.py"
 
 [tool.pixi.feature.fdev.tasks]
+setup = "pipelight enable git-hooks"
 build = "python3 ./prebuild.py && hatch build ./dist"
 
 [tool.pixi.environments]

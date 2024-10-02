@@ -1,6 +1,6 @@
 # ran
 
-RAN Library
+RAN Library (more info coming soon)
 
 ## Philosophy & Tenants
 
@@ -23,10 +23,11 @@ Just drop-in and start using it
 
 ## Setup
 
-This project uses [pixi](https://pixi.sh)
+Prerequisites: this project uses [pixi](https://pixi.sh) and [pipelight](https://pipelight.dev)
 
 ```bash
 pixi install
+pixi run -e dev setup  # runs `pipelight enable git-hooks` under the hood (MANDATORY)
 ```
 
 ### Development
@@ -47,12 +48,3 @@ You must be in the development environment as shown in the command above
 pixi run build
 ```
 
-In order to install this now, refer to the next section (Local Installation).
-
-### Local Installation
-
-There already exist some pre-built versions with this repo (for now) that can be installed if you have not built them. (We should probably move this to releases). Whether you re-built or not, you can install ran with this command:
-
-```bash
-pip install ./ranlib-0.0.1-py3-none-any.whl
-```
