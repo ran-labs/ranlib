@@ -1,6 +1,6 @@
 [project]
 name = "ranlib"
-version = "0.0.7"
+version = "0.0.8"
 description = "RAN library"
 authors = [
   { name = "AmeerArsala", email = "ameer.arsala03@gmail.com" },
@@ -20,13 +20,13 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/anemo-ai/ranlib"
-Changelog = "https://github.com/anemo-ai/ranlib/blob/main/CHANGELOG.md"
+Repository = "https://github.com/ran-labs/ranlib"
+Changelog = "https://github.com/ran-labs/ranlib/blob/main/CHANGELOG.md"
 Homepage = "https://ran.so"
 Documentation = "https://ran.so/docs"
-Source = "https://github.com/anemo-ai/ranlib"
-Tracker = "https://github.com/anemo-ai/ranlib/issues"
-Twitter = "https://twitter.com/AnemoDotAI"
+Source = "https://github.com/ran-labs/ranlib"
+Tracker = "https://github.com/ran-labs/ranlib/issues"
+Twitter = "https://twitter.com/RANdotSO"
 
 [project.scripts]
 ran = "ranlib.cli.main:app"
