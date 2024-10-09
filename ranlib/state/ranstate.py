@@ -503,7 +503,7 @@ def produce_delta_lock(
 
     # First thing's first: to the fetching HERE before anything else
     # Here's what it's gotta do:
-    # 0.) process tags like 'latest' into their actual values
+    # 0.) Process tags like 'latest' into their actual values
     # 1.) Fetch the dependencies based on that and wrap in a nice RanPaperInstallation
     ran_paper_installations: list[RanPaperInstallation] = fetch_dependencies(paper_installations)
 
