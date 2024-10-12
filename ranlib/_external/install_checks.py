@@ -1,5 +1,19 @@
 import subprocess
+import platform
 
+
+def install_pixi():
+    if platform.system() != "Windows":
+        # MacOS and Linux
+        subprocess.run("curl -fsSL https://pixi.sh/install.sh | bash", shell=True, check=True)
+    else:
+        # Windows
+        try:
+            # Try with PowerShell
+            subprocess.run("iwr -useb https://pixi.sh/install.ps1 | iex", shell=True, check=True)
+        except subprocess.CalledProcessError:
+            # Try with winget
+            subprocess.run("winget install prefix-dev.pixi", shell=True, check=True)
 
 # Pixi
 def ensure_pixi_installation():
@@ -10,7 +24,7 @@ def ensure_pixi_installation():
         print("Pixi is not installed. Installing pixi...")
 
         # Install pixi
-        subprocess.run("curl -fsSL https://pixi.sh/install.sh | bash", shell=True, check=True)
+        install_pixi()
 
         # Also installs the autocompletion for the respective shell
         # Maybe remove this if it becomes a problem
