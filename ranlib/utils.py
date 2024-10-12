@@ -1,5 +1,6 @@
 import os
 import re
+import socket
 from pathlib import Path
 
 
@@ -49,3 +50,32 @@ def append_to_gitignore(item: str, gitignore_path: str = ".gitignore"):
 
 def remove_all_whitespace(s: str) -> str:
     return re.sub(r"\s+", "", s)
+
+
+def find_open_localhost_port() -> int:
+    # Top 50 candidates. Being lazy here
+    def is_port_open(port):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = sock.connect_ex(('localhost', port))
+        sock.close()
+        return result != 0
+    
+    first_candidates: list[int] = [
+        5000,
+        8000,
+        8080,
+        8787,
+        9001,
+        4321,
+    ]
+
+    for candidate in first_candidates:
+        if is_port_open(candidate):
+            return candidate
+    
+    remaining: int = 50 - len(first_candidates)
+    backup_candidates: list[int] = [(5001 + i) for i in range(remaining)]
+
+    for candidate in backup_candidates:
+        if is_port_open(candidate):
+            return candidate

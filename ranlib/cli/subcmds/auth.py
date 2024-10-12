@@ -20,7 +20,7 @@ def login(verbose: bool = False):
     if authentication.is_user_already_logged_in(verbose=verbose, debug_mode=False):
         user_response_raw: str = str(
             typer.prompt(
-                "You already seemed to be logged in. Re-log in (for using a different account perhaps)? (Y/n)"
+                "You already seemed to be logged in. Log in again (for using a different account perhaps)? (Y/n)"
             )
         )
         login_again: bool = user_response_raw.lower() == "y"
@@ -28,10 +28,10 @@ def login(verbose: bool = False):
         # If yes, then login. Otherwise, terminate the command
         if login_again:
             if verbose:
-                print("Logging in...")
+                typer.echo("Logging in...")
 
             authentication.execute_login_flow()
         elif verbose:
-            print("Not logging in")
+            typer.echo("Not logging in")
     else:
         authentication.execute_login_flow()
