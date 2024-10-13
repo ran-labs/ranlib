@@ -24,6 +24,7 @@ app = typer.Typer(rich_markup_mode="rich")
 
 DEFAULT_EPILOG: str = ":rocket: [orange]Skyrocket[/orange] your Research from Theory to Experiment"
 
+
 # ran setup
 @app.command(name="init", epilog=DEFAULT_EPILOG)
 @pre([manifest_project_root, manifest_pixi_project])
@@ -63,9 +64,9 @@ def setup(
 @pre([manifest_project_root])
 def integrate(integration: Integration = "auto"):
     """Setup integrations such as git, github, etc."""
-    
+
     # TODO: this
-    
+
     # Setup the integration
     if integration != "none":
         integrations.setup_integration(integration)
