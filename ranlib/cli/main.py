@@ -22,9 +22,10 @@ from ranlib.state.ranstate import PaperImplID, RanLock, RanTOML, read_ran_toml
 
 app = typer.Typer(rich_markup_mode="rich")
 
+DEFAULT_EPILOG: str = ":rocket: [orange]Skyrocket[/orange] your Research from Theory to Experiment"
 
 # ran setup
-@app.command(name="init", epilog=":rocket: [orange]Skyrocket[/orange] your Research")
+@app.command(name="init", epilog=DEFAULT_EPILOG)
 @pre([manifest_project_root, manifest_pixi_project])
 def setup(
     papers: list[str] = [],
@@ -58,18 +59,20 @@ def setup(
         modify_papers.add_papers(papers, isolated)
 
 
-@app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
+@app.command(epilog=DEFAULT_EPILOG)
 @pre([manifest_project_root])
 def integrate(integration: Integration = "auto"):
     """Setup integrations such as git, github, etc."""
-
+    
+    # TODO: this
+    
     # Setup the integration
     if integration != "none":
         integrations.setup_integration(integration)
 
 
 # ran install
-@app.command(epilog=":rocket: [orange]Skyrocket[/orange] your Research")
+@app.command(epilog=DEFAULT_EPILOG)
 @pre([manifest_project_root, manifest_pixi_project])
 def install(from_rantoml: bool = False):
     """Installs the papers from the ran-lock.json (lockfile), unless the user specifies to be from ran.toml. If lockfile not found, try ran.toml"""
@@ -97,7 +100,7 @@ def update():
 # ran loadstate
 @app.command()
 @pre([manifest_project_root, manifest_pixi_project])
-def loadstate(epilog=":rocket: [orange]Skyrocket[/orange] your Research"):
+def loadstate(epilog=DEFAULT_EPILOG):
     """Load from the lockfile that is in ran/ran-lock.json"""
     # init_from_lockfile will always be from zero since otherwise nothing would happpen (x - x = 0, but x - 0 = x)
     init.init_from_lockfile()
@@ -144,7 +147,7 @@ def remove(paper_impl_ids: list[str]):
 
 # ran publish
 # As of right now, git push should auto-push to ran if need-be
-@app.command()
+@app.command(epilog=DEFAULT_EPILOG)
 @pre([manifest_project_root, manifest_pixi_project])
 def publish():
     """
