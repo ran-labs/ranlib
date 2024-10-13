@@ -76,7 +76,7 @@ def execute_login_flow():
     ]
 
     # 5.) Close the ranx server via an api call to it (GET /kill)
-    kill_response = httpx.get(url=f"{localhost}/kill")
+    httpx.get(url=f"{localhost}/kill")
 
     # 6.) Handle any errors that could've been encountered
     if auto_auth_failed:
