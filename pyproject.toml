@@ -1,6 +1,6 @@
 [project]
 name = "ranlib"
-version = "0.0.12"
+version = "0.0.13"
 description = "RAN library"
 authors = [
   { name = "AmeerArsala", email = "ameer.arsala03@gmail.com" },
