@@ -2119,9 +2119,9 @@ packages:
   requires_python: '>=3.8'
 - kind: pypi
   name: ranlib
-  version: 0.0.11
+  version: 0.0.12
   path: .
-  sha256: 2d2dad12dd64986a428c37ba5c2f806369d5c1a67603c0931ec3d88bc0dc17ef
+  sha256: aaab8478b0c35b9fe63792e8344343c90b7a039fcf5c552d7e347f40aa0568fe
   requires_dist:
   - typer>=0.12.3,<0.13
   - pydantic>=2.8.2,<2.9
