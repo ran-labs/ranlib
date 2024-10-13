@@ -31,14 +31,14 @@ def push_entry_to_registry(entry: RegistryPaperImplEntry):
         raise Exception(
             "Invalid tag name. You are not allowed to put 'earliest' as your tag name."
         )
-    
+
     auth_credentials: AuthToken = authentication.read_token()
-    
+
     response = httpx.post(
         url=f"{RAN_API_SERVER_URL}/v1/publish",
         headers={
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {auth_credentials.token}"
+            "Authorization": f"Bearer {auth_credentials.token}",
         },
         data=json.dumps(entry.dict()),
     )

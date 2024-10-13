@@ -7,7 +7,7 @@ import typer
 from pydantic import BaseModel
 from rich import print
 
-from ranlib.constants import RAN_AUTH_TOKEN_FILEPATH_JSON, RAN_API_SERVER_URL
+from ranlib.constants import RAN_API_SERVER_URL, RAN_AUTH_TOKEN_FILEPATH_JSON
 from ranlib.utils import find_open_localhost_port
 
 
