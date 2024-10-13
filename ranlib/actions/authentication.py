@@ -15,6 +15,20 @@ class AuthToken(BaseModel):
     token: str
 
 
+def read_token() -> AuthToken:
+    with open(RAN_AUTH_TOKEN_FILEPATH_JSON, 'r') as dot_ranprofile:
+        data: dict = json.load(dot_ranprofile)
+
+    auth_token: AuthToken = AuthToken(**data)
+
+    # some small checking just in case
+    MIN_TOKEN_LEN: int = 5
+    if len(auth_token.token) < MIN_TOKEN_LEN:
+        raise Exception("Not a token")
+
+    return auth_token
+
+
 def is_user_already_logged_in(verbose: bool = False, debug_mode: bool = False) -> bool:
     """
     This function does NOT determine for sure whether the user is completely logged in.
