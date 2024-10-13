@@ -30,7 +30,7 @@ def is_user_already_logged_in(verbose: bool = False, debug_mode: bool = False) -
         auth_creds: AuthToken = AuthToken(**data)
 
         MIN_TOKEN_LEN: int = 5
-        return len(auth_creds.value) >= MIN_TOKEN_LEN
+        return len(auth_creds.token) >= MIN_TOKEN_LEN
     except Exception as e:
         if verbose or debug_mode:
             print("Unable to read credentials. You are not logged in.")
