@@ -7,7 +7,7 @@ import typer
 from pydantic import BaseModel
 from rich import print
 
-from ranlib.constants import RAN_AUTH_TOKEN_FILEPATH_JSON
+from ranlib.constants import RAN_AUTH_TOKEN_FILEPATH_JSON, RAN_API_SERVER_URL
 from ranlib.utils import find_open_localhost_port
 
 
@@ -29,20 +29,31 @@ def read_token() -> AuthToken:
     return auth_token
 
 
-def is_user_already_logged_in(verbose: bool = False, debug_mode: bool = False) -> bool:
-    """
-    This function does NOT determine for sure whether the user is completely logged in.
-    It just reveals if the user APPEARS to be logged in (as in whether or not they have a token, not whether the token is valid or not), which is enough for the way it is gonna be used in the CLI.
-    But point is, don't treat this function like a source of truth
-    """
+def is_token_valid(credentials: AuthToken) -> bool:
+    # Check if valid
     try:
-        with open(RAN_AUTH_TOKEN_FILEPATH_JSON, 'r') as auth_file:
-            data: dict = json.load(auth_file)
+        res = httpx.post(
+            url=f"{RAN_API_SERVER_URL}/v1/auth/cli/are_credentials_valid",
+            headers={"Authorization": f"Bearer {credentials.token}"},
+        )
 
-        auth_creds: AuthToken = AuthToken(**data)
+        if not res.is_success:
+            return False
 
-        MIN_TOKEN_LEN: int = 5
-        return len(auth_creds.token) >= MIN_TOKEN_LEN
+        res_data: dict = res.json()
+        if not res_data.get("valid"):
+            return False
+
+        return True
+    except:
+        return False
+
+
+def is_user_already_logged_in(verbose: bool = False, debug_mode: bool = False) -> bool:
+    try:
+        auth_creds: AuthToken = read_token()
+
+        return is_token_valid(auth_creds)
     except Exception as e:
         if verbose or debug_mode:
             print("Unable to read credentials. You are not logged in.")

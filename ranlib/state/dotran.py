@@ -4,7 +4,6 @@ from ranlib.constants import DOTRAN_FOLDER_NAME
 
 # import sys
 from ranlib.state.pathutils import get_dotran_dir_path
-from ranlib.state.ranfile import RANFILE
 
 
 # -- .ran/ --
@@ -23,9 +22,6 @@ def generate_dotran_dir():
         # sys.path.append(dotran_dir_path)
     except OSError as error:
         print(f"Directory '{DOTRAN_FOLDER_NAME}/' cannot be created successfully. Error: {error}")
-
-    # Generate a RANFILE (ran/RANFILE) [lightweight lil file]
-    RANFILE().write_to_ranfile()
 
     # Generate __init__.py
     with open(f"{dotran_dir_path}/__init__.py", "w") as hackyworkaroundfile:

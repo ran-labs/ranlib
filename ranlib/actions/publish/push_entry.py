@@ -5,13 +5,14 @@ from typing import Union
 
 import httpx
 
+from ranlib.actions import authentication
+from ranlib.actions.authentication import AuthToken
 from ranlib.actions.publish.gather_entry import (
     RegistryPaperImplEntry,
     gather_dependencies,
     gather_registry_entry,
 )
 from ranlib.constants import RAN_API_SERVER_URL
-from ranlib.state.ranfile import RANFILE
 from ranlib.state.ranstate import generate_default_tag_hash
 
 
@@ -30,18 +31,22 @@ def push_entry_to_registry(entry: RegistryPaperImplEntry):
         raise Exception(
             "Invalid tag name. You are not allowed to put 'earliest' as your tag name."
         )
-
+    
+    auth_credentials: AuthToken = authentication.read_token()
+    
     response = httpx.post(
-        url=f"{RAN_API_SERVER_URL}/publish_to_registry",
-        headers={"Content-Type": "application/json"},
+        url=f"{RAN_API_SERVER_URL}/v1/publish",
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {auth_credentials.token}"
+        },
         data=json.dumps(entry.dict()),
     )
 
     if response.status_code != 200:
         # Request failed
-        print("Request failed with status code:", response.status_code)
+        print(f"An Error Occurred: {response.reason_phrase}")
     else:
-        # TODO: with the api server, make it so that it returns the paper_impl_id and then make a message like:
         # "Published! Use this paper with: ran use ameerarsala/attention_is_all_you_need"
         json_response = response.json()
         username = json_response.get("username")
@@ -53,17 +58,9 @@ def push_to_registry():
     # Gather the dependencies
     dependencies: list[str] = gather_dependencies()
 
-    # TODO: maybe deprecate the RANFILE or make it a ranrc at the very most
-    # Write the dependencies to the RANFILE
-    ranfile: RANFILE = RANFILE(python_dependencies=dependencies)
-    ranfile.write_to_ranfile()
-
     # Get the registry entry
     registry_entry: RegistryPaperImplEntry = gather_registry_entry(dependencies)
 
     # Then push this to the remote registry
-    # Afterwards, push to the git remote by making a request to the server
 
     push_entry_to_registry(registry_entry)
-
-    print("Pushing to registry")

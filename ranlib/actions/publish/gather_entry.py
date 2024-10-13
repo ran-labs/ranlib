@@ -4,10 +4,6 @@ Here's how to use:
     # Gather the dependencies
     dependencies: list[str] = gather_dependencies()
 
-    # Write the dependencies to the RANFILE
-    ranfile: RANFILE = RANFILE(python_dependencies=dependencies)
-    ranfile.write_to_ranfile()
-
     # Get the registry entry
     registry_entry: RegistryPaperImplEntry = gather_registry_entry(dependencies)
 
