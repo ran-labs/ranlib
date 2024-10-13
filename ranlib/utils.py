@@ -59,7 +59,7 @@ def find_open_localhost_port() -> int:
         result = sock.connect_ex(('localhost', port))
         sock.close()
         return result != 0
-    
+
     first_candidates: list[int] = [
         5000,
         8000,
@@ -72,7 +72,7 @@ def find_open_localhost_port() -> int:
     for candidate in first_candidates:
         if is_port_open(candidate):
             return candidate
-    
+
     remaining: int = 50 - len(first_candidates)
     backup_candidates: list[int] = [(5001 + i) for i in range(remaining)]
 

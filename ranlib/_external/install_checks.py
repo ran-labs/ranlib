@@ -1,5 +1,5 @@
-import subprocess
 import platform
+import subprocess
 
 
 def install_pixi():
@@ -14,6 +14,7 @@ def install_pixi():
         except subprocess.CalledProcessError:
             # Try with winget
             subprocess.run("winget install prefix-dev.pixi", shell=True, check=True)
+
 
 # Pixi
 def ensure_pixi_installation():
