@@ -10,9 +10,7 @@ def modify_recipe(recipe_path: str):
     # Modify it
 
     # For whatever reason, rattler-build does not copy in the LICENSE so we have to take it manually
-    # TODO: once the repo is public, use our own repo's LICENSE file for a free automation
-    # For now, just use the one in this link
-    LICENSE_URL: str = "https://raw.githubusercontent.com/AmeerArsala/apache-license/refs/heads/main/LICENSE"
+    LICENSE_URL: str = "https://raw.githubusercontent.com/ran-labs/ranlib/refs/heads/main/LICENSE"
     curl_cmd: str = f"curl {LICENSE_URL} -o ./LICENSE"
 
     # Python install command
