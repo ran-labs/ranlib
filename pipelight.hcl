@@ -4,11 +4,11 @@ pipelines = [
     steps = [
       {
         name     = "format"
-        commands = ["pixi run ruff format ranlib"]
+        commands = ["ruff format ranlib"]
       },
       {
         name     = "lint"
-        commands = ["pixi run ruff check ranlib --fix"]
+        commands = ["ruff check ranlib --fix"]
       }
     ]
     triggers = [{
@@ -21,7 +21,7 @@ pipelines = [
     steps = [
       {
         name = "update"
-        commands = ["pixi run bashify installation/install.template.sh"]
+        commands = ["bashify installation/install.template.sh"]
       }
     ]
     triggers = [{
