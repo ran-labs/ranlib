@@ -36,8 +36,8 @@ fdev = [
   "jupytext>=1.16.4,<2",
   "pytest>=8.3.2,<9",
   "hatch>=1.12.0,<2",
-  "pybashify>=0.0.1,<0.0.2",
   "ruff>=0.6.8,<0.7",
+  "pybashify>=0.1.1,<0.2",
 ]
 
 [build-system]

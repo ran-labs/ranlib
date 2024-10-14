@@ -1,4 +1,4 @@
-"""These are strictly for EXTERNAL purposes. Do not use them from within ranlib"""
+# These are strictly for EXTERNAL purposes. Do not use them from within ranlib
 
 import os
 import subprocess

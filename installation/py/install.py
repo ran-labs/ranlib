@@ -1,8 +1,5 @@
-"""
-Context: someone is downloading RAN with `curl -fsSL https://ran.so/install.sh | bash` which just redirects them to here (the bash file, not this python file)
-
-This is not the main way to install RAN, but is a nice touch for people who want to just check it out for the first time
-"""
+# Context: someone is downloading RAN with `curl -fsSL https://ran.so/install.sh | bash` which just redirects them to here (the bash file, not this python file)
+# This is not the main way to install RAN, but is a nice touch for people who want to just check it out for the first time
 
 import subprocess
 from ranlib._external import install_checks as prerequisites
