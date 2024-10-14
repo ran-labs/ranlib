@@ -20,8 +20,8 @@ pipelines = [
     name = "update-install-sh"
     steps = [
       {
-        name = "update"
-        commands = ["bashify installation/install.template.sh"]
+        name = "update-hooks"
+        commands = ["python3 ./prebuild.py"]
       }
     ]
     triggers = [{

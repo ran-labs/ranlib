@@ -49,7 +49,7 @@ if __name__ == "__main__":
     
     # Rewrite the installation every time it builds
     subprocess.run(
-        "bashify installation/install_template.sh --out installation/_out/install.sh",
+        "bashify installation/install.template.sh",
         shell=True,
         check=True
     )
