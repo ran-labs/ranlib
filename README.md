@@ -2,6 +2,18 @@
 
 RAN Library (more info coming soon)
 
+## Installation
+
+```bash
+pip install ranlib
+```
+
+or
+
+```bash
+pixi add ranlib
+```
+
 ## Philosophy & Tenants
 
 For any paper:
