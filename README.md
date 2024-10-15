@@ -1,6 +1,6 @@
 # ran
 
-RAN Library (more info coming soon)
+RAN Library (more info **coming soon**)
 
 ## Installation
 
